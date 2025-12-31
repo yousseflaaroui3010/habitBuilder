@@ -459,3 +459,31 @@ Animatable with linear easing for smooth countdown effect.
 - Technical Debt: None
 
 **Reversal Difficulty:** Easy (localized to StreakBreakAnimation component)
+
+---
+
+### [DEC-015] Deep Link Navigation via Splash Screen
+**Date:** 2025-12-31
+**Category:** Architecture
+
+**Context:**
+Need to handle partner invite deep links that arrive before user is authenticated.
+
+**Options Considered:**
+1. **Splash screen redirect** — Pass invite code through splash, redirect after auth
+   - Pros: Works with existing auth flow, clean separation
+   - Cons: Requires state passing through multiple screens
+
+2. **Global deep link handler** — Intercept at NavHost level
+   - Pros: Centralized handling
+   - Cons: May conflict with auth state, more complex
+
+**Decision:**
+Pass invite code from MainActivity to NavHost, then redirect from splash screen after auth check.
+
+**Consequences:**
+- Positive: Invite processed after user confirmed authenticated
+- Negative: Deep link not immediately visible (must wait for splash)
+- Technical Debt: None
+
+**Reversal Difficulty:** Medium (would need to refactor NavHost structure)

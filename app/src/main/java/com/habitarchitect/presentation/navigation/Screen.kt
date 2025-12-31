@@ -36,4 +36,8 @@ sealed class Screen(val route: String) {
     object PartnerManagement : Screen("partners")
 
     object PartnerView : Screen("partner_view")
+
+    object AcceptPartnerInvite : Screen("partner/invite/{inviteCode}") {
+        fun createRoute(inviteCode: String) = "partner/invite/$inviteCode"
+    }
 }

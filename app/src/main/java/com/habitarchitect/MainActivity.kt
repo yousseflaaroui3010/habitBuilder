@@ -1,5 +1,6 @@
 package com.habitarchitect
 
+import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -24,15 +25,39 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
 
+        // Parse deep link invite code if present
+        val inviteCode = parseInviteCodeFromIntent(intent)
+
         setContent {
             HabitArchitectTheme {
                 Surface(
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ) {
-                    HabitArchitectNavHost()
+                    HabitArchitectNavHost(deepLinkInviteCode = inviteCode)
                 }
             }
         }
+    }
+
+    override fun onNewIntent(intent: Intent) {
+        super.onNewIntent(intent)
+        // Handle deep links when app is already running
+        val inviteCode = parseInviteCodeFromIntent(intent)
+        if (inviteCode != null) {
+            // Recreate to re-compose with new deep link
+            recreate()
+        }
+    }
+
+    private fun parseInviteCodeFromIntent(intent: Intent?): String? {
+        val uri = intent?.data ?: return null
+        // Expected format: https://habitarchitect.app/invite/{inviteCode}
+        if (uri.host == "habitarchitect.app" && uri.pathSegments.size >= 2) {
+            if (uri.pathSegments[0] == "invite") {
+                return uri.pathSegments[1]
+            }
+        }
+        return null
     }
 }

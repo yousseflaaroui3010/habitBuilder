@@ -1,6 +1,7 @@
 package com.habitarchitect.presentation.navigation
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -17,6 +18,7 @@ import com.habitarchitect.presentation.screen.habitdetail.HabitDetailScreen
 import com.habitarchitect.presentation.screen.habitdetail.ResistanceListScreen
 import com.habitarchitect.presentation.screen.home.HomeScreen
 import com.habitarchitect.presentation.screen.onboarding.OnboardingScreen
+import com.habitarchitect.presentation.screen.partner.AcceptPartnerInviteScreen
 import com.habitarchitect.presentation.screen.settings.PartnerManagementScreen
 import com.habitarchitect.presentation.screen.settings.SettingsScreen
 import com.habitarchitect.presentation.screen.splash.SplashScreen
@@ -27,8 +29,11 @@ import com.habitarchitect.presentation.screen.templates.TemplateBrowserScreen
  */
 @Composable
 fun HabitArchitectNavHost(
-    navController: NavHostController = rememberNavController()
+    navController: NavHostController = rememberNavController(),
+    deepLinkInviteCode: String? = null
 ) {
+    // Handle deep link navigation after auth
+    val pendingInviteCode = deepLinkInviteCode
     NavHost(
         navController = navController,
         startDestination = Screen.Splash.route
@@ -42,8 +47,15 @@ fun HabitArchitectNavHost(
                     }
                 },
                 onNavigateToHome = {
-                    navController.navigate(Screen.Home.route) {
-                        popUpTo(Screen.Splash.route) { inclusive = true }
+                    // If there's a pending invite, navigate to accept screen first
+                    if (pendingInviteCode != null) {
+                        navController.navigate(Screen.AcceptPartnerInvite.createRoute(pendingInviteCode)) {
+                            popUpTo(Screen.Splash.route) { inclusive = true }
+                        }
+                    } else {
+                        navController.navigate(Screen.Home.route) {
+                            popUpTo(Screen.Splash.route) { inclusive = true }
+                        }
                     }
                 },
                 onNavigateToSignIn = {
@@ -183,6 +195,23 @@ fun HabitArchitectNavHost(
         // Partner Management
         composable(Screen.PartnerManagement.route) {
             PartnerManagementScreen(
+                onNavigateBack = { navController.popBackStack() }
+            )
+        }
+
+        // Accept Partner Invite (via deep link)
+        composable(
+            route = Screen.AcceptPartnerInvite.route,
+            arguments = listOf(navArgument("inviteCode") { type = NavType.StringType })
+        ) { backStackEntry ->
+            val inviteCode = backStackEntry.arguments?.getString("inviteCode") ?: return@composable
+            AcceptPartnerInviteScreen(
+                inviteCode = inviteCode,
+                onNavigateToHome = {
+                    navController.navigate(Screen.Home.route) {
+                        popUpTo(Screen.AcceptPartnerInvite.route) { inclusive = true }
+                    }
+                },
                 onNavigateBack = { navController.popBackStack() }
             )
         }
