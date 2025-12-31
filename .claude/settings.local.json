@@ -1,0 +1,18 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(keytool:*)",
+      "Bash(findstr:*)",
+      "WebSearch",
+      "Bash(cmd.exe /c \"keytool -list -v -keystore C:\\\\Users\\\\lenovo\\\\.android\\\\debug.keystore -alias androiddebugkey -storepass android -keypass android\")",
+      "Bash(powershell.exe -Command \"if \\(Test-Path ''C:\\\\Users\\\\lenovo\\\\.android\\\\debug.keystore''\\) { Write-Host ''Keystore exists'' } else { Write-Host ''Keystore not found'' }\")",
+      "Bash(powershell.exe -Command \"Get-Command keytool -ErrorAction SilentlyContinue | Select-Object -ExpandProperty Source\")",
+      "Bash(powershell.exe:*)",
+      "WebFetch(domain:pixabay.com)",
+      "mcp__ide__getDiagnostics",
+      "Bash(.gradlew.bat clean:*)",
+      "Bash(cmd.exe /c:*)",
+      "Bash(.gradlew.bat assembleDebug)"
+    ]
+  }
+}

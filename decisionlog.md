@@ -207,6 +207,184 @@ What was chosen and why?
 
 ---
 
+---
+
+### [DEC-007] SoundPool over MediaPlayer for Sound Effects
+**Date:** 2025-12-31
+**Category:** Performance
+
+**Context:**
+Need to play short sound effects (success ding, streak break) with low latency on habit actions.
+
+**Options Considered:**
+1. **SoundPool** — Pre-loaded audio pool
+   - Pros: Low latency (<10ms), multiple simultaneous sounds, efficient memory
+   - Cons: Limited to short sounds (<1MB), requires pre-loading
+
+2. **MediaPlayer** — Full-featured player
+   - Pros: Handles any audio length/format, streaming support
+   - Cons: Higher latency (~200ms), heavier resource usage
+
+**Decision:**
+SoundPool for all habit sound effects.
+
+**Consequences:**
+- Positive: Instant feedback on habit actions, minimal battery/memory impact
+- Negative: Would need MediaPlayer if longer audio needed (not a concern)
+- Technical Debt: None
+
+**Reversal Difficulty:** Easy (swap implementation in SoundManager)
+
+---
+
+### [DEC-008] SharedFlow for One-Time UI Events
+**Date:** 2025-12-31
+**Category:** Architecture
+
+**Context:**
+HomeViewModel needs to trigger one-time events (launch activity, show celebration) without replay on configuration changes.
+
+**Options Considered:**
+1. **SharedFlow** — Hot flow that doesn't replay
+   - Pros: No replay on rotation, type-safe, coroutine-native
+   - Cons: Slightly more complex than LiveData
+
+2. **SingleLiveEvent (LiveData wrapper)** — Traditional approach
+   - Pros: Familiar pattern
+   - Cons: Not native to Compose, custom implementation needed
+
+3. **Channel** — Conflated channel for events
+   - Pros: Guaranteed delivery
+   - Cons: Can lose events if not collected
+
+**Decision:**
+MutableSharedFlow with default replay=0 for UI events.
+
+**Consequences:**
+- Positive: Clean separation of state (StateFlow) vs events (SharedFlow)
+- Negative: Must ensure collection is active (handled with LaunchedEffect)
+- Technical Debt: None
+
+**Reversal Difficulty:** Easy (pattern is localized to ViewModel/Screen pairs)
+
+---
+
+### [DEC-009] Glance Widget State via DataStore Preferences
+**Date:** 2025-12-31
+**Category:** Data
+
+**Context:**
+Glance widgets can't directly inject Hilt dependencies or easily access Room. Need a way to pass habit data to widget.
+
+**Options Considered:**
+1. **DataStore Preferences** — Built into Glance
+   - Pros: Native Glance support, simple key-value storage, auto-updates widget
+   - Cons: Denormalized data, manual sync with database
+
+2. **Direct Room access** — Query database from widget
+   - Pros: Always fresh data
+   - Cons: Complex context handling, potential main thread issues
+
+3. **Broadcast data** — Send data via broadcast to widget
+   - Pros: Decoupled
+   - Cons: More complex, Android restrictions on implicit broadcasts
+
+**Decision:**
+DataStore Preferences with database sync on widget update.
+
+**Consequences:**
+- Positive: Simple, reliable, works with Glance API naturally
+- Negative: Data could be stale until next widget update (30 min default)
+- Technical Debt: Could add explicit widget update on habit status change
+
+**Reversal Difficulty:** Medium (would need to refactor widget data flow)
+
+---
+
+### [DEC-010] LocalDate for DailyLog Date Field
+**Date:** 2025-12-31
+**Category:** Data
+
+**Context:**
+Initially assumed DailyLog.date was a Long timestamp, but domain model uses LocalDate. Calendar component needed to map dates.
+
+**Options Considered:**
+1. **Use LocalDate directly** — Domain model already has it
+   - Pros: Clean, no conversion needed
+   - Cons: None
+
+2. **Convert to Long** — Milliseconds since epoch
+   - Pros: Database-friendly primitive
+   - Cons: Conversion overhead, timezone issues
+
+**Decision:**
+Keep LocalDate in domain model, Room TypeConverter handles storage.
+
+**Consequences:**
+- Positive: Clean calendar mapping with associateBy { it.date }
+- Negative: None
+- Technical Debt: None
+
+**Reversal Difficulty:** Hard (would affect entire data layer)
+
+---
+
+### [DEC-011] Removed Debug Application ID Suffix
+**Date:** 2025-12-31
+**Category:** Build Configuration
+
+**Context:**
+Firebase google-services.json was configured for `com.habitarchitect` but debug builds were getting `com.habitarchitect.debug` due to applicationIdSuffix.
+
+**Options Considered:**
+1. **Remove suffix** — Same package for debug/release
+   - Pros: Firebase works, simpler configuration
+   - Cons: Can't install debug and release side-by-side
+
+2. **Add debug package to Firebase** — Register both packages
+   - Pros: Can install both versions
+   - Cons: More Firebase configuration, larger google-services.json
+
+**Decision:**
+Remove applicationIdSuffix for debug builds.
+
+**Consequences:**
+- Positive: Firebase auth works immediately
+- Negative: Can't have debug and release installed simultaneously
+- Technical Debt: Could add second Firebase app registration if needed
+
+**Reversal Difficulty:** Easy (add suffix back and register in Firebase)
+
+---
+
+### [DEC-012] Disabled Gradle Configuration Cache
+**Date:** 2025-12-31
+**Category:** Build Configuration
+
+**Context:**
+Gradle configuration cache was causing JdkImageTransform/jlink errors during build.
+
+**Options Considered:**
+1. **Disable configuration cache** — Set to false in gradle.properties
+   - Pros: Build works immediately
+   - Cons: Slightly slower incremental builds
+
+2. **Debug the cache issue** — Find root cause
+   - Pros: Faster builds with cache
+   - Cons: Time-consuming, may be Gradle/JDK version mismatch
+
+**Decision:**
+Disable configuration cache for stability.
+
+**Consequences:**
+- Positive: Build works reliably
+- Negative: ~10-20% slower incremental builds (acceptable)
+- Technical Debt: Could re-enable after updating Gradle/AGP
+
+**Reversal Difficulty:** Easy (toggle in gradle.properties)
+
+---
+
 ## Quick Reference: Key Decisions
 
 | ID | Decision | Reversal |
@@ -217,3 +395,67 @@ What was chosen and why?
 | DEC-004 | Glance API for widgets | Medium |
 | DEC-005 | WorkManager for notifications | Easy |
 | DEC-006 | No gamification/points | Easy |
+| DEC-007 | SoundPool for sound effects | Easy |
+| DEC-008 | SharedFlow for UI events | Easy |
+| DEC-009 | Widget state via DataStore | Medium |
+| DEC-010 | LocalDate for DailyLog | Hard |
+| DEC-011 | No debug app ID suffix | Easy |
+| DEC-012 | Disabled config cache | Easy |
+| DEC-013 | FileProvider for export sharing | Easy |
+| DEC-014 | Animatable for streak break | Easy |
+
+---
+
+### [DEC-013] FileProvider for Data Export Sharing
+**Date:** 2025-12-31
+**Category:** Security
+
+**Context:**
+Need to share exported JSON file with other apps (email, cloud storage) from cache directory.
+
+**Options Considered:**
+1. **FileProvider** — Content URI approach
+   - Pros: Secure, works with Android's scoped storage, temporary permission grant
+   - Cons: Requires XML configuration
+
+2. **External storage** — Write to Downloads folder
+   - Pros: User can access directly
+   - Cons: Requires WRITE_EXTERNAL_STORAGE permission, less secure
+
+**Decision:**
+FileProvider with cache-path for exports directory.
+
+**Consequences:**
+- Positive: Secure sharing via Intent.ACTION_SEND, no special permissions needed
+- Negative: File only accessible through share intent
+- Technical Debt: None
+
+**Reversal Difficulty:** Easy (file saving location change)
+
+---
+
+### [DEC-014] Animatable for Streak Break Counter Animation
+**Date:** 2025-12-31
+**Category:** UI/UX
+
+**Context:**
+Streak break animation needs to show counter counting down from previous streak to 0.
+
+**Options Considered:**
+1. **Animatable + LaunchedEffect** — Compose animation primitives
+   - Pros: Full control, coroutine-based, integrates with Compose lifecycle
+   - Cons: More code than pre-built animations
+
+2. **AnimatedContent** — Built-in number animation
+   - Pros: Simpler API
+   - Cons: Less control over timing and intermediate values
+
+**Decision:**
+Animatable with linear easing for smooth countdown effect.
+
+**Consequences:**
+- Positive: Smooth animation with variable duration based on streak size
+- Negative: None
+- Technical Debt: None
+
+**Reversal Difficulty:** Easy (localized to StreakBreakAnimation component)

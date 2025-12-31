@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<full-backup-content>
+    <!-- Include Room database -->
+    <include domain="database" path="." />
+    <!-- Include DataStore preferences -->
+    <include domain="sharedpref" path="." />
+    <!-- Exclude sensitive files -->
+    <exclude domain="cache" path="." />
+</full-backup-content>
