@@ -18,6 +18,7 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ContentCopy
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Share
+import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material3.Card
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilledTonalIconButton
@@ -47,6 +48,7 @@ import com.habitarchitect.domain.model.PartnershipStatus
 @Composable
 fun PartnerManagementScreen(
     onNavigateBack: () -> Unit,
+    onViewPartner: (String) -> Unit = {},
     viewModel: PartnerManagementViewModel = hiltViewModel()
 ) {
     val context = LocalContext.current
@@ -161,13 +163,24 @@ fun PartnerManagementScreen(
                                         }
                                     }
                                 } else {
-                                    FilledTonalIconButton(
-                                        onClick = { viewModel.revokePartnership(partnership.id) }
-                                    ) {
-                                        Icon(
-                                            Icons.Default.Delete,
-                                            contentDescription = "Remove partner"
-                                        )
+                                    Row {
+                                        FilledTonalIconButton(
+                                            onClick = { onViewPartner(partnership.partnerId) }
+                                        ) {
+                                            Icon(
+                                                Icons.Default.Visibility,
+                                                contentDescription = "View partner's habits"
+                                            )
+                                        }
+                                        Spacer(modifier = Modifier.width(4.dp))
+                                        FilledTonalIconButton(
+                                            onClick = { viewModel.revokePartnership(partnership.id) }
+                                        ) {
+                                            Icon(
+                                                Icons.Default.Delete,
+                                                contentDescription = "Remove partner"
+                                            )
+                                        }
                                     }
                                 }
                             }

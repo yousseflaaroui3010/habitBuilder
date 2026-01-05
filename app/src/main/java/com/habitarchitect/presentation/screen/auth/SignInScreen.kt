@@ -139,6 +139,23 @@ fun SignInScreen(
                 Spacer(modifier = Modifier.size(8.dp))
                 Text("Sign in with Email")
             }
+
+            Spacer(modifier = Modifier.height(24.dp))
+
+            // Guest button
+            TextButton(
+                onClick = { viewModel.signInAsGuest() },
+                modifier = Modifier.fillMaxWidth(),
+                enabled = uiState !is SignInUiState.Loading
+            ) {
+                Text("Continue as Guest")
+            }
+
+            Text(
+                text = "Guest data stays on device only",
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
         } else {
             // Email form
             OutlinedTextField(

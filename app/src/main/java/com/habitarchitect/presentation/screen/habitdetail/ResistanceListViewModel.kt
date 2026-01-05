@@ -21,7 +21,9 @@ data class ResistanceListUiState(
     val items: List<ListItem> = emptyList(),
     val listType: String = "RESISTANCE",
     val isLoading: Boolean = true,
-    val showAddDialog: Boolean = false
+    val showDialog: Boolean = false,
+    val editingItem: ListItem? = null,
+    val dialogText: String = ""
 )
 
 /**
@@ -60,31 +62,86 @@ class ResistanceListViewModel @Inject constructor(
     }
 
     fun showAddDialog() {
-        _uiState.value = _uiState.value.copy(showAddDialog = true)
+        _uiState.value = _uiState.value.copy(
+            showDialog = true,
+            editingItem = null,
+            dialogText = ""
+        )
     }
 
-    fun hideAddDialog() {
-        _uiState.value = _uiState.value.copy(showAddDialog = false)
+    fun showEditDialog(item: ListItem) {
+        _uiState.value = _uiState.value.copy(
+            showDialog = true,
+            editingItem = item,
+            dialogText = item.content
+        )
     }
 
-    fun addItem(content: String) {
+    fun hideDialog() {
+        _uiState.value = _uiState.value.copy(
+            showDialog = false,
+            editingItem = null,
+            dialogText = ""
+        )
+    }
+
+    fun updateDialogText(text: String) {
+        _uiState.value = _uiState.value.copy(dialogText = text)
+    }
+
+    fun saveItem() {
+        val content = _uiState.value.dialogText.trim()
+        if (content.isBlank()) return
+
         viewModelScope.launch {
-            val type = ListItemType.valueOf(_uiState.value.listType)
-            val item = ListItem(
-                id = UUID.randomUUID().toString(),
-                habitId = habitId,
-                type = type,
-                content = content,
-                orderIndex = _uiState.value.items.size
-            )
-            listItemRepository.addListItem(item)
-            hideAddDialog()
+            val editingItem = _uiState.value.editingItem
+            if (editingItem != null) {
+                listItemRepository.updateListItem(editingItem.copy(content = content))
+            } else {
+                val type = ListItemType.valueOf(_uiState.value.listType)
+                val item = ListItem(
+                    id = UUID.randomUUID().toString(),
+                    habitId = habitId,
+                    type = type,
+                    content = content,
+                    orderIndex = _uiState.value.items.size
+                )
+                listItemRepository.addListItem(item)
+            }
+            hideDialog()
         }
     }
 
     fun deleteItem(itemId: String) {
         viewModelScope.launch {
             listItemRepository.deleteListItem(itemId)
+        }
+    }
+
+    fun moveItemUp(itemId: String) {
+        val items = _uiState.value.items.toMutableList()
+        val index = items.indexOfFirst { it.id == itemId }
+        if (index > 0) {
+            val item = items.removeAt(index)
+            items.add(index - 1, item)
+            saveOrder(items.map { it.id })
+        }
+    }
+
+    fun moveItemDown(itemId: String) {
+        val items = _uiState.value.items.toMutableList()
+        val index = items.indexOfFirst { it.id == itemId }
+        if (index < items.size - 1) {
+            val item = items.removeAt(index)
+            items.add(index + 1, item)
+            saveOrder(items.map { it.id })
+        }
+    }
+
+    private fun saveOrder(orderedIds: List<String>) {
+        viewModelScope.launch {
+            val type = ListItemType.valueOf(_uiState.value.listType)
+            listItemRepository.reorderItems(habitId, type, orderedIds)
         }
     }
 }

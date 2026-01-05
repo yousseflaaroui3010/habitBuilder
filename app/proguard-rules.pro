@@ -36,3 +36,32 @@
 -keep class * extends androidx.work.ListenableWorker {
     public <init>(android.content.Context,androidx.work.WorkerParameters);
 }
+
+# Glance Widgets
+-keep class * extends androidx.glance.appwidget.GlanceAppWidget { *; }
+-keep class * extends androidx.glance.appwidget.GlanceAppWidgetReceiver { *; }
+
+# Keep domain models
+-keep class com.habitarchitect.domain.model.** { *; }
+
+# Keep enums
+-keepclassmembers enum * {
+    public static **[] values();
+    public static ** valueOf(java.lang.String);
+}
+
+# BroadcastReceivers
+-keep class * extends android.content.BroadcastReceiver { *; }
+
+# Keep R classes
+-keepclassmembers class **.R$* {
+    public static <fields>;
+}
+
+# Google Play Services Auth
+-keep class com.google.android.gms.auth.** { *; }
+-keep class com.google.android.gms.common.** { *; }
+
+# Konfetti animation library
+-dontwarn nl.dionsegijn.konfetti.**
+-keep class nl.dionsegijn.konfetti.** { *; }

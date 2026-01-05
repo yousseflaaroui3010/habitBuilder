@@ -25,6 +25,18 @@ interface DailyLogDao {
         endDate: String
     ): Flow<List<DailyLogEntity>>
 
+    @Query("""
+        SELECT * FROM daily_logs
+        WHERE habitId = :habitId
+        AND date BETWEEN :startDate AND :endDate
+        ORDER BY date ASC
+    """)
+    suspend fun getLogsForRangeOnce(
+        habitId: String,
+        startDate: String,
+        endDate: String
+    ): List<DailyLogEntity>
+
     @Query("SELECT * FROM daily_logs WHERE habitId = :habitId AND date = :date LIMIT 1")
     suspend fun getLogForDate(habitId: String, date: String): DailyLogEntity?
 

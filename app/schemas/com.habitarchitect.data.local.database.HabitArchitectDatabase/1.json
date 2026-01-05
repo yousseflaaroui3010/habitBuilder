@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 1,
-    "identityHash": "7f5339d9a4dc87fc44f52f201811c2bd",
+    "identityHash": "06b782e98d5fc3f69745a617aa35ee76",
     "entities": [
       {
         "tableName": "users",
@@ -86,7 +86,7 @@
       },
       {
         "tableName": "habits",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` TEXT NOT NULL, `userId` TEXT NOT NULL, `name` TEXT NOT NULL, `type` TEXT NOT NULL, `category` TEXT, `templateId` TEXT, `iconEmoji` TEXT NOT NULL, `triggerTime` TEXT, `triggerContext` TEXT, `frequency` TEXT NOT NULL, `activeDays` TEXT, `minimumVersion` TEXT, `stackAnchor` TEXT, `reward` TEXT, `frictionStrategies` TEXT, `currentStreak` INTEGER NOT NULL, `longestStreak` INTEGER NOT NULL, `totalSuccessDays` INTEGER NOT NULL, `totalFailureDays` INTEGER NOT NULL, `isSharedWithPartner` INTEGER NOT NULL, `createdAt` INTEGER NOT NULL, `updatedAt` INTEGER NOT NULL, `isArchived` INTEGER NOT NULL, PRIMARY KEY(`id`))",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` TEXT NOT NULL, `userId` TEXT NOT NULL, `name` TEXT NOT NULL, `type` TEXT NOT NULL, `category` TEXT, `templateId` TEXT, `iconEmoji` TEXT NOT NULL, `triggerTime` TEXT, `triggerContext` TEXT, `frequency` TEXT NOT NULL, `activeDays` TEXT, `minimumVersion` TEXT, `stackAnchor` TEXT, `reward` TEXT, `frictionStrategies` TEXT, `implementedFrictionStrategies` TEXT, `currentStreak` INTEGER NOT NULL, `longestStreak` INTEGER NOT NULL, `totalSuccessDays` INTEGER NOT NULL, `totalFailureDays` INTEGER NOT NULL, `isSharedWithPartner` INTEGER NOT NULL, `orderIndex` INTEGER NOT NULL, `priority` TEXT NOT NULL, `createdAt` INTEGER NOT NULL, `updatedAt` INTEGER NOT NULL, `isArchived` INTEGER NOT NULL, PRIMARY KEY(`id`))",
         "fields": [
           {
             "fieldPath": "id",
@@ -179,6 +179,12 @@
             "notNull": false
           },
           {
+            "fieldPath": "implementedFrictionStrategies",
+            "columnName": "implementedFrictionStrategies",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
             "fieldPath": "currentStreak",
             "columnName": "currentStreak",
             "affinity": "INTEGER",
@@ -206,6 +212,18 @@
             "fieldPath": "isSharedWithPartner",
             "columnName": "isSharedWithPartner",
             "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "orderIndex",
+            "columnName": "orderIndex",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "priority",
+            "columnName": "priority",
+            "affinity": "TEXT",
             "notNull": true
           },
           {
@@ -491,7 +509,7 @@
     "views": [],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '7f5339d9a4dc87fc44f52f201811c2bd')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '06b782e98d5fc3f69745a617aa35ee76')"
     ]
   }
 }

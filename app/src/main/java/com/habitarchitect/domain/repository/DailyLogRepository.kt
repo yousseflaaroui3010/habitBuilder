@@ -16,6 +16,12 @@ interface DailyLogRepository {
         endDate: LocalDate
     ): Flow<List<DailyLog>>
 
+    suspend fun getLogsForRangeOnce(
+        habitId: String,
+        startDate: LocalDate,
+        endDate: LocalDate
+    ): List<DailyLog>
+
     suspend fun getLogForDate(habitId: String, date: LocalDate): DailyLog?
 
     fun observeLogForDate(habitId: String, date: LocalDate): Flow<DailyLog?>

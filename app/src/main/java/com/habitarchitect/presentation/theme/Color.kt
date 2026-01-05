@@ -2,16 +2,20 @@ package com.habitarchitect.presentation.theme
 
 import androidx.compose.ui.graphics.Color
 
-// Primary Colors - Green (Growth, Success)
-val Primary = Color(0xFF4CAF50)
-val PrimaryDark = Color(0xFF388E3C)
-val PrimaryLight = Color(0xFFC8E6C9)
+// Primary Colors - Blue Gradient (Trust, Calm)
+val Primary = Color(0xFF2D669B)         // Light zone blue
+val PrimaryDark = Color(0xFF173451)     // Dark zone blue
+val PrimaryLight = Color(0xFF5A8FBF)    // Lighter blue
 val OnPrimary = Color(0xFFFFFFFF)
 
-// Secondary Colors - Blue (Calm, Trust)
-val Secondary = Color(0xFF2196F3)
-val SecondaryDark = Color(0xFF1976D2)
-val SecondaryLight = Color(0xFFBBDEFB)
+// Gradient Colors for backgrounds
+val GradientBlueLight = Color(0xFF2D669B)
+val GradientBlueDark = Color(0xFF173451)
+
+// Secondary Colors - Green (Success, Growth)
+val Secondary = Color(0xFF4CAF50)
+val SecondaryDark = Color(0xFF388E3C)
+val SecondaryLight = Color(0xFFC8E6C9)
 val OnSecondary = Color(0xFFFFFFFF)
 
 // Tertiary Colors

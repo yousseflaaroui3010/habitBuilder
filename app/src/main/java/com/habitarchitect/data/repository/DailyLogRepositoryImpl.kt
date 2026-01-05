@@ -32,6 +32,18 @@ class DailyLogRepositoryImpl @Inject constructor(
         }
     }
 
+    override suspend fun getLogsForRangeOnce(
+        habitId: String,
+        startDate: LocalDate,
+        endDate: LocalDate
+    ): List<DailyLog> {
+        return dailyLogDao.getLogsForRangeOnce(
+            habitId = habitId,
+            startDate = startDate.toString(),
+            endDate = endDate.toString()
+        ).map { it.toDomain() }
+    }
+
     override suspend fun getLogForDate(habitId: String, date: LocalDate): DailyLog? {
         return dailyLogDao.getLogForDate(habitId, date.toString())?.toDomain()
     }

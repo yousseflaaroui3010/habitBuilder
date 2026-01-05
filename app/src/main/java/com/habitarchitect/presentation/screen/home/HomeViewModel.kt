@@ -3,6 +3,7 @@ package com.habitarchitect.presentation.screen.home
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.google.firebase.auth.FirebaseAuth
+import com.habitarchitect.data.preferences.ThemePreferences
 import com.habitarchitect.domain.model.DailyStatus
 import com.habitarchitect.domain.model.Habit
 import com.habitarchitect.domain.repository.DailyLogRepository
@@ -16,15 +17,29 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import java.time.DayOfWeek
 import java.time.LocalDate
+import java.time.temporal.TemporalAdjusters
 import javax.inject.Inject
+
+data class WeeklyStatus(
+    val sunday: DailyStatus? = null,
+    val monday: DailyStatus? = null,
+    val tuesday: DailyStatus? = null,
+    val wednesday: DailyStatus? = null,
+    val thursday: DailyStatus? = null,
+    val friday: DailyStatus? = null,
+    val saturday: DailyStatus? = null
+)
 
 sealed class HomeUiState {
     object Loading : HomeUiState()
     object Empty : HomeUiState()
     data class Success(
         val habits: List<Habit>,
-        val todayStatuses: Map<String, DailyStatus>
+        val todayStatuses: Map<String, DailyStatus>,
+        val weeklyStatuses: Map<String, WeeklyStatus> = emptyMap(),
+        val todaysFocus: String = ""
     ) : HomeUiState()
 }
 
@@ -42,7 +57,8 @@ class HomeViewModel @Inject constructor(
     private val firebaseAuth: FirebaseAuth,
     private val habitRepository: HabitRepository,
     private val dailyLogRepository: DailyLogRepository,
-    private val soundManager: SoundManager
+    private val soundManager: SoundManager,
+    private val themePreferences: ThemePreferences
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow<HomeUiState>(HomeUiState.Loading)
@@ -58,7 +74,10 @@ class HomeViewModel @Inject constructor(
 
     init {
         loadHabits()
+        loadTodaysFocus()
     }
+
+    private var currentFocus: String = ""
 
     private fun loadHabits() {
         val userId = firebaseAuth.currentUser?.uid ?: return
@@ -73,12 +92,54 @@ class HomeViewModel @Inject constructor(
                         today
                     )
                     val statusMap = todayLogs.associate { it.habitId to it.status }
+
+                    // Load weekly status for each habit
+                    val startOfWeek = today.with(TemporalAdjusters.previousOrSame(DayOfWeek.SUNDAY))
+                    val endOfWeek = today.with(TemporalAdjusters.nextOrSame(DayOfWeek.SATURDAY))
+
+                    val weeklyStatusMap = habits.associate { habit ->
+                        val weekLogs = dailyLogRepository.getLogsForRangeOnce(
+                            habit.id, startOfWeek, endOfWeek
+                        )
+                        val logsByDay = weekLogs.associateBy { it.date.dayOfWeek }
+
+                        habit.id to WeeklyStatus(
+                            sunday = logsByDay[DayOfWeek.SUNDAY]?.status,
+                            monday = logsByDay[DayOfWeek.MONDAY]?.status,
+                            tuesday = logsByDay[DayOfWeek.TUESDAY]?.status,
+                            wednesday = logsByDay[DayOfWeek.WEDNESDAY]?.status,
+                            thursday = logsByDay[DayOfWeek.THURSDAY]?.status,
+                            friday = logsByDay[DayOfWeek.FRIDAY]?.status,
+                            saturday = logsByDay[DayOfWeek.SATURDAY]?.status
+                        )
+                    }
+
                     _uiState.value = HomeUiState.Success(
                         habits = habits,
-                        todayStatuses = statusMap
+                        todayStatuses = statusMap,
+                        weeklyStatuses = weeklyStatusMap,
+                        todaysFocus = currentFocus
                     )
                 }
             }
+        }
+    }
+
+    private fun loadTodaysFocus() {
+        viewModelScope.launch {
+            themePreferences.todaysFocus.collect { focus ->
+                currentFocus = focus
+                val currentState = _uiState.value
+                if (currentState is HomeUiState.Success) {
+                    _uiState.value = currentState.copy(todaysFocus = focus)
+                }
+            }
+        }
+    }
+
+    fun updateTodaysFocus(focus: String) {
+        viewModelScope.launch {
+            themePreferences.setTodaysFocus(focus)
         }
     }
 
@@ -123,6 +184,24 @@ class HomeViewModel @Inject constructor(
     fun showTemptationOverlay(habitId: String) {
         viewModelScope.launch {
             _events.emit(HomeEvent.LaunchTemptationOverlay(habitId))
+        }
+    }
+
+    fun deleteHabit(habitId: String) {
+        viewModelScope.launch {
+            habitRepository.deleteHabit(habitId)
+        }
+    }
+
+    fun archiveHabit(habitId: String) {
+        viewModelScope.launch {
+            habitRepository.archiveHabit(habitId)
+        }
+    }
+
+    fun reorderHabits(habitIds: List<String>) {
+        viewModelScope.launch {
+            habitRepository.reorderHabits(habitIds)
         }
     }
 }

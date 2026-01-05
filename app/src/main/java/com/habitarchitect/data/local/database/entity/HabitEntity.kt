@@ -31,7 +31,11 @@ data class HabitEntity(
     val frequency: String,
     val activeDays: String?,
 
-    // Two-minute rule
+    // Intentions-based creation
+    val location: String?,
+    val goal: String?,
+
+    // Two-minute rule - Start with
     val minimumVersion: String?,
 
     // Stacking
@@ -42,6 +46,7 @@ data class HabitEntity(
 
     // Friction strategies (for BREAK) - pipe-separated
     val frictionStrategies: String?,
+    val implementedFrictionStrategies: String?,
 
     // Streaks
     val currentStreak: Int,
@@ -51,6 +56,10 @@ data class HabitEntity(
 
     // Sharing
     val isSharedWithPartner: Boolean,
+
+    // Ordering & Priority
+    val orderIndex: Int = 0,
+    val priority: String = "MEDIUM",
 
     // Meta
     val createdAt: Long,

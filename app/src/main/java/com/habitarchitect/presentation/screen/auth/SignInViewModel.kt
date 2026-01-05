@@ -10,6 +10,7 @@ import com.habitarchitect.domain.model.User
 import com.habitarchitect.domain.repository.UserRepository
 import com.habitarchitect.service.auth.GoogleAuthService
 import dagger.hilt.android.lifecycle.HiltViewModel
+import com.google.firebase.auth.FirebaseUser
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -24,9 +25,6 @@ sealed class SignInUiState {
     data class Error(val message: String) : SignInUiState()
 }
 
-/**
- * ViewModel for sign in screen.
- */
 @HiltViewModel
 class SignInViewModel @Inject constructor(
     private val firebaseAuth: FirebaseAuth,
@@ -36,6 +34,24 @@ class SignInViewModel @Inject constructor(
 
     private val _uiState = MutableStateFlow<SignInUiState>(SignInUiState.Idle)
     val uiState: StateFlow<SignInUiState> = _uiState.asStateFlow()
+
+    private fun createUserFromFirebase(
+        firebaseUser: FirebaseUser,
+        provider: AuthProvider
+    ): User {
+        val now = System.currentTimeMillis()
+        return User(
+            id = firebaseUser.uid,
+            email = firebaseUser.email ?: "",
+            displayName = if (provider == AuthProvider.GUEST) "Guest" else firebaseUser.displayName,
+            photoUrl = firebaseUser.photoUrl?.toString(),
+            authProvider = provider,
+            createdAt = now,
+            lastActiveAt = now,
+            onboardingCompleted = true,
+            notificationsEnabled = true
+        )
+    }
 
     fun signInWithGoogle() {
         viewModelScope.launch {
@@ -53,24 +69,9 @@ class SignInViewModel @Inject constructor(
     fun handleSignInResult(intent: Intent) {
         viewModelScope.launch {
             _uiState.value = SignInUiState.Loading
-
             val firebaseUser = googleAuthService.handleSignInResult(intent)
             if (firebaseUser != null) {
-                // Create or update user in local database
-                val now = System.currentTimeMillis()
-                val user = User(
-                    id = firebaseUser.uid,
-                    email = firebaseUser.email ?: "",
-                    displayName = firebaseUser.displayName,
-                    photoUrl = firebaseUser.photoUrl?.toString(),
-                    authProvider = AuthProvider.GOOGLE,
-                    createdAt = now,
-                    lastActiveAt = now,
-                    onboardingCompleted = true,
-                    notificationsEnabled = true
-                )
-
-                userRepository.saveUser(user)
+                userRepository.saveUser(createUserFromFirebase(firebaseUser, AuthProvider.GOOGLE))
                 _uiState.value = SignInUiState.Success
             } else {
                 _uiState.value = SignInUiState.Error("Sign-in failed. Please try again.")
@@ -81,36 +82,20 @@ class SignInViewModel @Inject constructor(
     fun signInWithEmail(email: String, password: String) {
         viewModelScope.launch {
             _uiState.value = SignInUiState.Loading
-
             try {
-                val authResult = firebaseAuth.signInWithEmailAndPassword(email, password)
-                authResult.addOnCompleteListener { task ->
-                    if (task.isSuccessful) {
-                        viewModelScope.launch {
-                            val firebaseUser = firebaseAuth.currentUser
-                            if (firebaseUser != null) {
-                                val now = System.currentTimeMillis()
-                                val user = User(
-                                    id = firebaseUser.uid,
-                                    email = firebaseUser.email ?: "",
-                                    displayName = firebaseUser.displayName,
-                                    photoUrl = firebaseUser.photoUrl?.toString(),
-                                    authProvider = AuthProvider.EMAIL,
-                                    createdAt = now,
-                                    lastActiveAt = now,
-                                    onboardingCompleted = true,
-                                    notificationsEnabled = true
-                                )
-                                userRepository.saveUser(user)
-                                _uiState.value = SignInUiState.Success
+                firebaseAuth.signInWithEmailAndPassword(email, password)
+                    .addOnCompleteListener { task ->
+                        if (task.isSuccessful) {
+                            viewModelScope.launch {
+                                firebaseAuth.currentUser?.let { user ->
+                                    userRepository.saveUser(createUserFromFirebase(user, AuthProvider.EMAIL))
+                                    _uiState.value = SignInUiState.Success
+                                }
                             }
+                        } else {
+                            _uiState.value = SignInUiState.Error(task.exception?.message ?: "Sign-in failed")
                         }
-                    } else {
-                        _uiState.value = SignInUiState.Error(
-                            task.exception?.message ?: "Sign-in failed"
-                        )
                     }
-                }
             } catch (e: Exception) {
                 _uiState.value = SignInUiState.Error(e.message ?: "Sign-in failed")
             }
@@ -120,38 +105,44 @@ class SignInViewModel @Inject constructor(
     fun createAccount(email: String, password: String) {
         viewModelScope.launch {
             _uiState.value = SignInUiState.Loading
-
             try {
-                val authResult = firebaseAuth.createUserWithEmailAndPassword(email, password)
-                authResult.addOnCompleteListener { task ->
+                firebaseAuth.createUserWithEmailAndPassword(email, password)
+                    .addOnCompleteListener { task ->
+                        if (task.isSuccessful) {
+                            viewModelScope.launch {
+                                firebaseAuth.currentUser?.let { user ->
+                                    userRepository.saveUser(createUserFromFirebase(user, AuthProvider.EMAIL))
+                                    _uiState.value = SignInUiState.Success
+                                }
+                            }
+                        } else {
+                            _uiState.value = SignInUiState.Error(task.exception?.message ?: "Account creation failed")
+                        }
+                    }
+            } catch (e: Exception) {
+                _uiState.value = SignInUiState.Error(e.message ?: "Account creation failed")
+            }
+        }
+    }
+
+    fun signInAsGuest() {
+        viewModelScope.launch {
+            _uiState.value = SignInUiState.Loading
+            try {
+                firebaseAuth.signInAnonymously().addOnCompleteListener { task ->
                     if (task.isSuccessful) {
                         viewModelScope.launch {
-                            val firebaseUser = firebaseAuth.currentUser
-                            if (firebaseUser != null) {
-                                val now = System.currentTimeMillis()
-                                val user = User(
-                                    id = firebaseUser.uid,
-                                    email = firebaseUser.email ?: "",
-                                    displayName = null,
-                                    photoUrl = null,
-                                    authProvider = AuthProvider.EMAIL,
-                                    createdAt = now,
-                                    lastActiveAt = now,
-                                    onboardingCompleted = true,
-                                    notificationsEnabled = true
-                                )
-                                userRepository.saveUser(user)
+                            firebaseAuth.currentUser?.let { user ->
+                                userRepository.saveUser(createUserFromFirebase(user, AuthProvider.GUEST))
                                 _uiState.value = SignInUiState.Success
                             }
                         }
                     } else {
-                        _uiState.value = SignInUiState.Error(
-                            task.exception?.message ?: "Account creation failed"
-                        )
+                        _uiState.value = SignInUiState.Error(task.exception?.message ?: "Guest sign-in failed")
                     }
                 }
             } catch (e: Exception) {
-                _uiState.value = SignInUiState.Error(e.message ?: "Account creation failed")
+                _uiState.value = SignInUiState.Error(e.message ?: "Guest sign-in failed")
             }
         }
     }

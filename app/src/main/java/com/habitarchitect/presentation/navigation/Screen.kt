@@ -27,15 +27,51 @@ sealed class Screen(val route: String) {
         fun createRoute(type: String) = "templates/$type"
     }
 
+    object TemplateConfirm : Screen("template/{templateId}/confirm") {
+        fun createRoute(templateId: String) = "template/$templateId/confirm"
+    }
+
+    object QuickAddHabit : Screen("add_habit/quick/{type}") {
+        fun createRoute(type: String) = "add_habit/quick/$type"
+    }
+
     object ResistanceList : Screen("habit/{habitId}/list") {
         fun createRoute(habitId: String) = "habit/$habitId/list"
     }
 
+    object EditHabit : Screen("habit/{habitId}/edit") {
+        fun createRoute(habitId: String) = "habit/$habitId/edit"
+    }
+
     object Settings : Screen("settings")
+
+    object Dashboard : Screen("dashboard")
+
+    object Profile : Screen("profile")
+
+    object WeeklyReflection : Screen("weekly_reflection")
+
+    object TemptationBundle : Screen("temptation_bundle/{habitId}") {
+        fun createRoute(habitId: String) = "temptation_bundle/$habitId"
+    }
+
+    object CueElimination : Screen("cue_elimination/{habitId}") {
+        fun createRoute(habitId: String) = "cue_elimination/$habitId"
+    }
+
+    object CostJournal : Screen("cost_journal/{habitId}") {
+        fun createRoute(habitId: String) = "cost_journal/$habitId"
+    }
+
+    object FrictionTracker : Screen("friction_tracker/{habitId}") {
+        fun createRoute(habitId: String) = "friction_tracker/$habitId"
+    }
 
     object PartnerManagement : Screen("partners")
 
-    object PartnerView : Screen("partner_view")
+    object PartnerView : Screen("partner_view/{partnerId}") {
+        fun createRoute(partnerId: String) = "partner_view/$partnerId"
+    }
 
     object AcceptPartnerInvite : Screen("partner/invite/{inviteCode}") {
         fun createRoute(inviteCode: String) = "partner/invite/$inviteCode"

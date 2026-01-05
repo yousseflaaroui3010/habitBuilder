@@ -1,8 +1,9 @@
 package com.habitarchitect.presentation.components
 
-import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -11,6 +12,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Close
@@ -22,26 +24,18 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.unit.dp
 import com.habitarchitect.domain.model.DailyStatus
 import com.habitarchitect.domain.model.Habit
 import com.habitarchitect.domain.model.HabitType
+import com.habitarchitect.domain.model.Priority
 import com.habitarchitect.presentation.theme.CalendarFailure
 import com.habitarchitect.presentation.theme.CalendarSuccess
 import com.habitarchitect.presentation.theme.Streak
 
-/**
- * Card component displaying a habit with actions.
- */
 @Composable
 fun HabitCard(
     habit: Habit,
@@ -52,13 +46,9 @@ fun HabitCard(
     onTemptedClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    var isPressed by remember { mutableStateOf(false) }
-    val scale by animateFloatAsState(if (isPressed) 0.97f else 1f, label = "scale")
-
     Card(
         modifier = modifier
             .fillMaxWidth()
-            .scale(scale)
             .clickable { onCardClick() },
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
     ) {
@@ -77,10 +67,20 @@ fun HabitCard(
                     )
                     Spacer(modifier = Modifier.width(12.dp))
                     Column {
-                        Text(
-                            text = habit.name,
-                            style = MaterialTheme.typography.titleMedium
-                        )
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Text(
+                                text = habit.name,
+                                style = MaterialTheme.typography.titleMedium
+                            )
+                            if (habit.priority == Priority.HIGH) {
+                                Spacer(modifier = Modifier.width(6.dp))
+                                Box(
+                                    modifier = Modifier
+                                        .size(8.dp)
+                                        .background(Color(0xFFFF5252), CircleShape)
+                                )
+                            }
+                        }
                         Text(
                             text = "${habit.currentStreak} day streak",
                             style = MaterialTheme.typography.bodySmall,

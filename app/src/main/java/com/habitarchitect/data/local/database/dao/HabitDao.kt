@@ -14,7 +14,7 @@ import kotlinx.coroutines.flow.Flow
 @Dao
 interface HabitDao {
 
-    @Query("SELECT * FROM habits WHERE userId = :userId AND isArchived = 0 ORDER BY createdAt DESC")
+    @Query("SELECT * FROM habits WHERE userId = :userId AND isArchived = 0 ORDER BY orderIndex ASC, createdAt DESC")
     fun getActiveHabits(userId: String): Flow<List<HabitEntity>>
 
     @Query("SELECT * FROM habits WHERE id = :id LIMIT 1")
@@ -60,6 +60,12 @@ interface HabitDao {
     @Query("UPDATE habits SET isSharedWithPartner = :shared, updatedAt = :timestamp WHERE id = :habitId")
     suspend fun updateSharingStatus(habitId: String, shared: Boolean, timestamp: Long)
 
+    @Query("UPDATE habits SET frictionStrategies = :strategies, implementedFrictionStrategies = :implemented, updatedAt = :timestamp WHERE id = :habitId")
+    suspend fun updateFrictionStrategies(habitId: String, strategies: String, implemented: String, timestamp: Long)
+
+    @Query("UPDATE habits SET reward = :reward, updatedAt = :timestamp WHERE id = :habitId")
+    suspend fun updateReward(habitId: String, reward: String, timestamp: Long)
+
     @Query("DELETE FROM habits WHERE id = :habitId")
     suspend fun deleteHabit(habitId: String)
 
@@ -71,4 +77,7 @@ interface HabitDao {
 
     @Query("SELECT * FROM habits WHERE type = :type AND isArchived = 0 ORDER BY createdAt ASC LIMIT 1")
     suspend fun getHabitsByTypeOnce(type: String): List<HabitEntity>
+
+    @Query("UPDATE habits SET orderIndex = :orderIndex, updatedAt = :timestamp WHERE id = :habitId")
+    suspend fun updateOrderIndex(habitId: String, orderIndex: Int, timestamp: Long)
 }

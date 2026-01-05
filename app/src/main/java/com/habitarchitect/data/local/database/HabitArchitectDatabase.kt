@@ -4,6 +4,8 @@ import android.content.Context
 import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
+import androidx.room.migration.Migration
+import androidx.sqlite.db.SupportSQLiteDatabase
 import com.habitarchitect.data.local.database.dao.DailyLogDao
 import com.habitarchitect.data.local.database.dao.HabitDao
 import com.habitarchitect.data.local.database.dao.ListItemDao
@@ -27,7 +29,7 @@ import com.habitarchitect.data.local.database.entity.UserEntity
         ListItemEntity::class,
         PartnershipEntity::class
     ],
-    version = 1,
+    version = 2,
     exportSchema = true
 )
 abstract class HabitArchitectDatabase : RoomDatabase() {
@@ -44,6 +46,14 @@ abstract class HabitArchitectDatabase : RoomDatabase() {
         @Volatile
         private var INSTANCE: HabitArchitectDatabase? = null
 
+        // Migration from version 1 to 2: Add location and goal fields for intentions-based habit creation
+        val MIGRATION_1_2 = object : Migration(1, 2) {
+            override fun migrate(database: SupportSQLiteDatabase) {
+                database.execSQL("ALTER TABLE habits ADD COLUMN location TEXT")
+                database.execSQL("ALTER TABLE habits ADD COLUMN goal TEXT")
+            }
+        }
+
         /**
          * Get singleton database instance for non-Hilt contexts (like widgets).
          */
@@ -53,7 +63,9 @@ abstract class HabitArchitectDatabase : RoomDatabase() {
                     context.applicationContext,
                     HabitArchitectDatabase::class.java,
                     DATABASE_NAME
-                ).build()
+                )
+                    .addMigrations(MIGRATION_1_2)
+                    .build()
                 INSTANCE = instance
                 instance
             }

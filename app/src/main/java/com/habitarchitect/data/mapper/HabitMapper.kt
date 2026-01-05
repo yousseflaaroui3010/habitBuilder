@@ -4,6 +4,7 @@ import com.habitarchitect.data.local.database.entity.HabitEntity
 import com.habitarchitect.domain.model.Frequency
 import com.habitarchitect.domain.model.Habit
 import com.habitarchitect.domain.model.HabitType
+import com.habitarchitect.domain.model.Priority
 import java.time.LocalTime
 
 /**
@@ -22,15 +23,20 @@ fun HabitEntity.toDomain(): Habit {
         triggerContext = triggerContext,
         frequency = Frequency.valueOf(frequency),
         activeDays = activeDays?.split(",")?.map { it.toInt() } ?: listOf(1, 2, 3, 4, 5, 6, 7),
+        location = location,
+        goal = goal,
         minimumVersion = minimumVersion,
         stackAnchor = stackAnchor,
         reward = reward,
         frictionStrategies = frictionStrategies?.split("|")?.filter { it.isNotBlank() } ?: emptyList(),
+        implementedFrictionStrategies = implementedFrictionStrategies?.split("|")?.filter { it.isNotBlank() } ?: emptyList(),
         currentStreak = currentStreak,
         longestStreak = longestStreak,
         totalSuccessDays = totalSuccessDays,
         totalFailureDays = totalFailureDays,
         isSharedWithPartner = isSharedWithPartner,
+        orderIndex = orderIndex,
+        priority = try { Priority.valueOf(priority) } catch (e: IllegalArgumentException) { Priority.MEDIUM },
         createdAt = createdAt,
         updatedAt = updatedAt,
         isArchived = isArchived
@@ -50,15 +56,20 @@ fun Habit.toEntity(): HabitEntity {
         triggerContext = triggerContext,
         frequency = frequency.name,
         activeDays = activeDays.joinToString(","),
+        location = location,
+        goal = goal,
         minimumVersion = minimumVersion,
         stackAnchor = stackAnchor,
         reward = reward,
         frictionStrategies = frictionStrategies.joinToString("|"),
+        implementedFrictionStrategies = implementedFrictionStrategies.joinToString("|"),
         currentStreak = currentStreak,
         longestStreak = longestStreak,
         totalSuccessDays = totalSuccessDays,
         totalFailureDays = totalFailureDays,
         isSharedWithPartner = isSharedWithPartner,
+        orderIndex = orderIndex,
+        priority = priority.name,
         createdAt = createdAt,
         updatedAt = updatedAt,
         isArchived = isArchived

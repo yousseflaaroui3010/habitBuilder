@@ -86,6 +86,20 @@ class HabitRepositoryImpl @Inject constructor(
         }
     }
 
+    override suspend fun updateFrictionStrategies(habitId: String, strategies: List<String>, implemented: List<String>): Result<Unit> {
+        return runCatching {
+            val strategiesString = strategies.joinToString("|")
+            val implementedString = implemented.joinToString("|")
+            habitDao.updateFrictionStrategies(habitId, strategiesString, implementedString, System.currentTimeMillis())
+        }
+    }
+
+    override suspend fun updateHabitReward(habitId: String, reward: String): Result<Unit> {
+        return runCatching {
+            habitDao.updateReward(habitId, reward, System.currentTimeMillis())
+        }
+    }
+
     override suspend fun deleteHabit(habitId: String): Result<Unit> {
         return runCatching {
             listItemDao.deleteAllForHabit(habitId)
@@ -96,5 +110,14 @@ class HabitRepositoryImpl @Inject constructor(
 
     override suspend fun getActiveHabitCount(userId: String): Int {
         return habitDao.getActiveHabitCount(userId)
+    }
+
+    override suspend fun reorderHabits(habitIds: List<String>): Result<Unit> {
+        return runCatching {
+            val timestamp = System.currentTimeMillis()
+            habitIds.forEachIndexed { index, habitId ->
+                habitDao.updateOrderIndex(habitId, index, timestamp)
+            }
+        }
     }
 }

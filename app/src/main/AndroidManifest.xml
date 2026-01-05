@@ -83,6 +83,15 @@
             </intent-filter>
         </receiver>
 
+        <!-- All Good notification action receiver -->
+        <receiver
+            android:name=".service.notification.AllGoodReceiver"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="com.habitarchitect.ACTION_ALL_GOOD" />
+            </intent-filter>
+        </receiver>
+
         <!-- FileProvider for sharing exported files -->
         <provider
             android:name="androidx.core.content.FileProvider"

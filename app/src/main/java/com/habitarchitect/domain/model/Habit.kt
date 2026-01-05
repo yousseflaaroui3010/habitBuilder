@@ -20,7 +20,11 @@ data class Habit(
     val frequency: Frequency = Frequency.DAILY,
     val activeDays: List<Int> = listOf(1, 2, 3, 4, 5, 6, 7),
 
-    // Two-minute rule (BUILD)
+    // Intentions-based creation
+    val location: String? = null,
+    val goal: String? = null,
+
+    // Two-minute rule (BUILD) - Start with
     val minimumVersion: String? = null,
 
     // Habit stacking (BUILD)
@@ -31,6 +35,7 @@ data class Habit(
 
     // Friction strategies (BREAK)
     val frictionStrategies: List<String> = emptyList(),
+    val implementedFrictionStrategies: List<String> = emptyList(),
 
     // Streaks
     val currentStreak: Int = 0,
@@ -40,6 +45,10 @@ data class Habit(
 
     // Sharing
     val isSharedWithPartner: Boolean = false,
+
+    // Ordering & Priority
+    val orderIndex: Int = 0,
+    val priority: Priority = Priority.MEDIUM,
 
     // Meta
     val createdAt: Long = System.currentTimeMillis(),

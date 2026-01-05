@@ -5,5 +5,6 @@ package com.habitarchitect.domain.model
  */
 enum class AuthProvider {
     GOOGLE,
-    EMAIL
+    EMAIL,
+    GUEST
 }

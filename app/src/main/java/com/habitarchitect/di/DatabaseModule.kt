@@ -2,6 +2,7 @@ package com.habitarchitect.di
 
 import android.content.Context
 import androidx.room.Room
+import androidx.room.migration.Migration
 import com.habitarchitect.data.local.database.HabitArchitectDatabase
 import com.habitarchitect.data.local.database.dao.DailyLogDao
 import com.habitarchitect.data.local.database.dao.HabitDao
@@ -15,12 +16,13 @@ import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import javax.inject.Singleton
 
-/**
- * Hilt module providing database-related dependencies.
- */
 @Module
 @InstallIn(SingletonComponent::class)
 object DatabaseModule {
+
+    private val ALL_MIGRATIONS: Array<Migration> = arrayOf(
+        HabitArchitectDatabase.MIGRATION_1_2
+    )
 
     @Provides
     @Singleton
@@ -30,7 +32,7 @@ object DatabaseModule {
             HabitArchitectDatabase::class.java,
             HabitArchitectDatabase.DATABASE_NAME
         )
-            .fallbackToDestructiveMigration()
+            .addMigrations(*ALL_MIGRATIONS)
             .build()
     }
 

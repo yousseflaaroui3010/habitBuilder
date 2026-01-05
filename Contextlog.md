@@ -1,211 +1,160 @@
-# Project Context Log — Habit Architect
+# Habit Architect — Context Log
 
-## Last Updated: 2025-12-31 (Session 3 - Partner Feature Complete)
-
----
-
-## ✅ COMPLETED PHASES
-
-### Phase 1: Foundation - COMPLETE ✅
-- Project structure with Gradle KTS
-- Room database with all entities & DAOs
-- Repository pattern (interfaces + implementations)
-- Hilt dependency injection
-- Material 3 theme (light/dark)
-- Navigation Compose setup
-
-### Phase 2: Authentication - COMPLETE ✅
-- Google Sign-In with One-Tap API
-- Email/Password authentication
-- Firebase Auth integration
-- User persistence in Room database
-
-### Phase 3: Core Habit CRUD - COMPLETE ✅
-- Home screen with habit list
-- HabitCard component with streak display
-- Habit Detail screen with **Calendar Grid**
-- Mark success/failure with streak logic
-- **Celebration animations** (Konfetti confetti)
-- **Sound Effects** (SoundManager.kt)
-
-### Phase 4: Socratic Flow - COMPLETE ✅
-- BUILD flow with 6 questions
-- BREAK flow with 6 questions
-- Resistance/Attraction list generation
-
-### Phase 5: Templates - COMPLETE ✅
-- HabitTemplates.kt with 10+ templates
-- Template Browser screen
-
-### Phase 6: Notifications - COMPLETE ✅
-- MorningReminderWorker - DONE
-- EveningCheckinWorker - DONE
-- BootReceiver - DONE
-- **Notification Time Picker** - DONE ✅
-- **Android 13+ permission handling** - DONE ✅
-- ⏳ "All Good" quick action - DEFERRED TO V2
-
-### Phase 7: Widget - COMPLETE ✅
-- HabitWidget with real data from database
-- TemptationActivity overlay
-- "I'm Tempted" button launches overlay
-
-### Phase 9: Polish - COMPLETE ✅
-- **Risk Warning for 6+ habits** - DONE ✅
-- **Data export (JSON)** - DONE ✅
-- **Streak break animation** - DONE ✅
-- **Onboarding enhancement** - DONE ✅
-- ⏳ Unit tests - DEFERRED TO V2
+**Last Updated:** 2026-01-05 | **Build:** SUCCESS | **Status:** V2 NEARLY COMPLETE
 
 ---
 
-## 🔧 NEW FEATURES ADDED THIS SESSION (Session 3)
+## ACTION REQUIRED FROM USER
 
-### 1. Data Export to JSON
-- **Files Created:**
-  - `service/export/DataExportService.kt` - Exports all user data (habits, logs, list items)
-  - `res/xml/file_paths.xml` - FileProvider configuration
-- **Files Modified:**
-  - `SettingsScreen.kt` - Added export button with loading indicator
-  - `SettingsViewModel.kt` - Added exportData method and event handling
-  - `AndroidManifest.xml` - Added FileProvider declaration
-  - `DailyLogDao.kt` - Added getLogsForHabit query
-- **Functionality:**
-  - Export all user data to JSON format
-  - Timestamped filename: `habit_architect_export_YYYYMMDD_HHMMSS.json`
-  - Share via any app (email, cloud storage, etc.)
-  - Includes: user info, habits, list items, daily logs
-
-### 2. Streak Break Animation
-- **Files Created:**
-  - `presentation/components/StreakBreakAnimation.kt` - Full-screen animation overlay
-- **Files Modified:**
-  - `HomeViewModel.kt` - Added ShowStreakBreakAnimation event, get streak before reset
-  - `HomeScreen.kt` - Added state and handler for streak break animation
-- **Functionality:**
-  - Full-screen dark overlay on streak break
-  - Animated counter countdown from previous streak to 0
-  - Motivational message: "Don't give up. Every day is a new chance."
-  - Animation duration scales with streak size (max 3 seconds)
-
-### 3. Android 13+ Notification Permission
-- **Files Modified:**
-  - `HomeScreen.kt` - Added POST_NOTIFICATIONS permission launcher
-- **Functionality:**
-  - Automatically requests permission on Android 13+ (API 33 TIRAMISU)
-  - Uses rememberLauncherForActivityResult for modern approach
-  - Permission only requested once on home screen load
-
-### 4. Enhanced Onboarding Content
-- **Files Modified:**
-  - `OnboardingScreen.kt` - Updated page content
-- **Functionality:**
-  - Page 1: "Build & Break Habits" - James Clear's Atomic Habits principles
-  - Page 2: "Your Personal Why" - Guided questions and motivation
-  - Page 3: "Streaks & Celebration" - Progress tracking and widget
-
-### 5. Partner Deep Link Handling (Complete)
-- **Files Created:**
-  - `presentation/screen/partner/AcceptPartnerInviteScreen.kt` - UI for accepting partner invites
-  - `presentation/screen/partner/AcceptPartnerInviteViewModel.kt` - Business logic for invite handling
-- **Files Modified:**
-  - `MainActivity.kt` - Deep link parsing for partner invites
-  - `NavGraph.kt` - Added AcceptPartnerInvite route and deep link navigation
-  - `Screen.kt` - Added AcceptPartnerInvite screen definition
-  - `PartnerManagementScreen.kt` - Added share, copy, and revoke functionality
-- **Functionality:**
-  - Parse deep links: `https://habitarchitect.app/invite/{inviteCode}`
-  - Accept/decline partner invitations
-  - Share invite links via system share sheet
-  - Copy invite links to clipboard
-  - Handle expired, invalid, and already-accepted invites
-  - Revoke partnerships
+**None at this time** - App builds and all core features are implemented.
 
 ---
 
-## 📊 PROGRESS SUMMARY
+## WHAT WAS DONE (Session 7 - 2026-01-05)
 
-| Phase | Status | Progress |
-|-------|--------|----------|
-| 1. Foundation | ✅ Complete | 100% |
-| 2. Authentication | ✅ Complete | 100% |
-| 3. Core CRUD | ✅ Complete | 100% |
-| 4. Socratic Flow | ✅ Complete | 100% |
-| 5. Templates | ✅ Complete | 100% |
-| 6. Notifications | ✅ Complete | 100% |
-| 7. Widget | ✅ Complete | 100% |
-| 8. Partners | ✅ Complete | 100% |
-| 9. Polish | ✅ Complete | 100% |
+1. **Fixed LinearProgressIndicator API change** - `AddHabitSocraticScreen.kt:141`
+   - Changed from lambda syntax `progress = { }` to direct value `progress = Float`
 
-**Overall: 100% Complete (V1 Feature Complete)**
+2. **Added habit reorder buttons** - `HomeContentScreen.kt`
+   - Up/down arrow buttons to reorder habits
+   - Separate reordering for BUILD and BREAK habit sections
+   - Persists order via `HabitRepository.reorderHabits()`
 
----
-
-## 📁 KEY FILES MODIFIED THIS SESSION (Session 3)
-
-### Data Export:
-- `service/export/DataExportService.kt` (NEW)
-- `res/xml/file_paths.xml` (NEW)
-- `presentation/screen/settings/SettingsScreen.kt`
-- `presentation/screen/settings/SettingsViewModel.kt`
-- `data/local/database/dao/DailyLogDao.kt`
-- `AndroidManifest.xml`
-
-### Streak Break Animation:
-- `presentation/components/StreakBreakAnimation.kt` (NEW)
-- `presentation/screen/home/HomeScreen.kt`
-- `presentation/screen/home/HomeViewModel.kt`
-
-### Notification Permission:
-- `presentation/screen/home/HomeScreen.kt`
-
-### Onboarding:
-- `presentation/screen/onboarding/OnboardingScreen.kt`
+3. **Verified existing features** (already implemented from previous sessions):
+   - Templates with one-tap creation
+   - Quick-Add mode (Name + Emoji)
+   - Swipe gestures (edit/delete)
+   - PAUSE screen (60-second lock for BREAK habits)
+   - Identity Page ("I am a..." with vote tracking)
+   - Breaking Bad Habits tools (Cue Elimination, Cost Journal, Friction Tracker)
+   - Temptation Bundle Creator
+   - Weekly Reflection
 
 ---
 
-## 🎯 REMAINING FOR V2
+## WHAT'S LEFT TO DO
 
-### Partner Features:
-1. Deep link handling for partner invites
-2. Partner data sync
+### Phase 6: Social Features (PENDING)
+- [ ] Community Challenges (30-day challenges)
+- [ ] Habit Circle (community progress)
+- [ ] Weekly email to Accountability Partner
 
-### Quality:
-1. Unit tests for repositories and ViewModels
-2. UI tests for critical flows
-3. "All Good" notification quick action
+### Paper Clip Jar Enhancement (PENDING)
+- [ ] Punishment system (lose 2 clips for missed days)
+- [ ] Visual animation improvements
 
----
-
-## 📝 BUILD STATUS
-
-**Latest Build:** ✅ SUCCESS (2025-12-31)
-- All features compile correctly
-- APK ready at: `app/build/outputs/apk/debug/app-debug.apk`
-- V1 feature-complete
+### Polish & Testing
+- [ ] End-to-end testing of all flows
+- [ ] Performance optimization
+- [ ] UI/UX polish pass
 
 ---
 
-## 🏆 V1 FEATURE SUMMARY
+## WHAT'S NEXT
 
-**Core Features:**
-- ✅ User authentication (Google + Email)
-- ✅ Habit CRUD with Socratic guided creation
-- ✅ BUILD habits (make good habits easy)
-- ✅ BREAK habits (make bad habits hard)
-- ✅ Template library (10+ pre-built habits)
-- ✅ Visual calendar with color-coded days
-- ✅ Streak tracking with celebration animations
-- ✅ Sound effects for success/failure
-- ✅ Home screen widget with temptation overlay
-- ✅ Morning/evening notification reminders
-- ✅ Customizable notification times
-- ✅ Data export to JSON
-- ✅ Streak break animation
-- ✅ Risk warning for too many habits
-- ✅ Android 13+ notification permission handling
-- ✅ Partner/accountability partner system
-- ✅ Deep link handling for partner invites
-- ✅ Share/copy invite links
+The app is feature-complete for local functionality. Next steps:
+1. Complete social features (requires backend/Firebase integration)
+2. UI/UX polish pass
+3. Testing and bug fixes
+4. Release preparation
 
-**Ready for production release!**
+---
+
+## BLOCKING ISSUES
+
+**None** - All core features are implemented and the app builds successfully.
+
+---
+
+## FEATURE STATUS SUMMARY
+
+### Phase 1: UI/UX Foundation - COMPLETED
+- [x] Profile picture from Google Account
+- [x] Bottom navigation bar (Home, Dashboard, Settings)
+- [x] Top bar with profile icon
+- [x] Greeting message (Good Morning/Evening)
+- [x] Theme colors (gradient blue)
+- [x] Back button on all screens
+
+### Phase 2: Home Screen Enhancements - COMPLETED
+- [x] Today's Focus section
+- [x] Weekly streak visualization (S M T W T F S)
+- [x] Separate BUILD and BREAK sections
+- [x] Visual streak counter + animations
+- [x] Success sound effects
+- [x] Habit reorder buttons (NEW)
+
+### Phase 3: Habit Creation Flow - COMPLETED
+- [x] Intentions-based creation ("I will X at Y in Z")
+- [x] Habit Stacking ("After X, I will Y")
+- [x] 2-Minute Rule guidance (Goal vs Start With)
+- [x] Quick-Add mode (Name + Emoji only)
+- [x] Templates with one-tap creation
+
+### Phase 4: Breaking Bad Habits Tools - COMPLETED
+- [x] PAUSE screen (60-second lock)
+- [x] Cue Elimination Checklist
+- [x] Cost Visibility Journal
+- [x] Friction Tracker
+
+### Phase 5: Gamification & Progress - COMPLETED
+- [x] Paper Clip Jar visual tracker
+- [x] Identity Page ("I am a...")
+- [x] Weekly Reflection screen
+- [x] Milestone celebrations (7, 14, 21, 30, 60, 90 days)
+
+### Phase 6: Social Features - PENDING
+- [x] Temptation Bundle Creator
+- [x] Accountability Partner (invite/view)
+- [ ] Community Challenges
+- [ ] Weekly email notifications
+
+---
+
+## KEY FILES MODIFIED THIS SESSION
+
+| File | Change |
+|------|--------|
+| `AddHabitSocraticScreen.kt` | Fixed LinearProgressIndicator API |
+| `HomeContentScreen.kt` | Added reorder buttons |
+| `build.gradle.kts` | No changes (removed unused library) |
+
+---
+
+## BUILD COMMANDS
+
+```bash
+./gradlew assembleDebug          # Debug build
+./gradlew assembleRelease        # Release (needs signing)
+./gradlew testDebugUnitTest      # Run tests
+```
+
+---
+
+## ARCHITECTURE OVERVIEW
+
+```
+presentation/
+├── screen/
+│   ├── home/           # HomeContentScreen, HomeViewModel
+│   ├── addhabit/       # QuickAddHabit, AddHabitSocratic
+│   ├── templates/      # TemplateBrowser, TemplateConfirm
+│   ├── habitdetail/    # HabitDetail, EditHabit, ResistanceList
+│   ├── breaktools/     # CueElimination, CostJournal, FrictionTracker
+│   ├── bundle/         # TemptationBundle
+│   ├── identity/       # IdentityScreen
+│   ├── reflection/     # WeeklyReflection
+│   ├── pause/          # PauseScreen
+│   └── settings/       # Settings, PartnerManagement
+├── components/         # Reusable UI components
+└── navigation/         # NavGraph, Screen routes
+
+domain/
+├── model/              # Habit, DailyStatus, etc.
+└── repository/         # Repository interfaces
+
+data/
+├── local/database/     # Room DB, DAOs, Entities
+├── repository/         # Repository implementations
+└── preferences/        # DataStore preferences
+```

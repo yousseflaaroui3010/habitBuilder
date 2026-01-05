@@ -31,7 +31,13 @@ interface HabitRepository {
 
     suspend fun updateSharingStatus(habitId: String, shared: Boolean): Result<Unit>
 
+    suspend fun updateFrictionStrategies(habitId: String, strategies: List<String>, implemented: List<String>): Result<Unit>
+
+    suspend fun updateHabitReward(habitId: String, reward: String): Result<Unit>
+
     suspend fun deleteHabit(habitId: String): Result<Unit>
 
     suspend fun getActiveHabitCount(userId: String): Int
+
+    suspend fun reorderHabits(habitIds: List<String>): Result<Unit>
 }

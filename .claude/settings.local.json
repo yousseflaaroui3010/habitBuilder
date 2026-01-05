@@ -12,7 +12,10 @@
       "mcp__ide__getDiagnostics",
       "Bash(.gradlew.bat clean:*)",
       "Bash(cmd.exe /c:*)",
-      "Bash(.gradlew.bat assembleDebug)"
+      "Bash(.gradlew.bat assembleDebug)",
+      "Bash(dir:*)",
+      "Bash(cat:*)",
+      "Bash(.gradlew.bat assembleDebug:*)"
     ]
   }
 }

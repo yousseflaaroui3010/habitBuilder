@@ -8,6 +8,7 @@ import com.habitarchitect.domain.model.PartnershipStatus
 import com.habitarchitect.domain.repository.PartnershipRepository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
+import java.security.SecureRandom
 import java.util.UUID
 import javax.inject.Inject
 
@@ -94,10 +95,11 @@ class PartnershipRepositoryImpl @Inject constructor(
 
     private fun generateInviteCode(): String {
         val chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789"
-        return (1..8).map { chars.random() }.joinToString("")
+        val secureRandom = SecureRandom()
+        return (1..8).map { chars[secureRandom.nextInt(chars.length)] }.joinToString("")
     }
 
     companion object {
-        private const val INVITE_EXPIRY_MS = 7 * 24 * 60 * 60 * 1000L // 7 days
+        private const val INVITE_EXPIRY_MS = 7 * 24 * 60 * 60 * 1000L
     }
 }

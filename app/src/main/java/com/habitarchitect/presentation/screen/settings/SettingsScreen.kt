@@ -13,6 +13,7 @@ import androidx.compose.material.icons.filled.ExitToApp
 import androidx.compose.material.icons.filled.FileDownload
 import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.People
+import androidx.compose.material.icons.filled.DarkMode
 import androidx.compose.material.icons.filled.Schedule
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.CircularProgressIndicator
@@ -41,6 +42,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.habitarchitect.data.preferences.ThemeMode
 
 /**
  * Settings screen with notification, account, and partner options.
@@ -212,6 +214,36 @@ fun SettingsScreen(
 
             Divider()
 
+            // Appearance section
+            Text(
+                text = "Appearance",
+                style = MaterialTheme.typography.titleSmall,
+                color = MaterialTheme.colorScheme.primary,
+                modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
+            )
+
+            ListItem(
+                headlineContent = { Text("Theme") },
+                supportingContent = {
+                    Text(
+                        when (uiState.themeMode) {
+                            ThemeMode.SYSTEM -> "Follow system"
+                            ThemeMode.LIGHT -> "Light"
+                            ThemeMode.DARK -> "Dark"
+                        }
+                    )
+                },
+                leadingContent = { Icon(Icons.Default.DarkMode, contentDescription = null) },
+                trailingContent = {
+                    ThemeSelector(
+                        currentMode = uiState.themeMode,
+                        onModeSelected = { viewModel.setThemeMode(it) }
+                    )
+                }
+            )
+
+            Divider()
+
             // Account section
             Text(
                 text = "Account",
@@ -299,4 +331,42 @@ private fun TimePickerDialog(
             }
         }
     )
+}
+
+@Composable
+private fun ThemeSelector(
+    currentMode: ThemeMode,
+    onModeSelected: (ThemeMode) -> Unit
+) {
+    var expanded by remember { mutableStateOf(false) }
+
+    androidx.compose.material3.DropdownMenu(
+        expanded = expanded,
+        onDismissRequest = { expanded = false }
+    ) {
+        ThemeMode.entries.forEach { mode ->
+            androidx.compose.material3.DropdownMenuItem(
+                text = {
+                    Text(
+                        when (mode) {
+                            ThemeMode.SYSTEM -> "Follow system"
+                            ThemeMode.LIGHT -> "Light"
+                            ThemeMode.DARK -> "Dark"
+                        }
+                    )
+                },
+                onClick = {
+                    onModeSelected(mode)
+                    expanded = false
+                },
+                leadingIcon = if (mode == currentMode) {
+                    { Icon(Icons.Default.Schedule, contentDescription = null) }
+                } else null
+            )
+        }
+    }
+
+    TextButton(onClick = { expanded = true }) {
+        Text("Change")
+    }
 }
