@@ -148,6 +148,9 @@ class HomeViewModel @Inject constructor(
             dailyLogRepository.markStatus(habitId, today, DailyStatus.SUCCESS)
             val newStreak = habitRepository.incrementStreak(habitId)
 
+            // Add 1 paper clip for success
+            habitRepository.addPaperClip(habitId)
+
             // Check for milestone celebration
             if (newStreak in milestoneStreaks) {
                 soundManager.playMilestoneSound()
@@ -169,6 +172,10 @@ class HomeViewModel @Inject constructor(
 
             dailyLogRepository.markStatus(habitId, today, DailyStatus.FAILURE)
             habitRepository.resetStreak(habitId)
+
+            // PUNISHMENT: Remove 2 paper clips for failure
+            habitRepository.removePaperClips(habitId, 2)
+
             soundManager.playStreakBreakSound()
 
             // Show animation if there was a streak to break

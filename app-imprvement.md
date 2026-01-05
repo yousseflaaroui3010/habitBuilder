@@ -149,4 +149,4 @@ btw the theme is preferably if light mode (white and gradient blue)  the blue of
 
 and if dark mode the background is gradient in the same way I told you earlier and the font is white 
 
-don't forget the Back (⬅️) button on the top left please always except for the home page where we have the account picture there 
+don't forget the Back (⬅️) button on the top left please always except for the home page where we have the account picture there

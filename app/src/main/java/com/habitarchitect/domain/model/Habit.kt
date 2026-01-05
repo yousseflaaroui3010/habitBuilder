@@ -43,6 +43,10 @@ data class Habit(
     val totalSuccessDays: Int = 0,
     val totalFailureDays: Int = 0,
 
+    // Paper Clip Jar (gamification)
+    val paperClipCount: Int = 0,
+    val paperClipGoal: Int = 30,
+
     // Sharing
     val isSharedWithPartner: Boolean = false,
 

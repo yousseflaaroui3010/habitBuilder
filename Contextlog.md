@@ -1,113 +1,110 @@
 # Habit Architect — Context Log
 
-**Last Updated:** 2026-01-05 | **Build:** SUCCESS | **Status:** V2 NEARLY COMPLETE
+**Last Updated:** 2026-01-05 | **Build:** SUCCESS | **Status:** PHASE 1 COMPLETE
 
 ---
 
 ## ACTION REQUIRED FROM USER
 
-**None at this time** - App builds and all core features are implemented.
+**None at this time** - App builds successfully.
 
 ---
 
-## WHAT WAS DONE (Session 7 - 2026-01-05)
+## REMAINING PHASES
 
-1. **Fixed LinearProgressIndicator API change** - `AddHabitSocraticScreen.kt:141`
-   - Changed from lambda syntax `progress = { }` to direct value `progress = Float`
+### Phase 1: UI/UX Polish - COMPLETED
+- [x] Logo switches based on theme mode (dark/light)
+- [x] Paper Clip punishment system (lose 2 clips on failure, gain 1 on success)
 
-2. **Added habit reorder buttons** - `HomeContentScreen.kt`
-   - Up/down arrow buttons to reorder habits
-   - Separate reordering for BUILD and BREAK habit sections
-   - Persists order via `HabitRepository.reorderHabits()`
+### Phase 2: AI Pattern Detection & Suggestions
+- [ ] Detect failure patterns ("You fail this habit every Monday")
+- [ ] Smart suggestions based on user behavior
+- [ ] AI coaching during temptation moments
 
-3. **Verified existing features** (already implemented from previous sessions):
-   - Templates with one-tap creation
-   - Quick-Add mode (Name + Emoji)
-   - Swipe gestures (edit/delete)
-   - PAUSE screen (60-second lock for BREAK habits)
-   - Identity Page ("I am a..." with vote tracking)
-   - Breaking Bad Habits tools (Cue Elimination, Cost Journal, Friction Tracker)
-   - Temptation Bundle Creator
-   - Weekly Reflection
+### Phase 3: Social Features
+- [ ] Community Challenges (30-day challenges with progress)
+- [ ] Email to Accountability Partner (weekly progress summary)
 
 ---
 
-## WHAT'S LEFT TO DO
+## WHAT WAS DONE (Session 8 - 2026-01-05)
 
-### Phase 6: Social Features (PENDING)
-- [ ] Community Challenges (30-day challenges)
-- [ ] Habit Circle (community progress)
-- [ ] Weekly email to Accountability Partner
+### Phase 1 Completed:
+1. **Logo Theme Switching** - Already implemented correctly
+   - Dark theme → `logo_dark.png`
+   - Light theme → `logo_light.png`
 
-### Paper Clip Jar Enhancement (PENDING)
-- [ ] Punishment system (lose 2 clips for missed days)
-- [ ] Visual animation improvements
+2. **Paper Clip Punishment System**
+   - Added `paperClipCount` and `paperClipGoal` fields to Habit model
+   - Database migration v2 → v3
+   - Success: +1 paper clip
+   - Failure: -2 paper clips (punishment)
+   - Repository methods: `addPaperClip()`, `removePaperClips()`
 
-### Polish & Testing
-- [ ] End-to-end testing of all flows
-- [ ] Performance optimization
-- [ ] UI/UX polish pass
+3. **Previous Session Fixes**
+   - Flashcard-style "I'm Tempted" overlay (auto-rotating)
+   - Template pre-fill system
+   - Removed redundant "Go deeper" button
+   - Weekly Reflection & Identity navigation in Settings
 
 ---
 
 ## WHAT'S NEXT
 
-The app is feature-complete for local functionality. Next steps:
-1. Complete social features (requires backend/Firebase integration)
-2. UI/UX polish pass
-3. Testing and bug fixes
-4. Release preparation
+**Phase 2: AI Pattern Detection** (requires external API or on-device ML)
+- Options: Gemini API, Claude API, or on-device pattern analysis
+- Would detect patterns like "You fail exercise every Monday"
+- Could suggest adjustments based on behavior
 
 ---
 
 ## BLOCKING ISSUES
 
-**None** - All core features are implemented and the app builds successfully.
+**None** - Phase 1 complete, app builds successfully.
 
 ---
 
 ## FEATURE STATUS SUMMARY
 
-### Phase 1: UI/UX Foundation - COMPLETED
+### Core Features - COMPLETED
 - [x] Profile picture from Google Account
-- [x] Bottom navigation bar (Home, Dashboard, Settings)
-- [x] Top bar with profile icon
+- [x] Bottom navigation bar
+- [x] Logo in TopAppBar (theme-aware)
 - [x] Greeting message (Good Morning/Evening)
-- [x] Theme colors (gradient blue)
-- [x] Back button on all screens
-
-### Phase 2: Home Screen Enhancements - COMPLETED
 - [x] Today's Focus section
-- [x] Weekly streak visualization (S M T W T F S)
-- [x] Separate BUILD and BREAK sections
-- [x] Visual streak counter + animations
-- [x] Success sound effects
-- [x] Habit reorder buttons (NEW)
+- [x] Weekly streak visualization
+- [x] Separate BUILD/BREAK sections
+- [x] Visual streak counter + celebrations
+- [x] Habit reorder buttons
+- [x] Swipe gestures (edit/delete)
 
-### Phase 3: Habit Creation Flow - COMPLETED
-- [x] Intentions-based creation ("I will X at Y in Z")
-- [x] Habit Stacking ("After X, I will Y")
-- [x] 2-Minute Rule guidance (Goal vs Start With)
-- [x] Quick-Add mode (Name + Emoji only)
+### Habit Creation - COMPLETED
+- [x] Intentions-based creation
+- [x] Habit Stacking
+- [x] 2-Minute Rule (Goal vs Start)
+- [x] Quick-Add mode
 - [x] Templates with one-tap creation
+- [x] Templates pre-fill and modify
 
-### Phase 4: Breaking Bad Habits Tools - COMPLETED
+### Breaking Bad Habits - COMPLETED
 - [x] PAUSE screen (60-second lock)
 - [x] Cue Elimination Checklist
 - [x] Cost Visibility Journal
 - [x] Friction Tracker
+- [x] Flashcard "I'm Tempted" overlay
 
-### Phase 5: Gamification & Progress - COMPLETED
+### Gamification - COMPLETED
 - [x] Paper Clip Jar visual tracker
-- [x] Identity Page ("I am a...")
-- [x] Weekly Reflection screen
-- [x] Milestone celebrations (7, 14, 21, 30, 60, 90 days)
+- [x] Paper Clip punishment system (+1/-2)
+- [x] Identity Page
+- [x] Weekly Reflection
+- [x] Milestone celebrations
 
-### Phase 6: Social Features - PENDING
+### Social Features - PARTIAL
 - [x] Temptation Bundle Creator
 - [x] Accountability Partner (invite/view)
 - [ ] Community Challenges
-- [ ] Weekly email notifications
+- [ ] Email notifications
 
 ---
 
@@ -115,9 +112,25 @@ The app is feature-complete for local functionality. Next steps:
 
 | File | Change |
 |------|--------|
-| `AddHabitSocraticScreen.kt` | Fixed LinearProgressIndicator API |
-| `HomeContentScreen.kt` | Added reorder buttons |
-| `build.gradle.kts` | No changes (removed unused library) |
+| `Habit.kt` | Added `paperClipCount`, `paperClipGoal` |
+| `HabitEntity.kt` | Added paper clip fields |
+| `HabitMapper.kt` | Map paper clip fields |
+| `HabitArchitectDatabase.kt` | Migration v2→v3 |
+| `DatabaseModule.kt` | Added migration |
+| `HabitDao.kt` | Added `updatePaperClipCount` |
+| `HabitRepository.kt` | Added paper clip methods |
+| `HabitRepositoryImpl.kt` | Implemented paper clip methods |
+| `HomeViewModel.kt` | +1 clip on success, -2 on failure |
+
+---
+
+## DATABASE VERSION
+
+**Current:** v3
+
+**Migrations:**
+- v1→v2: Added `location`, `goal` fields
+- v2→v3: Added `paperClipCount`, `paperClipGoal` fields
 
 ---
 
@@ -126,35 +139,4 @@ The app is feature-complete for local functionality. Next steps:
 ```bash
 ./gradlew assembleDebug          # Debug build
 ./gradlew assembleRelease        # Release (needs signing)
-./gradlew testDebugUnitTest      # Run tests
-```
-
----
-
-## ARCHITECTURE OVERVIEW
-
-```
-presentation/
-├── screen/
-│   ├── home/           # HomeContentScreen, HomeViewModel
-│   ├── addhabit/       # QuickAddHabit, AddHabitSocratic
-│   ├── templates/      # TemplateBrowser, TemplateConfirm
-│   ├── habitdetail/    # HabitDetail, EditHabit, ResistanceList
-│   ├── breaktools/     # CueElimination, CostJournal, FrictionTracker
-│   ├── bundle/         # TemptationBundle
-│   ├── identity/       # IdentityScreen
-│   ├── reflection/     # WeeklyReflection
-│   ├── pause/          # PauseScreen
-│   └── settings/       # Settings, PartnerManagement
-├── components/         # Reusable UI components
-└── navigation/         # NavGraph, Screen routes
-
-domain/
-├── model/              # Habit, DailyStatus, etc.
-└── repository/         # Repository interfaces
-
-data/
-├── local/database/     # Room DB, DAOs, Entities
-├── repository/         # Repository implementations
-└── preferences/        # DataStore preferences
 ```

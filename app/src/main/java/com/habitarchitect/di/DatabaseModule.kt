@@ -21,7 +21,8 @@ import javax.inject.Singleton
 object DatabaseModule {
 
     private val ALL_MIGRATIONS: Array<Migration> = arrayOf(
-        HabitArchitectDatabase.MIGRATION_1_2
+        HabitArchitectDatabase.MIGRATION_1_2,
+        HabitArchitectDatabase.MIGRATION_2_3
     )
 
     @Provides

@@ -60,6 +60,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -67,6 +68,9 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import com.google.firebase.auth.FirebaseAuth
+import com.habitarchitect.R
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.isSystemInDarkTheme
 import com.habitarchitect.domain.model.DailyStatus
 import com.habitarchitect.domain.model.Habit
 import com.habitarchitect.domain.model.HabitType
@@ -143,10 +147,22 @@ fun HomeContentScreen(
         }
     }
 
+    // Select logo based on theme
+    val isDarkTheme = isSystemInDarkTheme()
+    val logoRes = if (isDarkTheme) R.drawable.logo_dark else R.drawable.logo_light
+
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { },
+                title = {
+                    // Logo in center
+                    Image(
+                        painter = painterResource(id = logoRes),
+                        contentDescription = "Habit Architect Logo",
+                        modifier = Modifier.height(40.dp),
+                        contentScale = ContentScale.Fit
+                    )
+                },
                 navigationIcon = {
                     IconButton(onClick = onNavigateToProfile) {
                         if (userPhotoUrl != null) {

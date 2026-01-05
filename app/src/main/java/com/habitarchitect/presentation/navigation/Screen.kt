@@ -31,8 +31,14 @@ sealed class Screen(val route: String) {
         fun createRoute(templateId: String) = "template/$templateId/confirm"
     }
 
-    object QuickAddHabit : Screen("add_habit/quick/{type}") {
-        fun createRoute(type: String) = "add_habit/quick/$type"
+    object QuickAddHabit : Screen("add_habit/quick/{type}?templateId={templateId}") {
+        fun createRoute(type: String, templateId: String? = null): String {
+            return if (templateId != null) {
+                "add_habit/quick/$type?templateId=$templateId"
+            } else {
+                "add_habit/quick/$type"
+            }
+        }
     }
 
     object ResistanceList : Screen("habit/{habitId}/list") {
@@ -50,6 +56,8 @@ sealed class Screen(val route: String) {
     object Profile : Screen("profile")
 
     object WeeklyReflection : Screen("weekly_reflection")
+
+    object Identity : Screen("identity")
 
     object TemptationBundle : Screen("temptation_bundle/{habitId}") {
         fun createRoute(habitId: String) = "temptation_bundle/$habitId"

@@ -74,6 +74,20 @@ class HabitRepositoryImpl @Inject constructor(
         }
     }
 
+    override suspend fun addPaperClip(habitId: String): Int {
+        val habit = habitDao.getHabitByIdOnce(habitId) ?: return 0
+        val newCount = (habit.paperClipCount + 1).coerceAtMost(habit.paperClipGoal)
+        habitDao.updatePaperClipCount(habitId, newCount, System.currentTimeMillis())
+        return newCount
+    }
+
+    override suspend fun removePaperClips(habitId: String, count: Int): Int {
+        val habit = habitDao.getHabitByIdOnce(habitId) ?: return 0
+        val newCount = (habit.paperClipCount - count).coerceAtLeast(0)
+        habitDao.updatePaperClipCount(habitId, newCount, System.currentTimeMillis())
+        return newCount
+    }
+
     override suspend fun archiveHabit(habitId: String): Result<Unit> {
         return runCatching {
             habitDao.archiveHabit(habitId, System.currentTimeMillis())

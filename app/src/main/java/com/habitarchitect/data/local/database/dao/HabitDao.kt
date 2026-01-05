@@ -80,4 +80,7 @@ interface HabitDao {
 
     @Query("UPDATE habits SET orderIndex = :orderIndex, updatedAt = :timestamp WHERE id = :habitId")
     suspend fun updateOrderIndex(habitId: String, orderIndex: Int, timestamp: Long)
+
+    @Query("UPDATE habits SET paperClipCount = :count, updatedAt = :timestamp WHERE id = :habitId")
+    suspend fun updatePaperClipCount(habitId: String, count: Int, timestamp: Long)
 }

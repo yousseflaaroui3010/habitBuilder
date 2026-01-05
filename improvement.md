@@ -1,0 +1,3 @@
+new improvements noticed and needed: 
+when I build a new habit there's a button in the button saying: "Want to o deeper? Add more details" which takes you to a list of pages for creating the intention.. however the bad thing is that it builds a new habit while asking exactly the same questions that I answer when building the habit normally 
+use the transparent logo attached inside the app above the profile picture using the best practices 

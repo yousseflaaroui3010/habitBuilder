@@ -77,7 +77,6 @@ private val commonEmojis = listOf(
 fun QuickAddHabitScreen(
     onNavigateBack: () -> Unit,
     onHabitCreated: () -> Unit,
-    onGoDeeper: (String) -> Unit,
     viewModel: QuickAddHabitViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
@@ -404,7 +403,7 @@ fun QuickAddHabitScreen(
                 Spacer(modifier = Modifier.height(16.dp))
             }
 
-            // Action buttons
+            // Action button
             Button(
                 onClick = { viewModel.createHabit() },
                 modifier = Modifier.fillMaxWidth(),
@@ -417,15 +416,6 @@ fun QuickAddHabitScreen(
                 )
                 Spacer(modifier = Modifier.size(8.dp))
                 Text(if (uiState.isCreating) "Creating..." else "Create Habit")
-            }
-
-            Spacer(modifier = Modifier.height(8.dp))
-
-            TextButton(
-                onClick = { onGoDeeper(uiState.habitType.name) },
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                Text("Want to go deeper? Add more details")
             }
 
             Spacer(modifier = Modifier.height(16.dp))

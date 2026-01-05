@@ -39,14 +39,14 @@ import com.habitarchitect.domain.model.HabitType
 
 /**
  * One-tap template confirmation screen.
- * Shows template details and allows instant habit creation.
+ * Shows template details and allows instant habit creation or customization.
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TemplateConfirmScreen(
     onNavigateBack: () -> Unit,
     onHabitCreated: () -> Unit,
-    onCustomize: (String) -> Unit,
+    onCustomize: (type: String, templateId: String) -> Unit,
     viewModel: TemplateConfirmViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
@@ -169,7 +169,7 @@ fun TemplateConfirmScreen(
                 Spacer(modifier = Modifier.height(8.dp))
 
                 OutlinedButton(
-                    onClick = { onCustomize(template.type.name) },
+                    onClick = { onCustomize(template.type.name, template.id) },
                     modifier = Modifier.fillMaxWidth()
                 ) {
                     Text("Customize First")

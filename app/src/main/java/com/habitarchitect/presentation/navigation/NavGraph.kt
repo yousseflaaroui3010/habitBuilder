@@ -35,6 +35,7 @@ import com.habitarchitect.presentation.screen.breaktools.CueEliminationScreen
 import com.habitarchitect.presentation.screen.breaktools.FrictionTrackerScreen
 import com.habitarchitect.presentation.screen.bundle.TemptationBundleScreen
 import com.habitarchitect.presentation.screen.reflection.WeeklyReflectionScreen
+import com.habitarchitect.presentation.screen.identity.IdentityScreen
 
 /**
  * Main navigation host for Habit Architect.
@@ -198,21 +199,23 @@ fun HabitArchitectNavHost(
             )
         }
 
-        // Quick Add Habit (minimal: name + emoji)
+        // Quick Add Habit (optionally pre-filled from template)
         composable(
             route = Screen.QuickAddHabit.route,
-            arguments = listOf(navArgument("type") { type = NavType.StringType })
+            arguments = listOf(
+                navArgument("type") { type = NavType.StringType },
+                navArgument("templateId") {
+                    type = NavType.StringType
+                    nullable = true
+                    defaultValue = null
+                }
+            )
         ) {
             QuickAddHabitScreen(
                 onNavigateBack = { navController.popBackStack() },
                 onHabitCreated = {
                     navController.navigate(Screen.Home.route) {
                         popUpTo(Screen.AddHabitTypeSelection.route) { inclusive = true }
-                    }
-                },
-                onGoDeeper = { type ->
-                    navController.navigate(Screen.AddHabitSocratic.createRoute(type)) {
-                        popUpTo(Screen.QuickAddHabit.route) { inclusive = true }
                     }
                 }
             )
@@ -262,8 +265,9 @@ fun HabitArchitectNavHost(
                         popUpTo(Screen.AddHabitTypeSelection.route) { inclusive = true }
                     }
                 },
-                onCustomize = { type ->
-                    navController.navigate(Screen.AddHabitSocratic.createRoute(type)) {
+                onCustomize = { type, templateId ->
+                    // Navigate to QuickAddHabit with template pre-filled
+                    navController.navigate(Screen.QuickAddHabit.createRoute(type, templateId)) {
                         popUpTo(Screen.TemplateConfirm.route) { inclusive = true }
                     }
                 }
@@ -288,6 +292,12 @@ fun HabitArchitectNavHost(
                 onNavigateBack = { navController.popBackStack() },
                 onNavigateToPartners = {
                     navController.navigate(Screen.PartnerManagement.route)
+                },
+                onNavigateToWeeklyReflection = {
+                    navController.navigate(Screen.WeeklyReflection.route)
+                },
+                onNavigateToIdentity = {
+                    navController.navigate(Screen.Identity.route)
                 },
                 onSignOut = {
                     navController.navigate(Screen.SignIn.route) {
@@ -376,6 +386,13 @@ fun HabitArchitectNavHost(
         // Weekly Reflection
         composable(Screen.WeeklyReflection.route) {
             WeeklyReflectionScreen(
+                onNavigateBack = { navController.popBackStack() }
+            )
+        }
+
+        // Identity Page
+        composable(Screen.Identity.route) {
+            IdentityScreen(
                 onNavigateBack = { navController.popBackStack() }
             )
         }

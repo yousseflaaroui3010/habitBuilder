@@ -15,6 +15,8 @@ import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.People
 import androidx.compose.material.icons.filled.DarkMode
 import androidx.compose.material.icons.filled.Schedule
+import androidx.compose.material.icons.filled.EventNote
+import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Divider
@@ -52,6 +54,8 @@ import com.habitarchitect.data.preferences.ThemeMode
 fun SettingsScreen(
     onNavigateBack: () -> Unit,
     onNavigateToPartners: () -> Unit,
+    onNavigateToWeeklyReflection: () -> Unit = {},
+    onNavigateToIdentity: () -> Unit = {},
     onSignOut: () -> Unit,
     viewModel: SettingsViewModel = hiltViewModel()
 ) {
@@ -240,6 +244,30 @@ fun SettingsScreen(
                         onModeSelected = { viewModel.setThemeMode(it) }
                     )
                 }
+            )
+
+            Divider()
+
+            // Progress & Reflection section
+            Text(
+                text = "Progress & Reflection",
+                style = MaterialTheme.typography.titleSmall,
+                color = MaterialTheme.colorScheme.primary,
+                modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
+            )
+
+            ListItem(
+                headlineContent = { Text("Weekly Reflection") },
+                supportingContent = { Text("Review your weekly progress") },
+                leadingContent = { Icon(Icons.Default.EventNote, contentDescription = null) },
+                modifier = Modifier.clickable { onNavigateToWeeklyReflection() }
+            )
+
+            ListItem(
+                headlineContent = { Text("Identity Page") },
+                supportingContent = { Text("I am a... - Your identity votes") },
+                leadingContent = { Icon(Icons.Default.Star, contentDescription = null) },
+                modifier = Modifier.clickable { onNavigateToIdentity() }
             )
 
             Divider()
