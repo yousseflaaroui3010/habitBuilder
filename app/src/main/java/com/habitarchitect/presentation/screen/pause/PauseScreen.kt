@@ -1,20 +1,29 @@
 package com.habitarchitect.presentation.screen.pause
 
+import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -43,10 +52,12 @@ fun PauseScreen(
     habitName: String,
     onComplete: () -> Unit,
     onStayStrong: () -> Unit,
-    pauseDuration: Int = 60 // seconds
+    pauseDuration: Int = 60,
+    resistanceItems: List<String> = emptyList()
 ) {
     var secondsRemaining by remember { mutableIntStateOf(pauseDuration) }
     var isPaused by remember { mutableStateOf(false) }
+    var currentSlideIndex by remember { mutableIntStateOf(0) }
 
     val progress by animateFloatAsState(
         targetValue = 1f - (secondsRemaining.toFloat() / pauseDuration),
@@ -54,6 +65,7 @@ fun PauseScreen(
         label = "progress"
     )
 
+    // Countdown timer
     LaunchedEffect(isPaused) {
         if (!isPaused) {
             while (secondsRemaining > 0) {
@@ -61,6 +73,16 @@ fun PauseScreen(
                 secondsRemaining--
             }
             onComplete()
+        }
+    }
+
+    // Auto-rotate slides every 5 seconds
+    LaunchedEffect(resistanceItems) {
+        if (resistanceItems.isNotEmpty()) {
+            while (true) {
+                delay(5000)
+                currentSlideIndex = (currentSlideIndex + 1) % resistanceItems.size
+            }
         }
     }
 
@@ -76,83 +98,152 @@ fun PauseScreen(
     ) {
         Column(
             modifier = Modifier
-                .fillMaxWidth()
-                .padding(32.dp),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center
+                .fillMaxSize()
+                .padding(24.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            // PAUSE text
-            Text(
-                text = "PAUSE",
-                style = MaterialTheme.typography.displayLarge,
-                fontWeight = FontWeight.Bold,
-                color = Color.White,
-                letterSpacing = 8.sp
-            )
+            Spacer(modifier = Modifier.height(24.dp))
 
-            Spacer(modifier = Modifier.height(32.dp))
-
-            // Reflection question
-            Text(
-                text = "You committed to reducing $habitName.",
-                style = MaterialTheme.typography.titleLarge,
-                color = Color.White,
-                textAlign = TextAlign.Center
-            )
-
-            Spacer(modifier = Modifier.height(16.dp))
-
-            Text(
-                text = "Is doing this helping you become the person you want to be?",
-                style = MaterialTheme.typography.bodyLarge,
-                color = Color.White.copy(alpha = 0.9f),
-                textAlign = TextAlign.Center
-            )
-
-            Spacer(modifier = Modifier.height(48.dp))
-
-            // Circular progress timer
-            Box(
-                contentAlignment = Alignment.Center,
-                modifier = Modifier.size(200.dp)
+            // Header with timer
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.Center
             ) {
-                CircularProgressIndicator(
-                    progress = progress,
-                    modifier = Modifier.size(200.dp),
+                Text(
+                    text = "PAUSE",
+                    style = MaterialTheme.typography.headlineLarge,
+                    fontWeight = FontWeight.Bold,
                     color = Color.White,
-                    trackColor = Color.White.copy(alpha = 0.2f),
-                    strokeWidth = 8.dp
+                    letterSpacing = 4.sp
                 )
-
-                Column(
-                    horizontalAlignment = Alignment.CenterHorizontally
+                Spacer(modifier = Modifier.width(16.dp))
+                // Compact timer
+                Box(
+                    contentAlignment = Alignment.Center,
+                    modifier = Modifier.size(60.dp)
                 ) {
-                    Text(
-                        text = secondsRemaining.toString(),
-                        style = MaterialTheme.typography.displayLarge,
-                        fontWeight = FontWeight.Bold,
+                    CircularProgressIndicator(
+                        progress = progress,
+                        modifier = Modifier.size(60.dp),
                         color = Color.White,
-                        fontSize = 64.sp
+                        trackColor = Color.White.copy(alpha = 0.2f),
+                        strokeWidth = 4.dp
                     )
                     Text(
-                        text = "seconds",
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = Color.White.copy(alpha = 0.8f)
+                        text = secondsRemaining.toString(),
+                        style = MaterialTheme.typography.titleLarge,
+                        fontWeight = FontWeight.Bold,
+                        color = Color.White
                     )
                 }
             }
 
             Spacer(modifier = Modifier.height(24.dp))
 
-            Text(
-                text = "This screen will disappear in $secondsRemaining seconds.",
-                style = MaterialTheme.typography.bodySmall,
-                color = Color.White.copy(alpha = 0.7f)
-            )
+            // Flashcard area
+            if (resistanceItems.isNotEmpty()) {
+                Text(
+                    text = "Remember why you want to quit:",
+                    style = MaterialTheme.typography.titleMedium,
+                    color = Color.White.copy(alpha = 0.9f),
+                    textAlign = TextAlign.Center
+                )
 
-            Spacer(modifier = Modifier.height(48.dp))
+                Spacer(modifier = Modifier.height(16.dp))
 
-            // Stay Strong button (visible after some time)
+                // Animated flashcard
+                AnimatedContent(
+                    targetState = currentSlideIndex,
+                    transitionSpec = {
+                        fadeIn(animationSpec = tween(500)) togetherWith
+                                fadeOut(animationSpec = tween(500))
+                    },
+                    label = "slide",
+                    modifier = Modifier.weight(1f)
+                ) { index ->
+                    Card(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 8.dp),
+                        colors = CardDefaults.cardColors(
+                            containerColor = Color.White
+                        ),
+                        shape = RoundedCornerShape(24.dp),
+                        elevation = CardDefaults.cardElevation(defaultElevation = 8.dp)
+                    ) {
+                        Column(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(32.dp),
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                            verticalArrangement = Arrangement.Center
+                        ) {
+                            Text(
+                                text = "${index + 1} of ${resistanceItems.size}",
+                                style = MaterialTheme.typography.labelMedium,
+                                color = Color.Gray
+                            )
+                            Spacer(modifier = Modifier.height(24.dp))
+                            Text(
+                                text = "⚠️",
+                                fontSize = 48.sp
+                            )
+                            Spacer(modifier = Modifier.height(24.dp))
+                            Text(
+                                text = resistanceItems[index],
+                                style = MaterialTheme.typography.headlineSmall,
+                                fontWeight = FontWeight.Medium,
+                                textAlign = TextAlign.Center,
+                                color = Color(0xFF1A1A1A)
+                            )
+                        }
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                // Progress dots
+                if (resistanceItems.size > 1) {
+                    Row(
+                        horizontalArrangement = Arrangement.Center,
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        resistanceItems.forEachIndexed { index, _ ->
+                            Box(
+                                modifier = Modifier
+                                    .padding(horizontal = 4.dp)
+                                    .size(if (index == currentSlideIndex) 10.dp else 8.dp)
+                                    .clip(CircleShape)
+                                    .background(
+                                        if (index == currentSlideIndex) Color.White
+                                        else Color.White.copy(alpha = 0.4f)
+                                    )
+                            )
+                        }
+                    }
+                }
+            } else {
+                // Fallback: show default message if no resistance items
+                Spacer(modifier = Modifier.weight(0.3f))
+                Text(
+                    text = "You committed to reducing $habitName.",
+                    style = MaterialTheme.typography.titleLarge,
+                    color = Color.White,
+                    textAlign = TextAlign.Center
+                )
+                Spacer(modifier = Modifier.height(16.dp))
+                Text(
+                    text = "Is doing this helping you become the person you want to be?",
+                    style = MaterialTheme.typography.bodyLarge,
+                    color = Color.White.copy(alpha = 0.9f),
+                    textAlign = TextAlign.Center
+                )
+                Spacer(modifier = Modifier.weight(0.7f))
+            }
+
+            Spacer(modifier = Modifier.height(24.dp))
+
+            // Stay Strong button (visible after 15 seconds)
             if (secondsRemaining <= 45) {
                 Button(
                     onClick = {
@@ -167,13 +258,15 @@ fun PauseScreen(
                     )
                 ) {
                     Text(
-                        text = "I'll Stay Strong",
+                        text = "I'll Stay Strong 💪",
                         style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.Bold,
                         color = GradientBlueDark
                     )
                 }
             }
+
+            Spacer(modifier = Modifier.height(16.dp))
         }
     }
 }

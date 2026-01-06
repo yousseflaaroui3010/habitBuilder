@@ -105,13 +105,20 @@ fun TemptationFlow(
     habitId: String,
     habitName: String,
     isBuildHabit: Boolean,
-    onComplete: () -> Unit
+    onComplete: () -> Unit,
+    viewModel: TemptationViewModel = hiltViewModel()
 ) {
     var showPauseScreen by remember { mutableStateOf(!isBuildHabit) }
     var pauseCompleted by remember { mutableStateOf(false) }
+    val items by viewModel.items.collectAsState()
+
+    // Load resistance items for break habits
+    LaunchedEffect(habitId, isBuildHabit) {
+        viewModel.loadItems(habitId, isBuildHabit)
+    }
 
     if (showPauseScreen && !pauseCompleted) {
-        // Show PAUSE screen for break habits
+        // Show PAUSE screen with flashcards for break habits
         PauseScreen(
             habitName = habitName,
             onComplete = {
@@ -121,15 +128,17 @@ fun TemptationFlow(
             onStayStrong = {
                 onComplete()
             },
-            pauseDuration = 60
+            pauseDuration = 60,
+            resistanceItems = items.map { it.content }
         )
     } else {
-        // Show temptation overlay
+        // Show temptation overlay (for build habits or after pause)
         TemptationOverlay(
             habitId = habitId,
             isBuildHabit = isBuildHabit,
             onStayStrong = onComplete,
-            onFailed = onComplete
+            onFailed = onComplete,
+            viewModel = viewModel
         )
     }
 }
