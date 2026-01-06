@@ -9,6 +9,7 @@ import com.habitarchitect.data.local.database.dao.HabitDao
 import com.habitarchitect.data.local.database.dao.ListItemDao
 import com.habitarchitect.data.local.database.dao.PartnershipDao
 import com.habitarchitect.data.local.database.dao.UserDao
+import com.habitarchitect.data.local.database.dao.WeeklyReflectionDao
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -22,7 +23,8 @@ object DatabaseModule {
 
     private val ALL_MIGRATIONS: Array<Migration> = arrayOf(
         HabitArchitectDatabase.MIGRATION_1_2,
-        HabitArchitectDatabase.MIGRATION_2_3
+        HabitArchitectDatabase.MIGRATION_2_3,
+        HabitArchitectDatabase.MIGRATION_3_4
     )
 
     @Provides
@@ -51,4 +53,7 @@ object DatabaseModule {
 
     @Provides
     fun providePartnershipDao(database: HabitArchitectDatabase): PartnershipDao = database.partnershipDao()
+
+    @Provides
+    fun provideWeeklyReflectionDao(database: HabitArchitectDatabase): WeeklyReflectionDao = database.weeklyReflectionDao()
 }

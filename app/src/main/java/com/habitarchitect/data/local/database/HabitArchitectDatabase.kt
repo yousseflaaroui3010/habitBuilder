@@ -11,11 +11,13 @@ import com.habitarchitect.data.local.database.dao.HabitDao
 import com.habitarchitect.data.local.database.dao.ListItemDao
 import com.habitarchitect.data.local.database.dao.PartnershipDao
 import com.habitarchitect.data.local.database.dao.UserDao
+import com.habitarchitect.data.local.database.dao.WeeklyReflectionDao
 import com.habitarchitect.data.local.database.entity.DailyLogEntity
 import com.habitarchitect.data.local.database.entity.HabitEntity
 import com.habitarchitect.data.local.database.entity.ListItemEntity
 import com.habitarchitect.data.local.database.entity.PartnershipEntity
 import com.habitarchitect.data.local.database.entity.UserEntity
+import com.habitarchitect.data.local.database.entity.WeeklyReflectionEntity
 
 /**
  * Room database for Habit Architect app.
@@ -27,9 +29,10 @@ import com.habitarchitect.data.local.database.entity.UserEntity
         HabitEntity::class,
         DailyLogEntity::class,
         ListItemEntity::class,
-        PartnershipEntity::class
+        PartnershipEntity::class,
+        WeeklyReflectionEntity::class
     ],
-    version = 3,
+    version = 4,
     exportSchema = true
 )
 abstract class HabitArchitectDatabase : RoomDatabase() {
@@ -39,6 +42,7 @@ abstract class HabitArchitectDatabase : RoomDatabase() {
     abstract fun dailyLogDao(): DailyLogDao
     abstract fun listItemDao(): ListItemDao
     abstract fun partnershipDao(): PartnershipDao
+    abstract fun weeklyReflectionDao(): WeeklyReflectionDao
 
     companion object {
         const val DATABASE_NAME = "habit_architect_db"
@@ -62,6 +66,25 @@ abstract class HabitArchitectDatabase : RoomDatabase() {
             }
         }
 
+        // Migration from version 3 to 4: Add weekly reflections table
+        val MIGRATION_3_4 = object : Migration(3, 4) {
+            override fun migrate(database: SupportSQLiteDatabase) {
+                database.execSQL("""
+                    CREATE TABLE IF NOT EXISTS weekly_reflections (
+                        id TEXT PRIMARY KEY NOT NULL,
+                        userId TEXT NOT NULL,
+                        weekStartDate TEXT NOT NULL,
+                        wentWell TEXT NOT NULL,
+                        didntGoWell TEXT NOT NULL,
+                        learned TEXT NOT NULL,
+                        createdAt INTEGER NOT NULL,
+                        updatedAt INTEGER NOT NULL
+                    )
+                """)
+                database.execSQL("CREATE UNIQUE INDEX IF NOT EXISTS index_weekly_reflections_userId_weekStartDate ON weekly_reflections(userId, weekStartDate)")
+            }
+        }
+
         /**
          * Get singleton database instance for non-Hilt contexts (like widgets).
          */
@@ -72,7 +95,7 @@ abstract class HabitArchitectDatabase : RoomDatabase() {
                     HabitArchitectDatabase::class.java,
                     DATABASE_NAME
                 )
-                    .addMigrations(MIGRATION_1_2, MIGRATION_2_3)
+                    .addMigrations(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4)
                     .build()
                 INSTANCE = instance
                 instance
