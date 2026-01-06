@@ -21,10 +21,7 @@
       "Bash(gh issue list:*)",
       "WebFetch(domain:github.com)",
       "Bash(git checkout:*)",
-      "Bash(git add:*)",
-      "Bash(git commit:*)",
-      "Bash(git push:*)",
-      "Bash(del \"C:\\\\Users\\\\lenovo\\\\OneDrive\\\\Documents\\\\Projects\\\\habitBuilder\\\\pr_body.json\")"
+      "Bash(git add:*)"
     ]
   }
 }
