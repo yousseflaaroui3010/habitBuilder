@@ -17,7 +17,14 @@
       "Bash(cat:*)",
       "Bash(.gradlew.bat assembleDebug:*)",
       "Bash(copy \"C:\\\\Users\\\\lenovo\\\\OneDrive\\\\Documents\\\\Projects\\\\habitBuilder\\\\logo.png\" \"C:\\\\Users\\\\lenovo\\\\OneDrive\\\\Documents\\\\Projects\\\\habitBuilder\\\\app\\\\src\\\\main\\\\res\\\\drawable\\\\logo_dark.png\")",
-      "Bash(copy \"C:\\\\Users\\\\lenovo\\\\OneDrive\\\\Documents\\\\Projects\\\\habitBuilder\\\\logo-light.png\" \"C:\\\\Users\\\\lenovo\\\\OneDrive\\\\Documents\\\\Projects\\\\habitBuilder\\\\app\\\\src\\\\main\\\\res\\\\drawable\\\\logo_light.png\")"
+      "Bash(copy \"C:\\\\Users\\\\lenovo\\\\OneDrive\\\\Documents\\\\Projects\\\\habitBuilder\\\\logo-light.png\" \"C:\\\\Users\\\\lenovo\\\\OneDrive\\\\Documents\\\\Projects\\\\habitBuilder\\\\app\\\\src\\\\main\\\\res\\\\drawable\\\\logo_light.png\")",
+      "Bash(gh issue list:*)",
+      "WebFetch(domain:github.com)",
+      "Bash(git checkout:*)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(git push:*)",
+      "Bash(del \"C:\\\\Users\\\\lenovo\\\\OneDrive\\\\Documents\\\\Projects\\\\habitBuilder\\\\pr_body.json\")"
     ]
   }
 }
