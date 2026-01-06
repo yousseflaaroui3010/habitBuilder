@@ -57,9 +57,14 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.habitarchitect.domain.model.DailyStatus
 import com.habitarchitect.domain.model.ListItem
 import com.habitarchitect.domain.model.ListItemType
+import com.habitarchitect.domain.repository.DailyLogRepository
+import com.habitarchitect.domain.repository.HabitRepository
 import com.habitarchitect.domain.repository.ListItemRepository
+import com.habitarchitect.service.sound.SoundManager
+import java.time.LocalDate
 import com.habitarchitect.presentation.screen.pause.PauseScreen
 import com.habitarchitect.presentation.theme.GradientBlueDark
 import com.habitarchitect.presentation.theme.GradientBlueLight
@@ -152,12 +157,20 @@ fun TemptationOverlay(
     viewModel: TemptationViewModel = hiltViewModel()
 ) {
     val items by viewModel.items.collectAsState()
+    val failureComplete by viewModel.failureComplete.collectAsState()
     var currentIndex by remember { mutableIntStateOf(0) }
     var autoAdvance by remember { mutableStateOf(true) }
 
     // Load items when composable is first displayed
     LaunchedEffect(habitId, isBuildHabit) {
         viewModel.loadItems(habitId, isBuildHabit)
+    }
+
+    // Close after failure is processed
+    LaunchedEffect(failureComplete) {
+        if (failureComplete) {
+            onFailed()
+        }
     }
 
     // Auto-advance flashcards every 4 seconds
@@ -384,7 +397,7 @@ fun TemptationOverlay(
             Spacer(modifier = Modifier.height(12.dp))
 
             OutlinedButton(
-                onClick = onFailed,
+                onClick = { viewModel.markFailure(habitId) },
                 modifier = Modifier.fillMaxWidth(),
                 colors = ButtonDefaults.outlinedButtonColors(
                     contentColor = Color.White.copy(alpha = 0.8f)
@@ -403,11 +416,17 @@ fun TemptationOverlay(
 
 @HiltViewModel
 class TemptationViewModel @Inject constructor(
-    private val listItemRepository: ListItemRepository
+    private val listItemRepository: ListItemRepository,
+    private val habitRepository: HabitRepository,
+    private val dailyLogRepository: DailyLogRepository,
+    private val soundManager: SoundManager
 ) : ViewModel() {
 
     private val _items = MutableStateFlow<List<ListItem>>(emptyList())
     val items: StateFlow<List<ListItem>> = _items.asStateFlow()
+
+    private val _failureComplete = MutableStateFlow(false)
+    val failureComplete: StateFlow<Boolean> = _failureComplete.asStateFlow()
 
     fun loadItems(habitId: String, isBuildHabit: Boolean) {
         viewModelScope.launch {
@@ -415,6 +434,29 @@ class TemptationViewModel @Inject constructor(
             listItemRepository.getListItemsByType(habitId, itemType).collect {
                 _items.value = it
             }
+        }
+    }
+
+    fun markFailure(habitId: String) {
+        viewModelScope.launch {
+            val today = LocalDate.now()
+
+            // 1. Mark as FAILURE in daily logs
+            dailyLogRepository.markStatus(habitId, today, DailyStatus.FAILURE)
+
+            // 2. Reset streak
+            habitRepository.resetStreak(habitId)
+
+            // 3. Remove 2 paper clips (punishment)
+            habitRepository.removePaperClips(habitId, 2)
+
+            // 4. Play streak break sound
+            soundManager.playStreakBreakSound()
+
+            // 5. TODO: Notify partner if shared
+            // partnershipRepository.notifyPartnerOfFailure(habitId)
+
+            _failureComplete.value = true
         }
     }
 }
