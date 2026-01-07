@@ -69,6 +69,9 @@ class HomeViewModel @Inject constructor(
     private val _events = MutableSharedFlow<HomeEvent>()
     val events: SharedFlow<HomeEvent> = _events.asSharedFlow()
 
+    // Expose theme mode for UI
+    val themeMode = themePreferences.themeMode
+
     private val today = LocalDate.now()
 
     // Milestone streak values that trigger celebration

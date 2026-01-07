@@ -72,6 +72,7 @@ import com.google.firebase.auth.FirebaseAuth
 import com.habitarchitect.R
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.isSystemInDarkTheme
+import com.habitarchitect.data.preferences.ThemeMode
 import com.habitarchitect.domain.model.DailyStatus
 import com.habitarchitect.domain.model.Habit
 import com.habitarchitect.domain.model.HabitType
@@ -149,8 +150,14 @@ fun HomeContentScreen(
         }
     }
 
-    // Select logo based on theme
-    val isDarkTheme = isSystemInDarkTheme()
+    // Select logo based on theme (use app preference, not system)
+    val themeMode by viewModel.themeMode.collectAsState(initial = ThemeMode.SYSTEM)
+    val systemDark = isSystemInDarkTheme()
+    val isDarkTheme = when (themeMode) {
+        ThemeMode.SYSTEM -> systemDark
+        ThemeMode.DARK -> true
+        ThemeMode.LIGHT -> false
+    }
     val logoRes = if (isDarkTheme) R.drawable.logo_dark else R.drawable.logo_light
 
     Scaffold(
