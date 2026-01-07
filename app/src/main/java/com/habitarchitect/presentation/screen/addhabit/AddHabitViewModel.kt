@@ -22,13 +22,13 @@ import javax.inject.Inject
 data class AddHabitUiState(
     val habitType: HabitType = HabitType.BUILD,
     val currentStep: Int = 0,
-    val totalSteps: Int = 5, // BUILD: 5 steps, BREAK: 6 steps
+    val totalSteps: Int = 5, // Both BUILD and BREAK have 5 steps
 
-    // Current question/answer for BREAK habits (legacy flow)
+    // Current question/answer for BREAK habits
     val currentQuestion: String = "",
     val currentHint: String = "",
     val currentAnswer: String = "",
-    val answers: List<String> = List(6) { "" },
+    val answers: List<String> = List(5) { "" },
 
     // Intentions-based fields for BUILD habits
     val selectedTime: String = "",
@@ -45,12 +45,11 @@ data class AddHabitUiState(
 )
 
 private val breakQuestions = listOf(
-    "What habit do you want to break?" to "Be specific about the behavior",
-    "When does this usually happen?" to "Time of day, situation",
-    "What triggers the urge?" to "Emotions, environments, people",
-    "What does this habit cost you?" to "Be honest about the real consequences",
-    "What friction can you add?" to "Make it harder to do",
-    "Who could hold you accountable?" to "Optional: Share with a trusted person"
+    "What will you Stop?" to "Be specific about the behavior you want to eliminate",
+    "What makes it Attractive?" to "Why do you keep doing this? What reward does it give you?",
+    "What makes it Difficult to quit?" to "What barriers have you faced when trying to stop?",
+    "What makes it Visible/Easy?" to "What cues trigger this habit? How can you make it invisible?",
+    "What does this cost you?" to "Be honest - health, money, relationships, time"
 )
 
 /**
@@ -70,7 +69,7 @@ class AddHabitViewModel @Inject constructor(
     private val _uiState = MutableStateFlow(
         AddHabitUiState(
             habitType = habitType,
-            totalSteps = if (habitType == HabitType.BUILD) 5 else 6,
+            totalSteps = if (habitType == HabitType.BUILD) 5 else 5, // Both have 5 steps now
             currentQuestion = if (habitType == HabitType.BREAK) breakQuestions[0].first else "",
             currentHint = if (habitType == HabitType.BREAK) breakQuestions[0].second else ""
         )
@@ -223,21 +222,21 @@ class AddHabitViewModel @Inject constructor(
 
                 habitRepository.createHabit(habit)
             } else {
-                // BREAK habit - use legacy flow
+                // BREAK habit - new focused flow
                 val answers = state.answers
                 val habit = Habit(
                     id = habitId,
                     userId = userId,
-                    name = answers[0],
+                    name = answers[0], // What will you Stop?
                     type = HabitType.BREAK,
-                    triggerContext = answers[1],
+                    triggerContext = answers[3], // What makes it Visible/Easy (cues)
                     iconEmoji = "🚫"
                 )
 
                 habitRepository.createHabit(habit)
 
-                // Create list items from step 4 answer (costs)
-                val items = answers[3].split("\n")
+                // Create resistance items from costs (shown during temptation)
+                val costItems = answers[4].split("\n")
                     .filter { it.isNotBlank() }
                     .mapIndexed { index, content ->
                         ListItem(
@@ -249,8 +248,22 @@ class AddHabitViewModel @Inject constructor(
                         )
                     }
 
-                if (items.isNotEmpty()) {
-                    listItemRepository.addListItems(items)
+                // Save what makes it attractive (for self-awareness)
+                val attractiveItems = answers[1].split("\n")
+                    .filter { it.isNotBlank() }
+                    .mapIndexed { index, content ->
+                        ListItem(
+                            id = UUID.randomUUID().toString(),
+                            habitId = habitId,
+                            type = ListItemType.ATTRACTION,
+                            content = content.trim(),
+                            orderIndex = index
+                        )
+                    }
+
+                val allItems = costItems + attractiveItems
+                if (allItems.isNotEmpty()) {
+                    listItemRepository.addListItems(allItems)
                 }
             }
 

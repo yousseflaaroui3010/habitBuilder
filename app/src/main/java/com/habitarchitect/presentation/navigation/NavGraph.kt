@@ -249,6 +249,9 @@ fun HabitArchitectNavHost(
                 onNavigateBack = { navController.popBackStack() },
                 onTemplateSelected = { templateId ->
                     navController.navigate(Screen.TemplateConfirm.createRoute(templateId))
+                },
+                onCreateCustom = {
+                    navController.navigate(Screen.AddHabitSocratic.createRoute(type))
                 }
             )
         }

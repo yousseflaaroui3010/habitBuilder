@@ -32,12 +32,14 @@ import com.habitarchitect.presentation.theme.Error
 
 /**
  * Screen for selecting habit type (BUILD or BREAK).
+ * Now goes directly to templates when a type is selected.
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
+@Suppress("UNUSED_PARAMETER")
 fun AddHabitTypeSelectionScreen(
     onNavigateBack: () -> Unit,
-    onSelectType: (HabitType) -> Unit,
+    onSelectType: (HabitType) -> Unit, // Kept for API compatibility
     onBrowseTemplates: (HabitType) -> Unit
 ) {
     Scaffold(
@@ -66,37 +68,23 @@ fun AddHabitTypeSelectionScreen(
 
             Spacer(modifier = Modifier.height(8.dp))
 
-            // BUILD habit card
+            // BUILD habit card - goes to templates
             HabitTypeCard(
                 emoji = "🎯",
                 title = "Build a Habit",
                 description = "Start doing something good",
                 containerColor = CalendarSuccess.copy(alpha = 0.1f),
-                onClick = { onSelectType(HabitType.BUILD) }
+                onClick = { onBrowseTemplates(HabitType.BUILD) }
             )
 
-            TextButton(
-                onClick = { onBrowseTemplates(HabitType.BUILD) },
-                modifier = Modifier.align(Alignment.End)
-            ) {
-                Text("Browse BUILD templates")
-            }
-
-            // BREAK habit card
+            // BREAK habit card - goes to templates
             HabitTypeCard(
                 emoji = "🚫",
                 title = "Break a Habit",
                 description = "Stop doing something harmful",
                 containerColor = Error.copy(alpha = 0.1f),
-                onClick = { onSelectType(HabitType.BREAK) }
+                onClick = { onBrowseTemplates(HabitType.BREAK) }
             )
-
-            TextButton(
-                onClick = { onBrowseTemplates(HabitType.BREAK) },
-                modifier = Modifier.align(Alignment.End)
-            ) {
-                Text("Browse BREAK templates")
-            }
         }
     }
 }
