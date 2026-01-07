@@ -2,6 +2,7 @@ package com.habitarchitect.presentation.screen.main
 
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.BarChart
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Notifications
@@ -12,6 +13,7 @@ import androidx.compose.material.icons.outlined.Home
 import androidx.compose.material.icons.outlined.Notifications
 import androidx.compose.material.icons.outlined.Person
 import androidx.compose.material.icons.outlined.Settings
+import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
@@ -109,6 +111,11 @@ fun MainScreen(
                         label = { Text(item.title) }
                     )
                 }
+            }
+        },
+        floatingActionButton = {
+            FloatingActionButton(onClick = onNavigateToAddHabit) {
+                Icon(Icons.Default.Add, contentDescription = "Add habit")
             }
         }
     ) { paddingValues ->
