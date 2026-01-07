@@ -2,6 +2,8 @@ package com.habitarchitect.presentation.screen.breaktools
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -18,11 +20,13 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.AttachMoney
 import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.FamilyRestroom
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.Psychology
 import androidx.compose.material.icons.filled.Schedule
 import androidx.compose.material.icons.filled.ThumbDown
+import androidx.compose.material.icons.filled.Work
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -61,12 +65,14 @@ enum class CostCategory(
     TIME("Time", Icons.Default.Schedule, Color(0xFF2196F3), "⏰"),
     MONEY("Money", Icons.Default.AttachMoney, Color(0xFF4CAF50), "💰"),
     HEALTH("Health", Icons.Default.Favorite, Color(0xFFE91E63), "❤️"),
-    FOCUS("Focus & Energy", Icons.Default.Psychology, Color(0xFF9C27B0), "🧠"),
-    RELATIONSHIPS("Relationships", Icons.Default.FamilyRestroom, Color(0xFFFF9800), "👨‍👩‍👧"),
-    DISCIPLINE("Discipline", Icons.Default.ThumbDown, Color(0xFF795548), "💪")
+    FOCUS("Focus", Icons.Default.Psychology, Color(0xFF9C27B0), "🧠"),
+    RELATIONSHIPS("Family", Icons.Default.FamilyRestroom, Color(0xFFFF9800), "👨‍👩‍👧"),
+    DISCIPLINE("Discipline", Icons.Default.ThumbDown, Color(0xFF795548), "💪"),
+    WORK("Work", Icons.Default.Work, Color(0xFF607D8B), "💼"),
+    OTHER("Other", Icons.Default.Edit, Color(0xFF9E9E9E), "✏️")
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 @Composable
 fun CostJournalScreen(
     habitId: String,
@@ -75,7 +81,7 @@ fun CostJournalScreen(
 ) {
     val uiState by viewModel.uiState.collectAsState()
     var showAddSheet by remember { mutableStateOf(false) }
-    var selectedCategory by remember { mutableStateOf<CostCategory?>(null) }
+    var showCustomInput by remember { mutableStateOf(false) }
     var newCostText by remember { mutableStateOf("") }
     val sheetState = rememberModalBottomSheetState()
 
@@ -151,11 +157,12 @@ fun CostJournalScreen(
             // Summary stats
             if (uiState.costs.isNotEmpty()) {
                 item {
-                    Row(
+                    FlowRow(
                         modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                        verticalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
-                        CostCategory.values().forEach { category ->
+                        CostCategory.entries.forEach { category ->
                             val count = uiState.costs.count { it.category == category }
                             if (count > 0) {
                                 Card(
@@ -238,7 +245,7 @@ fun CostJournalScreen(
         ModalBottomSheet(
             onDismissRequest = {
                 showAddSheet = false
-                selectedCategory = null
+                showCustomInput = false
                 newCostText = ""
             },
             sheetState = sheetState
@@ -249,87 +256,83 @@ fun CostJournalScreen(
                     .padding(16.dp)
             ) {
                 Text(
-                    text = "Add a Cost",
+                    text = "What does this habit cost you?",
                     style = MaterialTheme.typography.titleLarge,
                     fontWeight = FontWeight.Bold
                 )
 
-                Spacer(modifier = Modifier.height(16.dp))
+                Spacer(modifier = Modifier.height(8.dp))
 
                 Text(
-                    text = "Select Category",
-                    style = MaterialTheme.typography.titleSmall,
-                    fontWeight = FontWeight.Medium
-                )
-
-                Spacer(modifier = Modifier.height(8.dp))
-
-                // Category selector
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                    CostCategory.values().take(3).forEach { category ->
-                        CategoryChip(
-                            category = category,
-                            isSelected = selectedCategory == category,
-                            onClick = { selectedCategory = category }
-                        )
-                    }
-                }
-
-                Spacer(modifier = Modifier.height(8.dp))
-
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                    CostCategory.values().drop(3).forEach { category ->
-                        CategoryChip(
-                            category = category,
-                            isSelected = selectedCategory == category,
-                            onClick = { selectedCategory = category }
-                        )
-                    }
-                }
-
-                Spacer(modifier = Modifier.height(16.dp))
-
-                OutlinedTextField(
-                    value = newCostText,
-                    onValueChange = { newCostText = it },
-                    label = { Text("Describe the cost") },
-                    placeholder = { Text("e.g., Spent 2 hours scrolling instead of studying") },
-                    modifier = Modifier.fillMaxWidth(),
-                    minLines = 2
+                    text = "Tap a category to add it",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
 
                 Spacer(modifier = Modifier.height(16.dp))
 
-                Row(
+                // Category buttons - FlowRow for proper wrapping
+                FlowRow(
                     modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.End
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    verticalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
-                    TextButton(onClick = {
-                        showAddSheet = false
-                        selectedCategory = null
-                        newCostText = ""
-                    }) {
-                        Text("Cancel")
-                    }
-                    Spacer(modifier = Modifier.width(8.dp))
-                    TextButton(
-                        onClick = {
-                            if (selectedCategory != null && newCostText.isNotBlank()) {
-                                viewModel.addCost(selectedCategory!!, newCostText)
-                                showAddSheet = false
-                                selectedCategory = null
-                                newCostText = ""
+                    CostCategory.entries.forEach { category ->
+                        CategoryChip(
+                            category = category,
+                            isSelected = false,
+                            onClick = {
+                                if (category == CostCategory.OTHER) {
+                                    showCustomInput = true
+                                } else {
+                                    // One-tap add for predefined categories
+                                    viewModel.addCost(category, category.displayName)
+                                    showAddSheet = false
+                                }
                             }
-                        },
-                        enabled = selectedCategory != null && newCostText.isNotBlank()
+                        )
+                    }
+                }
+
+                // Custom input for "Other" category
+                if (showCustomInput) {
+                    Spacer(modifier = Modifier.height(16.dp))
+
+                    OutlinedTextField(
+                        value = newCostText,
+                        onValueChange = { newCostText = it },
+                        label = { Text("Describe the cost") },
+                        placeholder = { Text("e.g., Prayer time, Sleep quality, Work focus...") },
+                        modifier = Modifier.fillMaxWidth(),
+                        singleLine = true
+                    )
+
+                    Spacer(modifier = Modifier.height(12.dp))
+
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.End
                     ) {
-                        Text("Add")
+                        TextButton(onClick = {
+                            showCustomInput = false
+                            newCostText = ""
+                        }) {
+                            Text("Cancel")
+                        }
+                        Spacer(modifier = Modifier.width(8.dp))
+                        TextButton(
+                            onClick = {
+                                if (newCostText.isNotBlank()) {
+                                    viewModel.addCost(CostCategory.OTHER, newCostText)
+                                    showAddSheet = false
+                                    showCustomInput = false
+                                    newCostText = ""
+                                }
+                            },
+                            enabled = newCostText.isNotBlank()
+                        ) {
+                            Text("Add")
+                        }
                     }
                 }
 
