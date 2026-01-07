@@ -1,7 +1,7 @@
 package com.habitarchitect.presentation.screen.main
 
-import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
@@ -93,11 +93,12 @@ fun MainScreen(
 
     Scaffold(
         bottomBar = {
-            // Compact navigation bar with reduced height
+            // Compact navigation bar - sits above system navigation
             NavigationBar(
-                modifier = Modifier.height(64.dp),
-                tonalElevation = 0.dp,
-                windowInsets = WindowInsets(0, 0, 0, 0)
+                modifier = Modifier
+                    .navigationBarsPadding()
+                    .height(64.dp),
+                tonalElevation = 0.dp
             ) {
                 bottomNavItems.forEach { item ->
                     val selected = currentDestination?.hierarchy?.any { it.route == item.route } == true
