@@ -6,10 +6,7 @@
 
 ## BRANCHES
 
-### Needs Review
-| Branch | Issue | Notes |
-|--------|-------|-------|
-| HB-17-19-modify-header-colors | #17+#19 | Still needs checking |
+None - all merged to main
 
 ---
 
@@ -21,7 +18,10 @@
 | 3 | Tempted screen flashcards | Done |
 | 4 | I Failed Today button | Done |
 | 13 | Break/Build Habit UX | Merged |
-| 18 | FAB visibility | Merged |
+| 17 | Header layout (logo left, profile right, theme toggle) | Merged |
+| 18 | FAB visibility on all tabs | Merged |
+| 19 | Color contrast AA compliance | Merged |
+| 30 | Navigation bar above system buttons | Merged |
 
 ---
 
@@ -39,12 +39,12 @@
 
 ---
 
-## NEW ISSUES TO CREATE
-| Issue | Description |
-|-------|-------------|
-| Failure confirmation | Add popup before marking habit as failed (protect streaks) |
-| Flashcard navigation | Allow manual swipe forward/back on tempted slides |
-| Top bar spacing | Minimize space above profile picture and logo |
+## NEW ISSUES (Created by user)
+| # | Issue |
+|---|-------|
+| 23+ | Failure confirmation popup |
+| 24+ | Flashcard manual navigation |
+| 25+ | Top bar spacing |
 
 ---
 
