@@ -1,148 +1,132 @@
 # Habit Architect — Context Log
 
-**Last Updated:** 2026-01-06 | **Build:** SUCCESS | **Status:** PHASE 1 COMPLETE
+**Last Updated:** 2026-01-07 | **Build:** SUCCESS | **Repo:** github.com/yousseflaaroui3010/habitBuilder
 
 ---
 
-## ACTION REQUIRED FROM USER
+## GITHUB ISSUES STATUS
 
-1. **GitHub Repository Access** - Repository returns 404 (private or typo in URL)
-   - Verify URL: `github.com/yousseflaaroui3010/habitBuilder`
-   - If private, share the GitHub issues list directly
+### MERGED
+| # | Issue | Branch |
+|---|-------|--------|
+| 2 | Cost input UX | - |
+| 3 | Tempted screen flashcards | - |
+| 4 | I Failed Today button | HB-4-modify-IfailedToday |
 
----
+### READY FOR TESTING (Branches created, NOT merged)
+| # | Issue | Branch |
+|---|-------|--------|
+| 1 | Weekly reflections summary in Dashboard | HB-1-add-weekly-reflection-summary |
+| 13 | Break Habit / Build Habit UX (templates default) | HB-13-modify-habit-creation-ux |
+| 17+19 | Header layout + Color contrast AA | HB-17-19-modify-header-colors |
+| 18 | FAB visibility on all tabs | HB-18-modify-fab-visibility |
 
-## REMAINING PHASES
+### POSTPONED
+| # | Issue | Reason |
+|---|-------|--------|
+| 12 | Notifications | WorkManager timing issues, needs AlarmManager |
 
-### Phase 1: UI/UX Polish - COMPLETED
-- [x] Logo switches based on theme mode (dark/light)
-- [x] Paper Clip punishment system (lose 2 clips on failure, gain 1 on success)
-
-### Phase 2: AI Pattern Detection & Suggestions
-- [ ] Detect failure patterns ("You fail this habit every Monday")
-- [ ] Smart suggestions based on user behavior
-- [ ] AI coaching during temptation moments
-
-### Phase 3: Social Features
-- [ ] Community Challenges (30-day challenges with progress)
-- [ ] Email to Accountability Partner (weekly progress summary)
-
----
-
-## WHAT WAS DONE (Session 8 - 2026-01-05)
-
-### Phase 1 Completed:
-1. **Logo Theme Switching** - Already implemented correctly
-   - Dark theme → `logo_dark.png`
-   - Light theme → `logo_light.png`
-
-2. **Paper Clip Punishment System**
-   - Added `paperClipCount` and `paperClipGoal` fields to Habit model
-   - Database migration v2 → v3
-   - Success: +1 paper clip
-   - Failure: -2 paper clips (punishment)
-   - Repository methods: `addPaperClip()`, `removePaperClips()`
-
-3. **Previous Session Fixes**
-   - Flashcard-style "I'm Tempted" overlay (auto-rotating)
-   - Template pre-fill system
-   - Removed redundant "Go deeper" button
-   - Weekly Reflection & Identity navigation in Settings
+### OPEN (Not started)
+| # | Issue | Priority |
+|---|-------|----------|
+| 10 | Break habit Protocol | Complex |
+| 14 | Progress Page improvements | Medium |
+| 15 | Widget Secrecy and Privacy | Medium |
+| 16 | Habit creation in home page | Low |
+| 20 | I'm Tempted slides improvements | Medium |
+| 21 | Guest Mode | Low |
+| 22 | Profile options | Low |
 
 ---
 
-## WHAT'S NEXT
+## KNOWN ISSUES
 
-**Phase 2: AI Pattern Detection** (requires external API or on-device ML)
-- Options: Gemini API, Claude API, or on-device pattern analysis
-- Would detect patterns like "You fail exercise every Monday"
-- Could suggest adjustments based on behavior
-
----
-
-## BLOCKING ISSUES
-
-**None** - Phase 1 complete, app builds successfully.
+| Issue | Status |
+|-------|--------|
+| Theme toggle loop | FIXED (used .first() instead of .collect) |
+| PaperClipJar not visible | Component exists, not integrated into UI |
+| OnboardingScreen missing logo | Needs logo added |
+| Notifications not firing at exact time | WorkManager limitation, needs AlarmManager |
 
 ---
 
-## FEATURE STATUS SUMMARY
+## FEATURE STATUS
 
-### Core Features - COMPLETED
-- [x] Profile picture from Google Account
-- [x] Bottom navigation bar
-- [x] Logo in TopAppBar (theme-aware)
-- [x] Greeting message (Good Morning/Evening)
-- [x] Today's Focus section
-- [x] Weekly streak visualization
-- [x] Separate BUILD/BREAK sections
-- [x] Visual streak counter + celebrations
-- [x] Habit reorder buttons
-- [x] Swipe gestures (edit/delete)
+### Core (Working)
+- Sign in (Google)
+- Home screen with habits
+- Bottom navigation (Home, Progress, Identity, Settings)
+- Theme switching (dark/light)
+- Logo switches based on theme
 
-### Habit Creation - COMPLETED
-- [x] Intentions-based creation
-- [x] Habit Stacking
-- [x] 2-Minute Rule (Goal vs Start)
-- [x] Quick-Add mode
-- [x] Templates with one-tap creation
-- [x] Templates pre-fill and modify
+### Habit Management (Working)
+- Create BUILD habits (Socratic questions)
+- Create BREAK habits (5 questions)
+- Templates browser + one-tap creation
+- Edit habit
+- Delete/Archive habit
+- Reorder habits (drag)
+- Mark success/failure
+- Streak tracking + celebrations
 
-### Breaking Bad Habits - COMPLETED
-- [x] PAUSE screen (60-second lock)
-- [x] Cue Elimination Checklist
-- [x] Cost Visibility Journal
-- [x] Friction Tracker
-- [x] Flashcard "I'm Tempted" overlay
+### Break Habit Tools (Working but hidden)
+- PAUSE screen (60s countdown)
+- Cue Elimination (Make It Invisible)
+- Cost Journal (Make It Unattractive)
+- Friction Tracker (Make It Difficult)
+- Accessible from HabitDetailScreen for BREAK habits
 
-### Gamification - COMPLETED
-- [x] Paper Clip Jar visual tracker
-- [x] Paper Clip punishment system (+1/-2)
-- [x] Identity Page
-- [x] Weekly Reflection
-- [x] Milestone celebrations
+### Gamification (Partial)
+- Paper Clip system (+1 success, -2 failure)
+- PaperClipJar component (NOT visible yet)
+- Milestone celebrations
+- Streak break animation
 
-### Social Features - PARTIAL
-- [x] Temptation Bundle Creator
-- [x] Accountability Partner (invite/view)
-- [ ] Community Challenges
-- [ ] Email notifications
+### Progress/Reflection (Working)
+- Dashboard with calendar
+- Weekly reflection
+- Identity page
 
----
+### Social (Partial)
+- Accountability partner invite
+- Partner view
+- Partner management
 
-## KEY FILES MODIFIED THIS SESSION
+### Notifications (Broken)
+- Morning reminder (8 AM) - timing unreliable
+- Evening check-in (8 PM) - timing unreliable
+- "All Good" action button exists
 
-| File | Change |
-|------|--------|
-| `Habit.kt` | Added `paperClipCount`, `paperClipGoal` |
-| `HabitEntity.kt` | Added paper clip fields |
-| `HabitMapper.kt` | Map paper clip fields |
-| `HabitArchitectDatabase.kt` | Migration v2→v3 |
-| `DatabaseModule.kt` | Added migration |
-| `HabitDao.kt` | Added `updatePaperClipCount` |
-| `HabitRepository.kt` | Added paper clip methods |
-| `HabitRepositoryImpl.kt` | Implemented paper clip methods |
-| `HomeViewModel.kt` | +1 clip on success, -2 on failure |
+### Widget (Working)
+- "I'm Tempted" button
+- Opens PauseScreen overlay
 
 ---
 
+## DATABASE
 
-new branch and issues created in github.. the username is yousseflaaroui3010
-therefore the link is github.com/yousseflaaroui3010/habitBuilder
+**Version:** 3
 
-## DATABASE VERSION
-
-**Current:** v3
-
-**Migrations:**
-- v1→v2: Added `location`, `goal` fields
-- v2→v3: Added `paperClipCount`, `paperClipGoal` fields
+| Migration | Changes |
+|-----------|---------|
+| v1→v2 | Added `location`, `goal` fields |
+| v2→v3 | Added `paperClipCount`, `paperClipGoal` fields |
 
 ---
 
-## BUILD COMMANDS
+## DELETED FILES
+
+| File | Reason | Date |
+|------|--------|------|
+| HomeScreen.kt | Never called, replaced by HomeContentScreen | 2026-01-07 |
+
+---
+
+## BUILD
 
 ```bash
-./gradlew assembleDebug          # Debug build
-./gradlew assembleRelease        # Release (needs signing)
+./gradlew assembleDebug    # Debug APK
+./gradlew assembleRelease  # Release (needs signing)
 ```
+
+APK location: `app/build/outputs/apk/debug/app-debug.apk`

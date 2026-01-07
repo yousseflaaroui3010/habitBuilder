@@ -19,7 +19,6 @@ import com.habitarchitect.presentation.screen.dashboard.DashboardScreen
 import com.habitarchitect.presentation.screen.habitdetail.EditHabitScreen
 import com.habitarchitect.presentation.screen.habitdetail.HabitDetailScreen
 import com.habitarchitect.presentation.screen.habitdetail.ResistanceListScreen
-import com.habitarchitect.presentation.screen.home.HomeScreen
 import com.habitarchitect.presentation.screen.main.MainScreen
 import com.habitarchitect.presentation.screen.onboarding.OnboardingScreen
 import com.habitarchitect.presentation.screen.profile.ProfileScreen
