@@ -1,166 +1,334 @@
-# Habit Architect — Honest Audit Report
+FILE AUDIT REPORT
 
-**Date:** 2026-01-03
-**Auditor:** Claude (15 years SE/UX/Business perspective)
+  Scoring: 1-5 (1=obsolete, 5=critical)
 
----
+  ---
+  ROOT DOCS
 
-## Executive Summary
+  | File                        | Score | Status    | Notes                             |
+  |-----------------------------|-------|-----------|-----------------------------------|
+  | readme.md                   | 1     | OBSOLETE  | Gibberish content, useless        |
+  | app-imprvement.md           | 2     | REFERENCE | Old improvement notes, may delete |
+  | Atomic_Habits_App_Design.md | 3     | REFERENCE | Design doc, keep for reference    |
+  | AUDIT_REPORT.md             | 2     | OUTDATED  | Old audit from Jan 3              |
+  | Contextlog.md               | 4     | USEFUL    | Project context tracking          |
+  | decisionlog.md              | 4     | USEFUL    | Decision history                  |
+  | discussion.md               | 5     | ACTIVE    | Current progress tracking         |
+  | HabitArchitect_PRD.md       | 4     | REFERENCE | PRD, keep                         |
+  | improvement.md              | 2     | OUTDATED  | Old notes                         |
+  | PRIVACY_POLICY.md           | 5     | REQUIRED  | Legal doc for Play Store          |
+  | Project-summary.md          | 3     | USEFUL    | Quick overview                    |
+  | requirements.md             | 3     | REFERENCE | Setup requirements                |
+  | system-instructions.md      | 4     | USEFUL    | AI context                        |
 
-The app has solid architecture but **poor UX that will kill user retention**. The Socratic flow, while theoretically sound, is practically tedious. Templates are broken. Core interactions feel dated. This is a developer's app, not a user's app.
+  ---
+  CONFIG FILES
 
----
+  | File                     | Score | Status                 |
+  |--------------------------|-------|------------------------|
+  | build.gradle.kts         | 5     | CRITICAL               |
+  | settings.gradle.kts      | 5     | CRITICAL               |
+  | gradle.properties        | 5     | CRITICAL               |
+  | local.properties         | 5     | CRITICAL               |
+  | app/build.gradle.kts     | 5     | CRITICAL               |
+  | app/google-services.json | 5     | CRITICAL               |
+  | app/schemas/*.json       | 4     | USEFUL (DB migrations) |
 
-## Critical Issues
+  ---
+  DATA LAYER
 
-### 1. Templates Are Useless
-**Problem:** Selecting a template does nothing meaningful. User still goes through the entire 6-question flow manually.
+  Entities (all CRITICAL - 5)
 
-**Expected:** Template should pre-fill EVERYTHING and take user directly to a confirmation screen. One tap to add a habit.
+  | File                      | Status |
+  |---------------------------|--------|
+  | HabitEntity.kt            | Core   |
+  | DailyLogEntity.kt         | Core   |
+  | ListItemEntity.kt         | Core   |
+  | PartnershipEntity.kt      | Core   |
+  | UserEntity.kt             | Core   |
+  | WeeklyReflectionEntity.kt | Core   |
 
-**Fix:** Template selection → Review screen (pre-filled) → "Add Habit" button. Done in 2 taps, not 12.
+  DAOs (all CRITICAL - 5)
 
----
+  | File                   | Status |
+  |------------------------|--------|
+  | HabitDao.kt            | Core   |
+  | DailyLogDao.kt         | Core   |
+  | ListItemDao.kt         | Core   |
+  | PartnershipDao.kt      | Core   |
+  | UserDao.kt             | Core   |
+  | WeeklyReflectionDao.kt | Core   |
 
-### 2. Socratic Flow is UX Death
-**Problem:** 6 questions feels like a job interview, not habit creation. Users will abandon by question 3.
+  Mappers (all USEFUL - 4)
 
-**Reality check:**
-- Duolingo onboards in 30 seconds
-- TikTok hooks in 3 seconds
-- Your app asks 6 essay questions
+  | File                 | Status             |
+  |----------------------|--------------------|
+  | HabitMapper.kt       | Maps entity↔domain |
+  | DailyLogMapper.kt    | Maps entity↔domain |
+  | ListItemMapper.kt    | Maps entity↔domain |
+  | PartnershipMapper.kt | Maps entity↔domain |
+  | UserMapper.kt        | Maps entity↔domain |
 
-**Fix Options:**
-- **Minimal mode:** Name + Emoji + One reason why. That's it. 3 fields.
-- **Deep mode:** Keep Socratic but make it OPTIONAL ("Want to go deeper?")
-- **Progressive:** Start simple, prompt for more detail after 3-day streak
+  Repositories (all CRITICAL - 5)
 
----
+  | File                         | Status |
+  |------------------------------|--------|
+  | HabitRepositoryImpl.kt       | Core   |
+  | DailyLogRepositoryImpl.kt    | Core   |
+  | ListItemRepositoryImpl.kt    | Core   |
+  | PartnershipRepositoryImpl.kt | Core   |
+  | UserRepositoryImpl.kt        | Core   |
 
-### 3. No Swipe Gestures
-**Problem:** In 2026, users expect swipe-to-delete/edit. Tapping into detail screen to access a menu is 2010 UX.
+  Other Data
 
-**Fix:**
-- Swipe left → Delete (with confirmation)
-- Swipe right → Quick edit / Mark done
-- Long press → Context menu
+  | File                      | Score | Status   |
+  |---------------------------|-------|----------|
+  | HabitArchitectDatabase.kt | 5     | CRITICAL |
+  | HabitTemplates.kt         | 5     | CRITICAL |
+  | ThemePreferences.kt       | 5     | CRITICAL |
 
----
+  ---
+  DOMAIN LAYER
 
-### 4. No Habit Prioritization
-**Problem:** All habits look equal. Users can't distinguish urgent from important.
+  Models (all CRITICAL - 5)
 
-**Real world:** Morning prayer vs. drinking water are NOT equal priority.
+  | File                 | Status                    |
+  |----------------------|---------------------------|
+  | Habit.kt             | Core                      |
+  | DailyLog.kt          | Core                      |
+  | DailyStatus.kt       | Core                      |
+  | Frequency.kt         | Core                      |
+  | HabitType.kt         | Core                      |
+  | HabitTemplate.kt     | Core                      |
+  | ListItem.kt          | Core                      |
+  | ListItemType.kt      | Core                      |
+  | Partnership.kt       | Core                      |
+  | PartnershipStatus.kt | Core                      |
+  | User.kt              | Core                      |
+  | AuthProvider.kt      | Core                      |
+  | Priority.kt          | 3 - May be unused, verify |
 
-**Fix:**
-- Drag-to-reorder on home screen
-- Priority levels (High/Medium/Low) with visual distinction
-- "Focus mode" showing only top 3 habits
-- Sort by: Priority, Streak, Alphabetical, Custom
+  Repository Interfaces (all CRITICAL - 5)
 
----
+  All 5 interfaces are used.
 
-### 5. No Smart Assistance
-**Problem:** App is passive. User does all the thinking.
+  ---
+  DI LAYER
 
-**Opportunity:** AI agent could:
-- Suggest habits based on goals ("I want to be healthier" → recommends 3 habits)
-- Detect patterns ("You fail this habit every Friday—want to adjust?")
-- Generate personalized resistance items
-- Coach through temptation moments with conversation
-- Celebrate intelligently ("You've never hit 30 days before!")
+  | File                | Score | Status   |
+  |---------------------|-------|----------|
+  | AppModule.kt        | 5     | CRITICAL |
+  | DatabaseModule.kt   | 5     | CRITICAL |
+  | RepositoryModule.kt | 5     | CRITICAL |
 
----
+  ---
+  PRESENTATION LAYER
 
-## UX Sins Summary
+  Components
 
-| Issue | Severity | Effort to Fix |
-|-------|----------|---------------|
-| Templates don't work | Critical | Low |
-| 6-question flow too long | Critical | Medium |
-| No swipe gestures | High | Medium |
-| No habit sorting/priority | High | Medium |
-| No AI assistance | Medium | High |
-| Bland visual feedback | Medium | Low |
+  | File                    | Score | Status   | Notes                 |
+  |-------------------------|-------|----------|-----------------------|
+  | HabitCard.kt            | 5     | CRITICAL | Main habit display    |
+  | HabitCalendar.kt        | 4     | USEFUL   | Calendar view         |
+  | MilestoneCelebration.kt | 4     | USEFUL   | Celebration animation |
+  | StreakBreakAnimation.kt | 4     | USEFUL   | Failure animation     |
+  | PaperClipJar.kt         | 3     | USEFUL   | Visual gamification   |
+  | TodaysFocus.kt          | 3     | USEFUL   | Focus widget          |
 
----
+  Navigation
 
-## What Competitors Do Better
+  | File        | Score | Status   |
+  |-------------|-------|----------|
+  | NavGraph.kt | 5     | CRITICAL |
+  | Screen.kt   | 5     | CRITICAL |
 
-**Streaks (iOS):** One tap to add, swipe to complete. No questions.
+  Theme
 
-**Habitica:** Gamification makes tedium fun.
+  | File     | Score | Status   |
+  |----------|-------|----------|
+  | Color.kt | 5     | CRITICAL |
+  | Theme.kt | 5     | CRITICAL |
+  | Type.kt  | 5     | CRITICAL |
 
-**Fabulous:** Beautiful animations, feels premium.
+  ---
+  SCREENS
 
-**Your app:** Asks too much, gives too little dopamine.
+  Auth
 
----
+  | File                | Score | Status   |
+  |---------------------|-------|----------|
+  | SignInScreen.kt     | 5     | CRITICAL |
+  | SignInViewModel.kt  | 5     | CRITICAL |
+  | SplashScreen.kt     | 5     | CRITICAL |
+  | SplashViewModel.kt  | 5     | CRITICAL |
+  | OnboardingScreen.kt | 4     | USEFUL   |
 
-## Recommended Immediate Fixes (1-2 days)
+  Main/Home
 
-1. **Fix templates** — Make them actually pre-fill and skip to confirmation
-2. **Add quick-add mode** — Name + emoji only, skip Socratic entirely
-3. **Implement swipe gestures** — SwipeToDismiss in Compose is straightforward
-4. **Add drag-to-reorder** — Users control their priority
+  | File                 | Score | Status   | Notes                |
+  |----------------------|-------|----------|----------------------|
+  | MainScreen.kt        | 5     | CRITICAL | Bottom nav host      |
+  | MainNavHost.kt       | 5     | CRITICAL | Tab navigation       |
+  | HomeContentScreen.kt | 5     | CRITICAL | Actual home content  |
+  | HomeScreen.kt        | 1     | OBSOLETE | Not called anywhere! |
+  | HomeViewModel.kt     | 5     | CRITICAL |                      |
 
----
+  Add Habit
 
-## AI Agent Integration (If You Want It)
+  | File                           | Score | Status   | Notes |
+  |--------------------------------|-------|----------|-------|
+  | AddHabitTypeSelectionScreen.kt | 5     | CRITICAL |       |
+  | AddHabitSocraticScreen.kt      | 5     | CRITICAL |       |
+  | AddHabitViewModel.kt           | 5     | CRITICAL |       |
+  | QuickAddHabitScreen.kt         | 5     | CRITICAL |       |
+  | QuickAddHabitViewModel.kt      | 5     | CRITICAL |       |
 
-**Feasibility:** Yes, absolutely possible.
+  Templates
 
-**Options:**
+  | File                        | Score | Status   |
+  |-----------------------------|-------|----------|
+  | TemplateBrowserScreen.kt    | 5     | CRITICAL |
+  | TemplateBrowserViewModel.kt | 5     | CRITICAL |
+  | TemplateConfirmScreen.kt    | 4     | USEFUL   |
+  | TemplateConfirmViewModel.kt | 4     | USEFUL   |
 
-1. **On-device (cheap, private):**
-   - Use Gemini Nano or similar for basic suggestions
-   - Pattern detection runs locally
-   - No API costs
+  Habit Detail
 
-2. **Cloud API (powerful, costs money):**
-   - Claude/GPT for conversational coaching
-   - ~$0.01-0.05 per conversation
-   - Needs backend or direct API calls
+  | File                       | Score | Status   |
+  |----------------------------|-------|----------|
+  | HabitDetailScreen.kt       | 5     | CRITICAL |
+  | HabitDetailViewModel.kt    | 5     | CRITICAL |
+  | EditHabitScreen.kt         | 4     | USEFUL   |
+  | EditHabitViewModel.kt      | 4     | USEFUL   |
+  | ResistanceListScreen.kt    | 4     | USEFUL   |
+  | ResistanceListViewModel.kt | 4     | USEFUL   |
 
-3. **Hybrid:**
-   - Local for quick suggestions
-   - Cloud for deep coaching sessions
+  Dashboard/Progress
 
-**Implementation approach:**
-```
-User: "I keep failing my exercise habit"
-AI: "I noticed you mark it failed mostly on Mondays.
-     Your weekend routine might be disrupting your
-     Monday morning. Want to try a lighter Monday
-     version—just 5 minutes instead of 30?"
-```
+  | File                  | Score | Status   |
+  |-----------------------|-------|----------|
+  | DashboardScreen.kt    | 5     | CRITICAL |
+  | DashboardViewModel.kt | 5     | CRITICAL |
 
-This would differentiate you from every other habit app.
+  Reflection
 
----
+  | File                         | Score | Status   |
+  |------------------------------|-------|----------|
+  | WeeklyReflectionScreen.kt    | 5     | CRITICAL |
+  | WeeklyReflectionViewModel.kt | 5     | CRITICAL |
 
-## My Honest Take
+  Settings
 
-You built a **technically solid app** with **academically correct** behavioral science. But users don't care about theory—they care about feeling successful.
+  | File                          | Score | Status   | Notes                     |
+  |-------------------------------|-------|----------|---------------------------|
+  | SettingsContentScreen.kt      | 5     | CRITICAL | Used in MainNavHost       |
+  | SettingsScreen.kt             | 4     | USEFUL   | Used for standalone route |
+  | SettingsViewModel.kt          | 5     | CRITICAL |                           |
+  | PartnerManagementScreen.kt    | 4     | USEFUL   |                           |
+  | PartnerManagementViewModel.kt | 4     | USEFUL   |                           |
 
-Right now the app feels like homework. It should feel like a win.
+  Identity
 
-**The fix isn't more features. It's less friction.**
+  | File                 | Score | Status |
+  |----------------------|-------|--------|
+  | IdentityScreen.kt    | 4     | USEFUL |
+  | IdentityViewModel.kt | 4     | USEFUL |
 
-Kill the 6-question flow for 80% of users. Make templates work. Add swipe. Then consider AI.
+  Profile
 
----
+  | File                | Score | Status |
+  |---------------------|-------|--------|
+  | ProfileScreen.kt    | 4     | USEFUL |
+  | ProfileViewModel.kt | 4     | USEFUL |
 
-## Priority Roadmap
+  Partner
 
-| Phase | Focus | Time |
-|-------|-------|------|
-| 1 | Fix templates + quick-add mode | 1 day |
-| 2 | Swipe gestures + reorder | 1-2 days |
-| 3 | Visual polish + micro-animations | 1 day |
-| 4 | AI agent (basic suggestions) | 3-5 days |
-| 5 | AI agent (conversational coach) | 1-2 weeks |
+  | File                            | Score | Status |
+  |---------------------------------|-------|--------|
+  | AcceptPartnerInviteScreen.kt    | 4     | USEFUL |
+  | AcceptPartnerInviteViewModel.kt | 4     | USEFUL |
+  | PartnerViewScreen.kt            | 4     | USEFUL |
+  | PartnerViewViewModel.kt         | 4     | USEFUL |
 
----
+  Break Habit Tools
 
-**Bottom line:** The bones are good. The skin needs work. Ship the UX fixes before adding AI—a beautiful dumb app beats an ugly smart one.
+  | File                        | Score | Status   | Notes                |
+  |-----------------------------|-------|----------|----------------------|
+  | PauseScreen.kt              | 5     | CRITICAL | Tempted overlay      |
+  | CostJournalScreen.kt        | 3     | USEFUL   | May need integration |
+  | CostJournalViewModel.kt     | 3     | USEFUL   |                      |
+  | CueEliminationScreen.kt     | 3     | USEFUL   |                      |
+  | CueEliminationViewModel.kt  | 3     | USEFUL   |                      |
+  | FrictionTrackerScreen.kt    | 3     | USEFUL   |                      |
+  | FrictionTrackerViewModel.kt | 3     | USEFUL   |                      |
+
+  Bundle
+
+  | File                         | Score | Status |
+  |------------------------------|-------|--------|
+  | TemptationBundleScreen.kt    | 3     | USEFUL |
+  | TemptationBundleViewModel.kt | 3     | USEFUL |
+
+  Reminders
+
+  | File                  | Score | Status |
+  |-----------------------|-------|--------|
+  | RemindersScreen.kt    | 3     | USEFUL |
+  | RemindersViewModel.kt | 3     | USEFUL |
+
+  ---
+  WIDGET
+
+  | File                   | Score | Status   |
+  |------------------------|-------|----------|
+  | HabitWidget.kt         | 5     | CRITICAL |
+  | HabitWidgetReceiver.kt | 5     | CRITICAL |
+  | TemptationActivity.kt  | 5     | CRITICAL |
+
+  ---
+  SERVICES
+
+  | File                     | Score | Status   | Notes         |
+  |--------------------------|-------|----------|---------------|
+  | GoogleAuthService.kt     | 5     | CRITICAL |               |
+  | DataExportService.kt     | 3     | USEFUL   |               |
+  | SoundManager.kt          | 5     | CRITICAL |               |
+  | MorningReminderWorker.kt | 4     | USEFUL   | Notifications |
+  | EveningCheckinWorker.kt  | 4     | USEFUL   |               |
+  | BootReceiver.kt          | 4     | USEFUL   |               |
+  | AllGoodReceiver.kt       | 3     | USEFUL   |               |
+
+  ---
+  TESTS
+
+  | File                          | Score | Status |
+  |-------------------------------|-------|--------|
+  | DailyLogRepositoryImplTest.kt | 4     | USEFUL |
+  | HabitRepositoryImplTest.kt    | 4     | USEFUL |
+  | ListItemRepositoryImplTest.kt | 4     | USEFUL |
+
+  ---
+  RESOURCES (all needed - 4/5)
+
+  All XML resources are used.
+
+  ---
+  SUMMARY
+
+  DELETE THESE (Score 1-2):
+
+  | File              | Reason                                      |
+  |-------------------|---------------------------------------------|
+  | readme.md         | Gibberish content                           |
+  | HomeScreen.kt     | Never called, replaced by HomeContentScreen |
+  | app-imprvement.md | Old notes, merged into discussion           |
+  | AUDIT_REPORT.md   | Outdated Jan 3 audit                        |
+  | improvement.md    | Old notes                                   |
+
+  VERIFY USAGE:
+
+  | File                      | Concern                   |
+  |---------------------------|---------------------------|
+  | Priority.kt               | Check if used anywhere    |
+  | Break tools screens       | Verify integration in nav |
+  | TemptationBundleScreen.kt | Verify navigation         |

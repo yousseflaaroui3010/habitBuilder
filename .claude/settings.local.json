@@ -25,7 +25,13 @@
       "Bash(git push:*)",
       "Bash(git pull:*)",
       "Bash(git commit -m \"$\\(cat <<''EOF''\nFix: Show flashcard slides during PAUSE screen for break habits\n\n- Modified PauseScreen to accept resistance items list\n- Added auto-rotating flashcards during 60s countdown\n- Compact timer moved to header with PAUSE title\n- Falls back to default message if no resistance items\n\nFixes #3\n\n🤖 Generated with [Claude Code]\\(https://claude.com/claude-code\\)\n\nCo-Authored-By: Claude Opus 4.5 <noreply@anthropic.com>\nEOF\n\\)\")",
-      "Bash(git commit:*)"
+      "Bash(git commit:*)",
+      "Bash(git stash:*)",
+      "Bash(git reset:*)",
+      "Bash(grep:*)",
+      "Bash(git branch:*)",
+      "Bash(git merge:*)",
+      "Bash(./gradlew.bat assembleDebug:*)"
     ]
   }
 }
