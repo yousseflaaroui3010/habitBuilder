@@ -3,6 +3,7 @@ package com.habitarchitect.presentation.screen.dashboard
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.google.firebase.auth.FirebaseAuth
+import com.habitarchitect.data.local.database.dao.WeeklyReflectionDao
 import com.habitarchitect.domain.model.Habit
 import com.habitarchitect.domain.model.HabitType
 import com.habitarchitect.domain.repository.DailyLogRepository
@@ -13,7 +14,10 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
+import java.time.DayOfWeek
 import java.time.LocalDate
+import java.time.format.DateTimeFormatter
+import java.time.temporal.TemporalAdjusters
 import javax.inject.Inject
 
 data class HabitProgress(
@@ -21,6 +25,13 @@ data class HabitProgress(
     val successDays: Int,
     val totalDays: Int,
     val last7Days: List<Boolean?> // true = success, false = failure, null = no data
+)
+
+data class WeeklyReflectionSummary(
+    val hasReflection: Boolean = false,
+    val wentWell: String = "",
+    val didntGoWell: String = "",
+    val learned: String = ""
 )
 
 data class DashboardUiState(
@@ -31,21 +42,45 @@ data class DashboardUiState(
     val totalStreakDays: Int = 0,
     val longestStreak: Int = 0,
     val overallSuccessRate: Float = 0f,
-    val habitProgress: List<HabitProgress> = emptyList()
+    val habitProgress: List<HabitProgress> = emptyList(),
+    val weeklyReflection: WeeklyReflectionSummary = WeeklyReflectionSummary()
 )
 
 @HiltViewModel
 class DashboardViewModel @Inject constructor(
     private val firebaseAuth: FirebaseAuth,
     private val habitRepository: HabitRepository,
-    private val dailyLogRepository: DailyLogRepository
+    private val dailyLogRepository: DailyLogRepository,
+    private val weeklyReflectionDao: WeeklyReflectionDao
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(DashboardUiState())
     val uiState: StateFlow<DashboardUiState> = _uiState.asStateFlow()
 
+    private val weekStartDate: String = LocalDate.now()
+        .with(TemporalAdjusters.previousOrSame(DayOfWeek.SUNDAY))
+        .format(DateTimeFormatter.ISO_DATE)
+
     init {
         loadDashboardData()
+        loadWeeklyReflection()
+    }
+
+    private fun loadWeeklyReflection() {
+        val userId = firebaseAuth.currentUser?.uid ?: return
+        viewModelScope.launch {
+            val reflection = weeklyReflectionDao.getReflectionForWeek(userId, weekStartDate)
+            if (reflection != null) {
+                _uiState.value = _uiState.value.copy(
+                    weeklyReflection = WeeklyReflectionSummary(
+                        hasReflection = true,
+                        wentWell = reflection.wentWell,
+                        didntGoWell = reflection.didntGoWell,
+                        learned = reflection.learned
+                    )
+                )
+            }
+        }
     }
 
     private fun loadDashboardData() {

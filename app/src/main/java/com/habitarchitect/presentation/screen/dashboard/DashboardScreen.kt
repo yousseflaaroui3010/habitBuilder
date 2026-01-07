@@ -130,7 +130,10 @@ fun DashboardScreen(
 
                 // Weekly Reflection Card
                 item {
-                    WeeklyReflectionCard(onClick = onNavigateToWeeklyReflection)
+                    WeeklyReflectionCard(
+                        reflection = uiState.weeklyReflection,
+                        onClick = onNavigateToWeeklyReflection
+                    )
                 }
 
                 // Individual habit progress
@@ -397,7 +400,10 @@ private fun DayIndicator(dayLabel: String, status: Boolean?) {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun WeeklyReflectionCard(onClick: () -> Unit) {
+private fun WeeklyReflectionCard(
+    reflection: WeeklyReflectionSummary,
+    onClick: () -> Unit
+) {
     Card(
         onClick = onClick,
         modifier = Modifier.fillMaxWidth(),
@@ -406,36 +412,100 @@ private fun WeeklyReflectionCard(onClick: () -> Unit) {
         ),
         shape = RoundedCornerShape(16.dp)
     ) {
-        Row(
+        Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(16.dp),
-            verticalAlignment = Alignment.CenterVertically
+                .padding(16.dp)
         ) {
-            Icon(
-                imageVector = Icons.Default.Edit,
-                contentDescription = null,
-                tint = Color(0xFF9C27B0),
-                modifier = Modifier.size(32.dp)
-            )
-            Spacer(modifier = Modifier.width(16.dp))
-            Column(modifier = Modifier.weight(1f)) {
-                Text(
-                    text = "Weekly Reflection",
-                    style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.Bold,
-                    color = Color(0xFF9C27B0)
+            Row(
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Edit,
+                    contentDescription = null,
+                    tint = Color(0xFF9C27B0),
+                    modifier = Modifier.size(32.dp)
                 )
-                Text(
-                    text = "Reflect on your progress and set intentions",
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                Spacer(modifier = Modifier.width(16.dp))
+                Column(modifier = Modifier.weight(1f)) {
+                    Text(
+                        text = "Weekly Reflection",
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.Bold,
+                        color = Color(0xFF9C27B0)
+                    )
+                    Text(
+                        text = if (reflection.hasReflection) "Tap to edit" else "Reflect on your progress",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+                Icon(
+                    imageVector = Icons.Default.ChevronRight,
+                    contentDescription = null,
+                    tint = Color(0xFF9C27B0)
                 )
             }
-            Icon(
-                imageVector = Icons.Default.ChevronRight,
-                contentDescription = null,
-                tint = Color(0xFF9C27B0)
+
+            // Show summary if reflection exists
+            if (reflection.hasReflection) {
+                Spacer(modifier = Modifier.height(12.dp))
+
+                // Went well summary
+                if (reflection.wentWell.isNotBlank()) {
+                    ReflectionSummaryItem(
+                        emoji = "👍",
+                        label = "Went well",
+                        text = reflection.wentWell
+                    )
+                    Spacer(modifier = Modifier.height(8.dp))
+                }
+
+                // Didn't go well summary
+                if (reflection.didntGoWell.isNotBlank()) {
+                    ReflectionSummaryItem(
+                        emoji = "👎",
+                        label = "Struggled with",
+                        text = reflection.didntGoWell
+                    )
+                    Spacer(modifier = Modifier.height(8.dp))
+                }
+
+                // Learned summary
+                if (reflection.learned.isNotBlank()) {
+                    ReflectionSummaryItem(
+                        emoji = "🎓",
+                        label = "Learned",
+                        text = reflection.learned
+                    )
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun ReflectionSummaryItem(
+    emoji: String,
+    label: String,
+    text: String
+) {
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        verticalAlignment = Alignment.Top
+    ) {
+        Text(text = emoji, fontSize = 14.sp)
+        Spacer(modifier = Modifier.width(8.dp))
+        Column {
+            Text(
+                text = label,
+                style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+            Text(
+                text = text.take(100) + if (text.length > 100) "..." else "",
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurface
             )
         }
     }
