@@ -3,6 +3,7 @@ package com.habitarchitect.presentation.screen.home
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.google.firebase.auth.FirebaseAuth
+import com.habitarchitect.data.preferences.ThemeMode
 import com.habitarchitect.data.preferences.ThemePreferences
 import com.habitarchitect.domain.model.DailyStatus
 import com.habitarchitect.domain.model.Habit
@@ -16,6 +17,7 @@ import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import java.time.DayOfWeek
 import java.time.LocalDate
@@ -209,6 +211,18 @@ class HomeViewModel @Inject constructor(
     fun reorderHabits(habitIds: List<String>) {
         viewModelScope.launch {
             habitRepository.reorderHabits(habitIds)
+        }
+    }
+
+    fun toggleTheme() {
+        viewModelScope.launch {
+            val currentMode = themePreferences.themeMode.first()
+            val newMode = when (currentMode) {
+                ThemeMode.SYSTEM -> ThemeMode.DARK
+                ThemeMode.DARK -> ThemeMode.LIGHT
+                ThemeMode.LIGHT -> ThemeMode.DARK
+            }
+            themePreferences.setThemeMode(newMode)
         }
     }
 }

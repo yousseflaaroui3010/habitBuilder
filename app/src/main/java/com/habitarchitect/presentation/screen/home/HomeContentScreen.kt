@@ -25,10 +25,12 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.DarkMode
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.KeyboardArrowUp
+import androidx.compose.material.icons.filled.LightMode
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Card
@@ -37,7 +39,6 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DismissDirection
 import androidx.compose.material3.DismissValue
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -84,9 +85,10 @@ import java.time.LocalTime
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
+@Suppress("UNUSED_PARAMETER")
 fun HomeContentScreen(
     onNavigateToHabitDetail: (String) -> Unit,
-    onNavigateToAddHabit: () -> Unit,
+    onNavigateToAddHabit: () -> Unit, // Kept for API compatibility - FAB in MainScreen
     onNavigateToEditHabit: (String) -> Unit = {},
     onNavigateToProfile: () -> Unit = {},
     viewModel: HomeViewModel = hiltViewModel()
@@ -154,16 +156,29 @@ fun HomeContentScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = {
-                    // Logo in center
+                title = { },
+                navigationIcon = {
+                    // Logo on left, bigger
                     Image(
                         painter = painterResource(id = logoRes),
                         contentDescription = "Habit Architect Logo",
-                        modifier = Modifier.height(40.dp),
+                        modifier = Modifier
+                            .padding(start = 8.dp)
+                            .height(48.dp),
                         contentScale = ContentScale.Fit
                     )
                 },
-                navigationIcon = {
+                actions = {
+                    // Theme toggle
+                    IconButton(onClick = { viewModel.toggleTheme() }) {
+                        Icon(
+                            imageVector = if (isDarkTheme) Icons.Default.LightMode else Icons.Default.DarkMode,
+                            contentDescription = if (isDarkTheme) "Switch to light mode" else "Switch to dark mode",
+                            tint = MaterialTheme.colorScheme.onSurface
+                        )
+                    }
+
+                    // Profile picture on right
                     IconButton(onClick = onNavigateToProfile) {
                         if (userPhotoUrl != null) {
                             AsyncImage(
@@ -194,15 +209,10 @@ fun HomeContentScreen(
                             }
                         }
                     }
-                },
-                actions = { }
+                }
             )
-        },
-        floatingActionButton = {
-            FloatingActionButton(onClick = onNavigateToAddHabit) {
-                Icon(Icons.Default.Add, contentDescription = "Add habit")
-            }
         }
+        // FAB moved to MainScreen for consistent visibility across all tabs
     ) { paddingValues ->
         when (val state = uiState) {
             is HomeUiState.Loading -> {
