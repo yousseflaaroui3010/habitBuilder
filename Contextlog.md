@@ -6,13 +6,6 @@
 
 ## BRANCHES
 
-### Ready to Merge
-| Branch | Issue | Status |
-|--------|-------|--------|
-| HB-1-add-weekly-reflection-summary | #1 | Done |
-| HB-13-modify-habit-creation-ux | #13 | Done |
-| HB-18-modify-fab-visibility | #18 | Done |
-
 ### Needs Review
 | Branch | Issue | Notes |
 |--------|-------|-------|
@@ -23,9 +16,12 @@
 ## CLOSED ISSUES
 | # | Issue | Notes |
 |---|-------|-------|
-| 2 | Cost input UX | Done, works well |
-| 3 | Tempted screen flashcards | Done, but: add manual slide back/forward |
-| 4 | I Failed Today button | Done, but: needs confirmation popup |
+| 1 | Weekly reflections summary | Merged |
+| 2 | Cost input UX | Done |
+| 3 | Tempted screen flashcards | Done |
+| 4 | I Failed Today button | Done |
+| 13 | Break/Build Habit UX | Merged |
+| 18 | FAB visibility | Merged |
 
 ---
 
