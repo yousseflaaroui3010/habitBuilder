@@ -13,6 +13,7 @@ import com.habitarchitect.domain.model.ListItemType
 import com.habitarchitect.domain.repository.DailyLogRepository
 import com.habitarchitect.domain.repository.HabitRepository
 import com.habitarchitect.domain.repository.ListItemRepository
+import com.habitarchitect.service.notification.AlarmScheduler
 import java.util.UUID
 import com.habitarchitect.service.sound.SoundManager
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -67,7 +68,8 @@ class HomeViewModel @Inject constructor(
     private val dailyLogRepository: DailyLogRepository,
     private val listItemRepository: ListItemRepository,
     private val soundManager: SoundManager,
-    private val themePreferences: ThemePreferences
+    private val themePreferences: ThemePreferences,
+    private val alarmScheduler: AlarmScheduler
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow<HomeUiState>(HomeUiState.Loading)
@@ -198,6 +200,8 @@ class HomeViewModel @Inject constructor(
             // For BREAK habits, ask what triggered the failure
             if (habit?.type == HabitType.BREAK) {
                 _events.emit(HomeEvent.ShowTriggerDialog(habitId, habit.name))
+                // Schedule supportive notification 1 hour later
+                alarmScheduler.schedulePostFailureReminder(habitId, habit.name)
             }
 
             // Reload to update UI
