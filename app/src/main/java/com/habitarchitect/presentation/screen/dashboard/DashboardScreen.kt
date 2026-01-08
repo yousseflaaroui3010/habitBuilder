@@ -136,7 +136,7 @@ fun DashboardScreen(
                     SuccessRateCard(uiState.overallSuccessRate)
                 }
 
-                // Charts section
+                // Charts section - side by side, larger and clickable
                 item {
                     Row(
                         modifier = Modifier.fillMaxWidth(),
@@ -146,14 +146,16 @@ fun DashboardScreen(
                         HabitTypePieChart(
                             buildCount = uiState.buildHabits,
                             breakCount = uiState.breakHabits,
-                            modifier = Modifier.weight(1f)
+                            modifier = Modifier.weight(1f),
+                            onClick = { /* TODO: Navigate to habits list */ }
                         )
 
                         // Success/Failure pie chart
                         SuccessFailurePieChart(
                             successDays = uiState.habitProgress.sumOf { it.successDays },
                             failureDays = uiState.habitProgress.sumOf { it.totalDays - it.successDays },
-                            modifier = Modifier.weight(1f)
+                            modifier = Modifier.weight(1f),
+                            onClick = { /* TODO: Show detailed stats */ }
                         )
                     }
                 }
@@ -171,19 +173,6 @@ fun DashboardScreen(
                         reflection = uiState.weeklyReflection,
                         onClick = onNavigateToWeeklyReflection
                     )
-                }
-
-                // Individual habit progress
-                item {
-                    Text(
-                        text = "Habit Progress",
-                        style = MaterialTheme.typography.titleLarge,
-                        fontWeight = FontWeight.Bold
-                    )
-                }
-
-                items(uiState.habitProgress) { progress ->
-                    HabitProgressCard(progress)
                 }
             }
         }
@@ -553,17 +542,20 @@ private fun ReflectionSummaryItem(
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun HabitTypePieChart(
     buildCount: Int,
     breakCount: Int,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    onClick: () -> Unit = {}
 ) {
     val total = buildCount + breakCount
     val buildColor = Color(0xFF81C784) // Green
     val breakColor = Color(0xFFE57373) // Red
 
     Card(
+        onClick = onClick,
         modifier = modifier,
         colors = CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.surfaceVariant
@@ -571,27 +563,27 @@ private fun HabitTypePieChart(
     ) {
         Column(
             modifier = Modifier
-                .padding(12.dp)
+                .padding(16.dp)
                 .fillMaxWidth(),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Text(
                 text = "Habit Types",
-                style = MaterialTheme.typography.labelMedium,
+                style = MaterialTheme.typography.titleSmall,
                 fontWeight = FontWeight.Bold
             )
 
-            Spacer(modifier = Modifier.height(8.dp))
+            Spacer(modifier = Modifier.height(12.dp))
 
             if (total > 0) {
                 Box(
-                    modifier = Modifier.size(80.dp),
+                    modifier = Modifier.size(120.dp),
                     contentAlignment = Alignment.Center
                 ) {
                     val buildAngle = (buildCount.toFloat() / total) * 360f
 
-                    Canvas(modifier = Modifier.size(80.dp)) {
-                        val strokeWidth = 16.dp.toPx()
+                    Canvas(modifier = Modifier.size(120.dp)) {
+                        val strokeWidth = 20.dp.toPx()
                         val radius = (size.minDimension - strokeWidth) / 2
 
                         // Break arc (background)
@@ -619,44 +611,60 @@ private fun HabitTypePieChart(
                         }
                     }
 
-                    Text(
-                        text = total.toString(),
-                        style = MaterialTheme.typography.titleMedium,
-                        fontWeight = FontWeight.Bold
-                    )
+                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                        Text(
+                            text = total.toString(),
+                            style = MaterialTheme.typography.headlineMedium,
+                            fontWeight = FontWeight.Bold
+                        )
+                        Text(
+                            text = "habits",
+                            style = MaterialTheme.typography.labelSmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
                 }
 
-                Spacer(modifier = Modifier.height(8.dp))
+                Spacer(modifier = Modifier.height(12.dp))
 
                 // Legend
-                Row(
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.spacedBy(4.dp)
                 ) {
                     LegendItem(color = buildColor, label = "Build: $buildCount")
                     LegendItem(color = breakColor, label = "Break: $breakCount")
                 }
             } else {
-                Text(
-                    text = "No habits",
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
+                Box(
+                    modifier = Modifier.size(120.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(
+                        text = "No habits",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
             }
         }
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun SuccessFailurePieChart(
     successDays: Int,
     failureDays: Int,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    onClick: () -> Unit = {}
 ) {
     val total = successDays + failureDays
     val successColor = Color(0xFF4CAF50) // Brighter green
     val failureColor = Color(0xFFFF5252) // Brighter red
 
     Card(
+        onClick = onClick,
         modifier = modifier,
         colors = CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.surfaceVariant
@@ -664,27 +672,27 @@ private fun SuccessFailurePieChart(
     ) {
         Column(
             modifier = Modifier
-                .padding(12.dp)
+                .padding(16.dp)
                 .fillMaxWidth(),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Text(
                 text = "Success Rate",
-                style = MaterialTheme.typography.labelMedium,
+                style = MaterialTheme.typography.titleSmall,
                 fontWeight = FontWeight.Bold
             )
 
-            Spacer(modifier = Modifier.height(8.dp))
+            Spacer(modifier = Modifier.height(12.dp))
 
             if (total > 0) {
                 Box(
-                    modifier = Modifier.size(80.dp),
+                    modifier = Modifier.size(120.dp),
                     contentAlignment = Alignment.Center
                 ) {
                     val successAngle = (successDays.toFloat() / total) * 360f
 
-                    Canvas(modifier = Modifier.size(80.dp)) {
-                        val strokeWidth = 16.dp.toPx()
+                    Canvas(modifier = Modifier.size(120.dp)) {
+                        val strokeWidth = 20.dp.toPx()
                         val radius = (size.minDimension - strokeWidth) / 2
 
                         // Failure arc (background)
@@ -712,29 +720,42 @@ private fun SuccessFailurePieChart(
                         }
                     }
 
-                    val percentage = if (total > 0) (successDays * 100 / total) else 0
-                    Text(
-                        text = "$percentage%",
-                        style = MaterialTheme.typography.titleMedium,
-                        fontWeight = FontWeight.Bold
-                    )
+                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                        val percentage = if (total > 0) (successDays * 100 / total) else 0
+                        Text(
+                            text = "$percentage%",
+                            style = MaterialTheme.typography.headlineMedium,
+                            fontWeight = FontWeight.Bold
+                        )
+                        Text(
+                            text = "success",
+                            style = MaterialTheme.typography.labelSmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
                 }
 
-                Spacer(modifier = Modifier.height(8.dp))
+                Spacer(modifier = Modifier.height(12.dp))
 
                 // Legend
-                Row(
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.spacedBy(4.dp)
                 ) {
-                    LegendItem(color = successColor, label = "✓ $successDays")
-                    LegendItem(color = failureColor, label = "✗ $failureDays")
+                    LegendItem(color = successColor, label = "Success: $successDays")
+                    LegendItem(color = failureColor, label = "Failed: $failureDays")
                 }
             } else {
-                Text(
-                    text = "No data",
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
+                Box(
+                    modifier = Modifier.size(120.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(
+                        text = "No data",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
             }
         }
     }
