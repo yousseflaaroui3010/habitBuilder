@@ -14,13 +14,17 @@ fun UserEntity.toDomain(): User {
         email = email,
         displayName = displayName,
         photoUrl = photoUrl,
-        authProvider = AuthProvider.valueOf(authProvider),
+        authProvider = try { AuthProvider.valueOf(authProvider) } catch (e: IllegalArgumentException) { AuthProvider.GOOGLE },
         createdAt = createdAt,
         lastActiveAt = lastActiveAt,
         onboardingCompleted = onboardingCompleted,
         notificationsEnabled = notificationsEnabled,
-        morningReminderTime = morningReminderTime?.let { LocalTime.parse(it) },
-        eveningReminderTime = eveningReminderTime?.let { LocalTime.parse(it) }
+        morningReminderTime = morningReminderTime?.let {
+            try { LocalTime.parse(it) } catch (e: Exception) { null }
+        },
+        eveningReminderTime = eveningReminderTime?.let {
+            try { LocalTime.parse(it) } catch (e: Exception) { null }
+        }
     )
 }
 

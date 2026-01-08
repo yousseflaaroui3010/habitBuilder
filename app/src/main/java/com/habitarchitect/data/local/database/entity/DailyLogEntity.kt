@@ -10,7 +10,7 @@ import androidx.room.Index
     tableName = "daily_logs",
     primaryKeys = ["habitId", "date"],
     indices = [
-        Index(value = ["habitId"]),
+        // Note: habitId index is implicit as first part of composite primary key
         Index(value = ["date"])
     ]
 )

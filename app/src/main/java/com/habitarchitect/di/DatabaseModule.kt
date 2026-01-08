@@ -1,8 +1,6 @@
 package com.habitarchitect.di
 
 import android.content.Context
-import androidx.room.Room
-import androidx.room.migration.Migration
 import com.habitarchitect.data.local.database.HabitArchitectDatabase
 import com.habitarchitect.data.local.database.dao.DailyLogDao
 import com.habitarchitect.data.local.database.dao.HabitDao
@@ -21,22 +19,11 @@ import javax.inject.Singleton
 @InstallIn(SingletonComponent::class)
 object DatabaseModule {
 
-    private val ALL_MIGRATIONS: Array<Migration> = arrayOf(
-        HabitArchitectDatabase.MIGRATION_1_2,
-        HabitArchitectDatabase.MIGRATION_2_3,
-        HabitArchitectDatabase.MIGRATION_3_4
-    )
-
     @Provides
     @Singleton
     fun provideDatabase(@ApplicationContext context: Context): HabitArchitectDatabase {
-        return Room.databaseBuilder(
-            context,
-            HabitArchitectDatabase::class.java,
-            HabitArchitectDatabase.DATABASE_NAME
-        )
-            .addMigrations(*ALL_MIGRATIONS)
-            .build()
+        // Use the singleton instance to ensure widgets and DI use the same database
+        return HabitArchitectDatabase.getInstance(context)
     }
 
     @Provides

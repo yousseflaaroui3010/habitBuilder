@@ -11,8 +11,8 @@ import java.time.LocalDate
 fun DailyLogEntity.toDomain(): DailyLog {
     return DailyLog(
         habitId = habitId,
-        date = LocalDate.parse(date),
-        status = DailyStatus.valueOf(status),
+        date = try { LocalDate.parse(date) } catch (e: Exception) { LocalDate.now() },
+        status = try { DailyStatus.valueOf(status) } catch (e: IllegalArgumentException) { DailyStatus.PENDING },
         markedAt = markedAt,
         note = note
     )

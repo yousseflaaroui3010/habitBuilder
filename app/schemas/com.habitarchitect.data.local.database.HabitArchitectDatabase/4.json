@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 4,
-    "identityHash": "38ed4b92518dbe65725db76b80675f43",
+    "identityHash": "6c1302b38d2c66260650587388475a42",
     "entities": [
       {
         "tableName": "users",
@@ -350,15 +350,6 @@
         },
         "indices": [
           {
-            "name": "index_daily_logs_habitId",
-            "unique": false,
-            "columnNames": [
-              "habitId"
-            ],
-            "orders": [],
-            "createSql": "CREATE INDEX IF NOT EXISTS `index_daily_logs_habitId` ON `${TABLE_NAME}` (`habitId`)"
-          },
-          {
             "name": "index_daily_logs_date",
             "unique": false,
             "columnNames": [
@@ -606,7 +597,7 @@
     "views": [],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '38ed4b92518dbe65725db76b80675f43')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '6c1302b38d2c66260650587388475a42')"
     ]
   }
 }

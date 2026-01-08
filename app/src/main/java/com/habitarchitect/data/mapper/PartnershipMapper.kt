@@ -14,7 +14,7 @@ fun PartnershipEntity.toDomain(): Partnership {
         partnerId = partnerId,
         inviteCode = inviteCode,
         inviteExpiresAt = inviteExpiresAt,
-        status = PartnershipStatus.valueOf(status),
+        status = try { PartnershipStatus.valueOf(status) } catch (e: IllegalArgumentException) { PartnershipStatus.PENDING },
         createdAt = createdAt
     )
 }

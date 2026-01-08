@@ -11,7 +11,7 @@ fun ListItemEntity.toDomain(): ListItem {
     return ListItem(
         id = id,
         habitId = habitId,
-        type = ListItemType.valueOf(type),
+        type = try { ListItemType.valueOf(type) } catch (e: IllegalArgumentException) { ListItemType.RESISTANCE },
         content = content,
         orderIndex = orderIndex,
         isFromTemplate = isFromTemplate,
