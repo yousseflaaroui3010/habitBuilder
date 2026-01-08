@@ -20,9 +20,11 @@ None - all merged to main
 | 10 | Break habit Protocol | Merged - trigger prompt after failure |
 | 12 | Notifications | Merged - AlarmManager for exact timing |
 | 13 | Break/Build Habit UX | Merged |
+| 14 | Progress Page | Merged - pie charts, bar chart, day labels |
 | 17 | Header layout | Merged |
 | 18 | FAB visibility | Merged |
 | 19 | Color contrast AA | Merged |
+| 20 | I'm Tempted slides | Merged - navigation, 30s timer, improved visuals |
 | 30 | Navigation bar above system buttons | Merged |
 
 ---
@@ -30,10 +32,8 @@ None - all merged to main
 ## OPEN ISSUES
 | # | Issue | Priority | Notes |
 |---|-------|----------|-------|
-| 14 | Progress Page | Medium | |
 | 15 | Widget Privacy | Medium | |
 | 16 | Habit creation in home | Low | |
-| 20 | I'm Tempted slides | Medium | Add manual navigation |
 | 21 | Guest Mode | Low | |
 | 22 | Profile options | Low | |
 

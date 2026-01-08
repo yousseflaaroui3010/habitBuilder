@@ -1,5 +1,6 @@
 package com.habitarchitect.presentation.screen.dashboard
 
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -38,13 +39,20 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.StrokeCap
+import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.habitarchitect.domain.model.HabitType
+import java.time.LocalDate
+import java.time.format.TextStyle
+import java.util.Locale
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -126,6 +134,35 @@ fun DashboardScreen(
                 // Success rate
                 item {
                     SuccessRateCard(uiState.overallSuccessRate)
+                }
+
+                // Charts section
+                item {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(12.dp)
+                    ) {
+                        // Pie Chart for habit types
+                        HabitTypePieChart(
+                            buildCount = uiState.buildHabits,
+                            breakCount = uiState.breakHabits,
+                            modifier = Modifier.weight(1f)
+                        )
+
+                        // Success/Failure pie chart
+                        SuccessFailurePieChart(
+                            successDays = uiState.habitProgress.sumOf { it.successDays },
+                            failureDays = uiState.habitProgress.sumOf { it.totalDays - it.successDays },
+                            modifier = Modifier.weight(1f)
+                        )
+                    }
+                }
+
+                // Weekly bar chart
+                item {
+                    WeeklyProgressBarChart(
+                        habitProgress = uiState.habitProgress
+                    )
                 }
 
                 // Weekly Reflection Card
@@ -328,9 +365,14 @@ private fun HabitProgressCard(progress: HabitProgress) {
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
+                val today = LocalDate.now()
+                val last7Days = (6 downTo 0).map { today.minusDays(it.toLong()) }
+
                 progress.last7Days.forEachIndexed { index, status ->
+                    val date = last7Days.getOrNull(index)
+                    val dayLabel = date?.dayOfWeek?.getDisplayName(TextStyle.NARROW, Locale.getDefault()) ?: ""
                     DayIndicator(
-                        dayLabel = listOf("M", "T", "W", "T", "F", "S", "S").getOrElse(index) { "" },
+                        dayLabel = dayLabel,
                         status = status
                     )
                 }
@@ -507,6 +549,327 @@ private fun ReflectionSummaryItem(
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurface
             )
+        }
+    }
+}
+
+@Composable
+private fun HabitTypePieChart(
+    buildCount: Int,
+    breakCount: Int,
+    modifier: Modifier = Modifier
+) {
+    val total = buildCount + breakCount
+    val buildColor = Color(0xFF81C784) // Green
+    val breakColor = Color(0xFFE57373) // Red
+
+    Card(
+        modifier = modifier,
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surfaceVariant
+        )
+    ) {
+        Column(
+            modifier = Modifier
+                .padding(12.dp)
+                .fillMaxWidth(),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Text(
+                text = "Habit Types",
+                style = MaterialTheme.typography.labelMedium,
+                fontWeight = FontWeight.Bold
+            )
+
+            Spacer(modifier = Modifier.height(8.dp))
+
+            if (total > 0) {
+                Box(
+                    modifier = Modifier.size(80.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+                    val buildAngle = (buildCount.toFloat() / total) * 360f
+
+                    Canvas(modifier = Modifier.size(80.dp)) {
+                        val strokeWidth = 16.dp.toPx()
+                        val radius = (size.minDimension - strokeWidth) / 2
+
+                        // Break arc (background)
+                        drawArc(
+                            color = breakColor,
+                            startAngle = -90f + buildAngle,
+                            sweepAngle = 360f - buildAngle,
+                            useCenter = false,
+                            topLeft = Offset(strokeWidth / 2, strokeWidth / 2),
+                            size = Size(radius * 2, radius * 2),
+                            style = Stroke(width = strokeWidth, cap = StrokeCap.Butt)
+                        )
+
+                        // Build arc
+                        if (buildCount > 0) {
+                            drawArc(
+                                color = buildColor,
+                                startAngle = -90f,
+                                sweepAngle = buildAngle,
+                                useCenter = false,
+                                topLeft = Offset(strokeWidth / 2, strokeWidth / 2),
+                                size = Size(radius * 2, radius * 2),
+                                style = Stroke(width = strokeWidth, cap = StrokeCap.Butt)
+                            )
+                        }
+                    }
+
+                    Text(
+                        text = total.toString(),
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.Bold
+                    )
+                }
+
+                Spacer(modifier = Modifier.height(8.dp))
+
+                // Legend
+                Row(
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    LegendItem(color = buildColor, label = "Build: $buildCount")
+                    LegendItem(color = breakColor, label = "Break: $breakCount")
+                }
+            } else {
+                Text(
+                    text = "No habits",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun SuccessFailurePieChart(
+    successDays: Int,
+    failureDays: Int,
+    modifier: Modifier = Modifier
+) {
+    val total = successDays + failureDays
+    val successColor = Color(0xFF4CAF50) // Brighter green
+    val failureColor = Color(0xFFFF5252) // Brighter red
+
+    Card(
+        modifier = modifier,
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surfaceVariant
+        )
+    ) {
+        Column(
+            modifier = Modifier
+                .padding(12.dp)
+                .fillMaxWidth(),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Text(
+                text = "Success Rate",
+                style = MaterialTheme.typography.labelMedium,
+                fontWeight = FontWeight.Bold
+            )
+
+            Spacer(modifier = Modifier.height(8.dp))
+
+            if (total > 0) {
+                Box(
+                    modifier = Modifier.size(80.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+                    val successAngle = (successDays.toFloat() / total) * 360f
+
+                    Canvas(modifier = Modifier.size(80.dp)) {
+                        val strokeWidth = 16.dp.toPx()
+                        val radius = (size.minDimension - strokeWidth) / 2
+
+                        // Failure arc (background)
+                        drawArc(
+                            color = failureColor,
+                            startAngle = -90f + successAngle,
+                            sweepAngle = 360f - successAngle,
+                            useCenter = false,
+                            topLeft = Offset(strokeWidth / 2, strokeWidth / 2),
+                            size = Size(radius * 2, radius * 2),
+                            style = Stroke(width = strokeWidth, cap = StrokeCap.Butt)
+                        )
+
+                        // Success arc
+                        if (successDays > 0) {
+                            drawArc(
+                                color = successColor,
+                                startAngle = -90f,
+                                sweepAngle = successAngle,
+                                useCenter = false,
+                                topLeft = Offset(strokeWidth / 2, strokeWidth / 2),
+                                size = Size(radius * 2, radius * 2),
+                                style = Stroke(width = strokeWidth, cap = StrokeCap.Butt)
+                            )
+                        }
+                    }
+
+                    val percentage = if (total > 0) (successDays * 100 / total) else 0
+                    Text(
+                        text = "$percentage%",
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.Bold
+                    )
+                }
+
+                Spacer(modifier = Modifier.height(8.dp))
+
+                // Legend
+                Row(
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    LegendItem(color = successColor, label = "✓ $successDays")
+                    LegendItem(color = failureColor, label = "✗ $failureDays")
+                }
+            } else {
+                Text(
+                    text = "No data",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun LegendItem(color: Color, label: String) {
+    Row(
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Box(
+            modifier = Modifier
+                .size(8.dp)
+                .clip(CircleShape)
+                .background(color)
+        )
+        Spacer(modifier = Modifier.width(4.dp))
+        Text(
+            text = label,
+            style = MaterialTheme.typography.labelSmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
+    }
+}
+
+@Composable
+private fun WeeklyProgressBarChart(
+    habitProgress: List<HabitProgress>
+) {
+    val today = LocalDate.now()
+    val last7Days = (6 downTo 0).map { today.minusDays(it.toLong()) }
+
+    // Calculate daily success rates
+    val dailyStats = last7Days.map { date ->
+        val dayIndex = 6 - java.time.temporal.ChronoUnit.DAYS.between(date, today).toInt()
+        var successCount = 0
+        var totalCount = 0
+
+        habitProgress.forEach { progress ->
+            val status = progress.last7Days.getOrNull(dayIndex)
+            if (status != null) {
+                totalCount++
+                if (status) successCount++
+            }
+        }
+
+        Triple(
+            date.dayOfWeek.getDisplayName(TextStyle.SHORT, Locale.getDefault()),
+            successCount,
+            totalCount
+        )
+    }
+
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surfaceVariant
+        )
+    ) {
+        Column(
+            modifier = Modifier.padding(16.dp)
+        ) {
+            Text(
+                text = "Weekly Progress",
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.Bold
+            )
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(120.dp),
+                horizontalArrangement = Arrangement.SpaceEvenly,
+                verticalAlignment = Alignment.Bottom
+            ) {
+                dailyStats.forEach { (dayLabel, success, total) ->
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        // Bar
+                        val maxHeight = 80.dp
+                        val barHeight = if (total > 0) {
+                            maxHeight * (success.toFloat() / total)
+                        } else {
+                            0.dp
+                        }
+
+                        val barColor = when {
+                            total == 0 -> MaterialTheme.colorScheme.outline.copy(alpha = 0.3f)
+                            success == total -> Color(0xFF4CAF50) // All success - green
+                            success > total / 2 -> Color(0xFFFFC107) // More than half - yellow
+                            else -> Color(0xFFFF5252) // Less than half - red
+                        }
+
+                        // Background bar
+                        Box(
+                            modifier = Modifier
+                                .width(24.dp)
+                                .height(maxHeight)
+                                .clip(RoundedCornerShape(topStart = 4.dp, topEnd = 4.dp))
+                                .background(MaterialTheme.colorScheme.outline.copy(alpha = 0.15f)),
+                            contentAlignment = Alignment.BottomCenter
+                        ) {
+                            // Filled bar
+                            if (total > 0) {
+                                Box(
+                                    modifier = Modifier
+                                        .width(24.dp)
+                                        .height(barHeight)
+                                        .clip(RoundedCornerShape(topStart = 4.dp, topEnd = 4.dp))
+                                        .background(barColor)
+                                )
+                            }
+                        }
+
+                        Spacer(modifier = Modifier.height(4.dp))
+
+                        // Count label
+                        Text(
+                            text = if (total > 0) "$success/$total" else "-",
+                            style = MaterialTheme.typography.labelSmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+
+                        // Day label
+                        Text(
+                            text = dayLabel,
+                            style = MaterialTheme.typography.labelSmall,
+                            fontWeight = FontWeight.Medium
+                        )
+                    }
+                }
+            }
         }
     }
 }
