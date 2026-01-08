@@ -20,8 +20,11 @@ enum class ThemeMode {
     DARK
 }
 
+/**
+ * App-wide preferences including theme settings and daily focus.
+ */
 @Singleton
-class ThemePreferences @Inject constructor(
+class AppPreferences @Inject constructor(
     @ApplicationContext private val context: Context
 ) {
     private val themeModeKey = stringPreferencesKey("theme_mode")

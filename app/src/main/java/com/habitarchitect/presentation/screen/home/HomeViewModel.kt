@@ -3,8 +3,8 @@ package com.habitarchitect.presentation.screen.home
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.google.firebase.auth.FirebaseAuth
+import com.habitarchitect.data.preferences.AppPreferences
 import com.habitarchitect.data.preferences.ThemeMode
-import com.habitarchitect.data.preferences.ThemePreferences
 import com.habitarchitect.domain.model.DailyStatus
 import com.habitarchitect.domain.model.Habit
 import com.habitarchitect.domain.model.HabitType
@@ -68,7 +68,7 @@ class HomeViewModel @Inject constructor(
     private val dailyLogRepository: DailyLogRepository,
     private val listItemRepository: ListItemRepository,
     private val soundManager: SoundManager,
-    private val themePreferences: ThemePreferences,
+    private val appPreferences: AppPreferences,
     private val alarmScheduler: AlarmScheduler
 ) : ViewModel() {
 
@@ -79,7 +79,7 @@ class HomeViewModel @Inject constructor(
     val events: SharedFlow<HomeEvent> = _events.asSharedFlow()
 
     // Expose theme mode for UI
-    val themeMode = themePreferences.themeMode
+    val themeMode = appPreferences.themeMode
 
     private val today = LocalDate.now()
 
@@ -141,7 +141,7 @@ class HomeViewModel @Inject constructor(
 
     private fun loadTodaysFocus() {
         viewModelScope.launch {
-            themePreferences.todaysFocus.collect { focus ->
+            appPreferences.todaysFocus.collect { focus ->
                 currentFocus = focus
                 val currentState = _uiState.value
                 if (currentState is HomeUiState.Success) {
@@ -153,7 +153,7 @@ class HomeViewModel @Inject constructor(
 
     fun updateTodaysFocus(focus: String) {
         viewModelScope.launch {
-            themePreferences.setTodaysFocus(focus)
+            appPreferences.setTodaysFocus(focus)
         }
     }
 
@@ -248,13 +248,13 @@ class HomeViewModel @Inject constructor(
 
     fun toggleTheme() {
         viewModelScope.launch {
-            val currentMode = themePreferences.themeMode.first()
+            val currentMode = appPreferences.themeMode.first()
             val newMode = when (currentMode) {
                 ThemeMode.SYSTEM -> ThemeMode.DARK
                 ThemeMode.DARK -> ThemeMode.LIGHT
                 ThemeMode.LIGHT -> ThemeMode.DARK
             }
-            themePreferences.setThemeMode(newMode)
+            appPreferences.setThemeMode(newMode)
         }
     }
 }

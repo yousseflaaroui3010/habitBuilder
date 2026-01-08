@@ -13,8 +13,8 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
+import com.habitarchitect.data.preferences.AppPreferences
 import com.habitarchitect.data.preferences.ThemeMode
-import com.habitarchitect.data.preferences.ThemePreferences
 import com.habitarchitect.presentation.navigation.HabitArchitectNavHost
 import com.habitarchitect.presentation.theme.HabitArchitectTheme
 import dagger.hilt.android.AndroidEntryPoint
@@ -27,7 +27,7 @@ import javax.inject.Inject
 class MainActivity : ComponentActivity() {
 
     @Inject
-    lateinit var themePreferences: ThemePreferences
+    lateinit var appPreferences: AppPreferences
 
     override fun onCreate(savedInstanceState: Bundle?) {
         installSplashScreen()
@@ -38,7 +38,7 @@ class MainActivity : ComponentActivity() {
         val inviteCode = parseInviteCodeFromIntent(intent)
 
         setContent {
-            val themeMode by themePreferences.themeMode.collectAsState(initial = ThemeMode.SYSTEM)
+            val themeMode by appPreferences.themeMode.collectAsState(initial = ThemeMode.SYSTEM)
             val isDarkTheme = when (themeMode) {
                 ThemeMode.SYSTEM -> isSystemInDarkTheme()
                 ThemeMode.LIGHT -> false

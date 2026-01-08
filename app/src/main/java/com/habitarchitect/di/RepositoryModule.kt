@@ -5,11 +5,13 @@ import com.habitarchitect.data.repository.HabitRepositoryImpl
 import com.habitarchitect.data.repository.ListItemRepositoryImpl
 import com.habitarchitect.data.repository.PartnershipRepositoryImpl
 import com.habitarchitect.data.repository.UserRepositoryImpl
+import com.habitarchitect.data.repository.WeeklyReflectionRepositoryImpl
 import com.habitarchitect.domain.repository.DailyLogRepository
 import com.habitarchitect.domain.repository.HabitRepository
 import com.habitarchitect.domain.repository.ListItemRepository
 import com.habitarchitect.domain.repository.PartnershipRepository
 import com.habitarchitect.domain.repository.UserRepository
+import com.habitarchitect.domain.repository.WeeklyReflectionRepository
 import dagger.Binds
 import dagger.Module
 import dagger.hilt.InstallIn
@@ -42,4 +44,8 @@ abstract class RepositoryModule {
     @Binds
     @Singleton
     abstract fun bindPartnershipRepository(impl: PartnershipRepositoryImpl): PartnershipRepository
+
+    @Binds
+    @Singleton
+    abstract fun bindWeeklyReflectionRepository(impl: WeeklyReflectionRepositoryImpl): WeeklyReflectionRepository
 }

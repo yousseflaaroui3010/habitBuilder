@@ -3,20 +3,18 @@ package com.habitarchitect.presentation.screen.dashboard
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.google.firebase.auth.FirebaseAuth
-import com.habitarchitect.data.local.database.dao.WeeklyReflectionDao
 import com.habitarchitect.domain.model.Habit
 import com.habitarchitect.domain.model.HabitType
 import com.habitarchitect.domain.repository.DailyLogRepository
 import com.habitarchitect.domain.repository.HabitRepository
+import com.habitarchitect.domain.repository.WeeklyReflectionRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import java.time.DayOfWeek
 import java.time.LocalDate
-import java.time.format.DateTimeFormatter
 import java.time.temporal.TemporalAdjusters
 import javax.inject.Inject
 
@@ -51,15 +49,14 @@ class DashboardViewModel @Inject constructor(
     private val firebaseAuth: FirebaseAuth,
     private val habitRepository: HabitRepository,
     private val dailyLogRepository: DailyLogRepository,
-    private val weeklyReflectionDao: WeeklyReflectionDao
+    private val weeklyReflectionRepository: WeeklyReflectionRepository
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(DashboardUiState())
     val uiState: StateFlow<DashboardUiState> = _uiState.asStateFlow()
 
-    private val weekStartDate: String = LocalDate.now()
+    private val weekStartDate: LocalDate = LocalDate.now()
         .with(TemporalAdjusters.previousOrSame(DayOfWeek.SUNDAY))
-        .format(DateTimeFormatter.ISO_DATE)
 
     init {
         loadDashboardData()
@@ -69,7 +66,7 @@ class DashboardViewModel @Inject constructor(
     private fun loadWeeklyReflection() {
         val userId = firebaseAuth.currentUser?.uid ?: return
         viewModelScope.launch {
-            val reflection = weeklyReflectionDao.getReflectionForWeek(userId, weekStartDate)
+            val reflection = weeklyReflectionRepository.getReflectionForWeek(userId, weekStartDate)
             if (reflection != null) {
                 _uiState.value = _uiState.value.copy(
                     weeklyReflection = WeeklyReflectionSummary(

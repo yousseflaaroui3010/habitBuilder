@@ -4,8 +4,8 @@ import android.net.Uri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.google.firebase.auth.FirebaseAuth
+import com.habitarchitect.data.preferences.AppPreferences
 import com.habitarchitect.data.preferences.ThemeMode
-import com.habitarchitect.data.preferences.ThemePreferences
 import com.habitarchitect.domain.repository.UserRepository
 import com.habitarchitect.service.export.DataExportService
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -38,7 +38,7 @@ class SettingsViewModel @Inject constructor(
     private val firebaseAuth: FirebaseAuth,
     private val userRepository: UserRepository,
     private val dataExportService: DataExportService,
-    private val themePreferences: ThemePreferences
+    private val appPreferences: AppPreferences
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(SettingsUiState())
@@ -57,7 +57,7 @@ class SettingsViewModel @Inject constructor(
 
     private fun loadThemeMode() {
         viewModelScope.launch {
-            themePreferences.themeMode.collect { mode ->
+            appPreferences.themeMode.collect { mode ->
                 _uiState.value = _uiState.value.copy(themeMode = mode)
             }
         }
@@ -65,7 +65,7 @@ class SettingsViewModel @Inject constructor(
 
     fun setThemeMode(mode: ThemeMode) {
         viewModelScope.launch {
-            themePreferences.setThemeMode(mode)
+            appPreferences.setThemeMode(mode)
         }
     }
 
