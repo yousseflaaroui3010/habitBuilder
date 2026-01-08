@@ -1,6 +1,6 @@
 # Habit Architect — Context Log
 
-**Last Updated:** 2026-01-07 | **Repo:** github.com/yousseflaaroui3010/habitBuilder
+**Last Updated:** 2026-01-08 | **Repo:** github.com/yousseflaaroui3010/habitBuilder
 
 ---
 
@@ -17,10 +17,12 @@ None - all merged to main
 | 2 | Cost input UX | Done |
 | 3 | Tempted screen flashcards | Done |
 | 4 | I Failed Today button | Done |
+| 10 | Break habit Protocol | Merged - trigger prompt after failure |
+| 12 | Notifications | Merged - AlarmManager for exact timing |
 | 13 | Break/Build Habit UX | Merged |
-| 17 | Header layout (logo left, profile right, theme toggle) | Merged |
-| 18 | FAB visibility on all tabs | Merged |
-| 19 | Color contrast AA compliance | Merged |
+| 17 | Header layout | Merged |
+| 18 | FAB visibility | Merged |
+| 19 | Color contrast AA | Merged |
 | 30 | Navigation bar above system buttons | Merged |
 
 ---
@@ -28,8 +30,6 @@ None - all merged to main
 ## OPEN ISSUES
 | # | Issue | Priority | Notes |
 |---|-------|----------|-------|
-| 10 | Break habit Protocol | Complex | |
-| 12 | Notifications | Postponed | Needs AlarmManager |
 | 14 | Progress Page | Medium | |
 | 15 | Widget Privacy | Medium | |
 | 16 | Habit creation in home | Low | |
@@ -53,7 +53,6 @@ None - all merged to main
 |-------|--------|
 | PaperClipJar not visible | Component exists, needs UI integration |
 | OnboardingScreen missing logo | Needs logo added |
-| Notifications timing | WorkManager unreliable, needs AlarmManager |
 
 ---
 
