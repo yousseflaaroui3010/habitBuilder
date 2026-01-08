@@ -7,8 +7,13 @@ import com.habitarchitect.data.preferences.ThemeMode
 import com.habitarchitect.data.preferences.ThemePreferences
 import com.habitarchitect.domain.model.DailyStatus
 import com.habitarchitect.domain.model.Habit
+import com.habitarchitect.domain.model.HabitType
+import com.habitarchitect.domain.model.ListItem
+import com.habitarchitect.domain.model.ListItemType
 import com.habitarchitect.domain.repository.DailyLogRepository
 import com.habitarchitect.domain.repository.HabitRepository
+import com.habitarchitect.domain.repository.ListItemRepository
+import java.util.UUID
 import com.habitarchitect.service.sound.SoundManager
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -49,6 +54,7 @@ sealed class HomeEvent {
     data class LaunchTemptationOverlay(val habitId: String) : HomeEvent()
     data class ShowMilestoneCelebration(val streak: Int) : HomeEvent()
     data class ShowStreakBreakAnimation(val previousStreak: Int) : HomeEvent()
+    data class ShowTriggerDialog(val habitId: String, val habitName: String) : HomeEvent()
 }
 
 /**
@@ -59,6 +65,7 @@ class HomeViewModel @Inject constructor(
     private val firebaseAuth: FirebaseAuth,
     private val habitRepository: HabitRepository,
     private val dailyLogRepository: DailyLogRepository,
+    private val listItemRepository: ListItemRepository,
     private val soundManager: SoundManager,
     private val themePreferences: ThemePreferences
 ) : ViewModel() {
@@ -188,8 +195,26 @@ class HomeViewModel @Inject constructor(
                 _events.emit(HomeEvent.ShowStreakBreakAnimation(previousStreak))
             }
 
+            // For BREAK habits, ask what triggered the failure
+            if (habit?.type == HabitType.BREAK) {
+                _events.emit(HomeEvent.ShowTriggerDialog(habitId, habit.name))
+            }
+
             // Reload to update UI
             loadHabits()
+        }
+    }
+
+    fun saveTrigger(habitId: String, trigger: String) {
+        viewModelScope.launch {
+            val listItem = ListItem(
+                id = UUID.randomUUID().toString(),
+                habitId = habitId,
+                type = ListItemType.TRIGGER,
+                content = trigger,
+                orderIndex = 0
+            )
+            listItemRepository.addListItem(listItem)
         }
     }
 

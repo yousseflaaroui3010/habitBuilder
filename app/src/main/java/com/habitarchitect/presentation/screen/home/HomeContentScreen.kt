@@ -80,6 +80,7 @@ import com.habitarchitect.presentation.components.HabitCard
 import com.habitarchitect.presentation.components.MilestoneCelebration
 import com.habitarchitect.presentation.components.StreakBreakAnimation
 import com.habitarchitect.presentation.components.TodaysFocusCard
+import com.habitarchitect.presentation.components.TriggerDialog
 import com.habitarchitect.presentation.widget.TemptationActivity
 import kotlinx.coroutines.flow.collectLatest
 import java.time.LocalTime
@@ -101,6 +102,9 @@ fun HomeContentScreen(
     var showStreakBreak by remember { mutableStateOf(false) }
     var brokenStreak by remember { mutableStateOf(0) }
     var habitToDelete by remember { mutableStateOf<Habit?>(null) }
+    var showTriggerDialog by remember { mutableStateOf(false) }
+    var triggerHabitId by remember { mutableStateOf("") }
+    var triggerHabitName by remember { mutableStateOf("") }
 
     // Get user info for greeting and profile picture
     val currentUser = FirebaseAuth.getInstance().currentUser
@@ -145,6 +149,11 @@ fun HomeContentScreen(
                 is HomeEvent.ShowStreakBreakAnimation -> {
                     brokenStreak = event.previousStreak
                     showStreakBreak = true
+                }
+                is HomeEvent.ShowTriggerDialog -> {
+                    triggerHabitId = event.habitId
+                    triggerHabitName = event.habitName
+                    showTriggerDialog = true
                 }
             }
         }
@@ -398,6 +407,18 @@ fun HomeContentScreen(
         visible = showStreakBreak,
         onAnimationComplete = { showStreakBreak = false }
     )
+
+    // Trigger dialog for BREAK habits
+    if (showTriggerDialog) {
+        TriggerDialog(
+            habitName = triggerHabitName,
+            onDismiss = { showTriggerDialog = false },
+            onTriggerSelected = { trigger ->
+                viewModel.saveTrigger(triggerHabitId, trigger)
+                showTriggerDialog = false
+            }
+        )
+    }
 
     // Delete confirmation dialog
     habitToDelete?.let { habit ->
