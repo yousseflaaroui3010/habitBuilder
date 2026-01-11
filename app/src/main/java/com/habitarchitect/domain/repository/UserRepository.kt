@@ -2,7 +2,6 @@ package com.habitarchitect.domain.repository
 
 import com.habitarchitect.domain.model.User
 import kotlinx.coroutines.flow.Flow
-import java.time.LocalTime
 
 /**
  * Repository interface for user operations.
@@ -20,10 +19,6 @@ interface UserRepository {
     suspend fun markOnboardingCompleted(userId: String): Result<Unit>
 
     suspend fun updateNotificationsEnabled(userId: String, enabled: Boolean): Result<Unit>
-
-    suspend fun updateMorningReminderTime(userId: String, time: LocalTime?): Result<Unit>
-
-    suspend fun updateEveningReminderTime(userId: String, time: LocalTime?): Result<Unit>
 
     suspend fun updateReminderTimes(userId: String, morningTime: String?, eveningTime: String?): Result<Unit>
 

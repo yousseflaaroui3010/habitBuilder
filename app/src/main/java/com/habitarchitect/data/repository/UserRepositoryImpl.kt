@@ -11,7 +11,6 @@ import com.habitarchitect.domain.model.User
 import com.habitarchitect.domain.repository.UserRepository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
-import java.time.LocalTime
 import javax.inject.Inject
 
 /**
@@ -54,18 +53,6 @@ class UserRepositoryImpl @Inject constructor(
     override suspend fun updateNotificationsEnabled(userId: String, enabled: Boolean): Result<Unit> {
         return runCatching {
             userDao.updateNotificationsEnabled(userId, enabled)
-        }
-    }
-
-    override suspend fun updateMorningReminderTime(userId: String, time: LocalTime?): Result<Unit> {
-        return runCatching {
-            userDao.updateMorningReminderTime(userId, time?.toString())
-        }
-    }
-
-    override suspend fun updateEveningReminderTime(userId: String, time: LocalTime?): Result<Unit> {
-        return runCatching {
-            userDao.updateEveningReminderTime(userId, time?.toString())
         }
     }
 
