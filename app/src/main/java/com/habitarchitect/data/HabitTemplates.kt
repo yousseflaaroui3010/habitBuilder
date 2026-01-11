@@ -31,7 +31,15 @@ object HabitTemplates {
                 "Have a friend set the blocker password",
                 "Keep devices out of bedroom",
                 "Never use phone/laptop in bed"
-            )
+            ),
+            defaultTriggerContexts = listOf(
+                "Alone at night with phone" to "🌙",
+                "Bored with nothing to do" to "😐",
+                "Stressed or anxious" to "😰",
+                "After seeing suggestive content" to "👁️",
+                "Couldn't fall asleep" to "😴",
+                "Feeling lonely or rejected" to "💔"
+            ).map { it.first }
         ),
         HabitTemplate(
             id = "break_smoking",
@@ -52,6 +60,14 @@ object HabitTemplates {
                 "Don't buy cigarettes; never have them at home",
                 "Avoid smoking areas and smoking friends initially",
                 "Replace the hand-to-mouth motion (toothpick, carrot)"
+            ),
+            defaultTriggerContexts = listOf(
+                "After a meal",
+                "With morning coffee",
+                "Stressed at work",
+                "Socializing with smokers",
+                "Drinking alcohol",
+                "Driving in car"
             )
         ),
         HabitTemplate(
@@ -72,6 +88,14 @@ object HabitTemplates {
                 "Set app time limits (Screen Time, Digital Wellbeing)",
                 "Remove social apps from home screen",
                 "Grayscale your phone display"
+            ),
+            defaultTriggerContexts = listOf(
+                "Bored waiting somewhere",
+                "Procrastinating on a task",
+                "In bed before sleep",
+                "During a work break",
+                "Feeling FOMO",
+                "After waking up in bed"
             )
         ),
         HabitTemplate(
@@ -91,6 +115,14 @@ object HabitTemplates {
                 "Don't keep alcohol at home",
                 "Order first at restaurants (water/mocktail)",
                 "Tell friends you're taking a break"
+            ),
+            defaultTriggerContexts = listOf(
+                "Social event with friends",
+                "Stressful day at work",
+                "Watching sports/TV",
+                "Friday/weekend evening",
+                "Celebrating something",
+                "Feeling anxious socially"
             )
         ),
         HabitTemplate(
@@ -112,6 +144,14 @@ object HabitTemplates {
                 "Use an app that requires solving puzzles to stop",
                 "Set a consistent bedtime to fix sleep cycle",
                 "No screens 1 hour before bed"
+            ),
+            defaultTriggerContexts = listOf(
+                "Went to bed too late",
+                "Weekend/day off",
+                "Cold/dark morning",
+                "No urgent plans today",
+                "Tired from poor sleep",
+                "Stayed up on phone/screen"
             )
         ),
         HabitTemplate(
@@ -132,6 +172,14 @@ object HabitTemplates {
                 "Keep nails trimmed short",
                 "Wear gloves or bandaids on fingers",
                 "Hold a stress ball instead"
+            ),
+            defaultTriggerContexts = listOf(
+                "Feeling anxious/nervous",
+                "Watching TV/movies",
+                "Bored in a meeting",
+                "Concentrating on something",
+                "Waiting for something",
+                "Reading or studying"
             )
         ),
         HabitTemplate(
@@ -153,6 +201,14 @@ object HabitTemplates {
                 "Meal prep healthy options in advance",
                 "Shop only from a list, never hungry",
                 "Take a different route that avoids fast food"
+            ),
+            defaultTriggerContexts = listOf(
+                "Stressed and need comfort",
+                "Skipped a proper meal",
+                "Late night craving",
+                "Passing by fast food place",
+                "Saw food advertisement",
+                "Bored with nothing to do"
             )
         ),
         HabitTemplate(
@@ -174,6 +230,14 @@ object HabitTemplates {
                 "Break tasks into tiny first steps",
                 "Block distracting websites during work hours",
                 "Set artificial deadlines before real ones"
+            ),
+            defaultTriggerContexts = listOf(
+                "Task feels overwhelming",
+                "Unclear where to start",
+                "Fear of failure/imperfection",
+                "Too many distractions around",
+                "Low energy/tired",
+                "No immediate deadline"
             )
         ),
         HabitTemplate(
@@ -194,6 +258,14 @@ object HabitTemplates {
                 "Replace 'I can't' with 'I'm learning to'",
                 "Keep a thought journal to notice patterns",
                 "Practice the 'no complaints' challenge"
+            ),
+            defaultTriggerContexts = listOf(
+                "Made a mistake",
+                "Compared myself to others",
+                "Received criticism",
+                "Feeling tired or unwell",
+                "Things didn't go as planned",
+                "Scrolling social media"
             )
         )
     )

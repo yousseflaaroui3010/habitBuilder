@@ -105,6 +105,7 @@ fun HomeContentScreen(
     var showTriggerDialog by remember { mutableStateOf(false) }
     var triggerHabitId by remember { mutableStateOf("") }
     var triggerHabitName by remember { mutableStateOf("") }
+    var triggerTemplateId by remember { mutableStateOf<String?>(null) }
 
     // Get user info for greeting and profile picture
     val currentUser = FirebaseAuth.getInstance().currentUser
@@ -153,6 +154,7 @@ fun HomeContentScreen(
                 is HomeEvent.ShowTriggerDialog -> {
                     triggerHabitId = event.habitId
                     triggerHabitName = event.habitName
+                    triggerTemplateId = event.templateId
                     showTriggerDialog = true
                 }
             }
@@ -408,10 +410,11 @@ fun HomeContentScreen(
         onAnimationComplete = { showStreakBreak = false }
     )
 
-    // Trigger dialog for BREAK habits
+    // Trigger dialog for BREAK habits (shows habit-specific triggers)
     if (showTriggerDialog) {
         TriggerDialog(
             habitName = triggerHabitName,
+            templateId = triggerTemplateId,
             onDismiss = { showTriggerDialog = false },
             onTriggerSelected = { trigger ->
                 viewModel.saveTrigger(triggerHabitId, trigger)

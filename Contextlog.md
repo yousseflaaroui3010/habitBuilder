@@ -1,31 +1,47 @@
 # Habit Architect — Context Log
 
-**Last Updated:** 2026-01-08 | **Repo:** github.com/yousseflaaroui3010/habitBuilder
+**Last Updated:** 2026-01-11 | **Repo:** github.com/yousseflaaroui3010/habitBuilder
 
 ---
 
 ## BRANCHES
 
-None - all merged to main
+| Branch | Status | Notes |
+|--------|--------|-------|
+| HB-36-add-trigger-templates | Active | Issue #36 - Habit-specific trigger templates |
 
 ---
 
-## CLOSED ISSUES
-| # | Issue | Notes |
-|---|-------|-------|
-| 1 | Weekly reflections summary | Merged |
-| 2 | Cost input UX | Done |
-| 3 | Tempted screen flashcards | Done |
-| 4 | I Failed Today button | Done |
-| 10 | Break habit Protocol | Merged - trigger prompt after failure |
-| 12 | Notifications | Merged - AlarmManager for exact timing |
-| 13 | Break/Build Habit UX | Merged |
-| 14 | Progress Page | Merged - pie charts, bar chart, day labels |
-| 17 | Header layout | Merged |
-| 18 | FAB visibility | Merged |
-| 19 | Color contrast AA | Merged |
-| 20 | I'm Tempted slides | Merged - navigation, 30s timer, improved visuals |
-| 30 | Navigation bar above system buttons | Merged |
+## WHAT WAS DONE (This Session)
+
+### Issue #36: Trigger Templates
+- Added `defaultTriggerContexts` to all 9 BREAK habit templates in `HabitTemplates.kt`
+- Each template has 6 habit-specific triggers (min 5 required)
+- Updated `TriggerDialog.kt` to accept `templateId` parameter
+- Added `getTriggerEmoji()` function to map trigger text to emojis
+- Updated `HomeViewModel.kt` to pass `templateId` in `ShowTriggerDialog` event
+- Updated `HomeContentScreen.kt` to pass `templateId` to TriggerDialog
+
+### Templates with Triggers:
+| Template | Example Triggers |
+|----------|-----------------|
+| No Porn | "Alone at night with phone", "Bored with nothing to do", "Stressed or anxious" |
+| Quit Smoking | "After a meal", "With morning coffee", "Socializing with smokers" |
+| No Doomscrolling | "Bored waiting somewhere", "Procrastinating on a task", "In bed before sleep" |
+| Reduce Alcohol | "Social event with friends", "Stressful day at work", "Friday/weekend evening" |
+| Stop Oversleeping | "Went to bed too late", "Weekend/day off", "Cold/dark morning" |
+| Stop Nail Biting | "Feeling anxious/nervous", "Watching TV/movies", "Bored in a meeting" |
+| Reduce Junk Food | "Stressed and need comfort", "Skipped a proper meal", "Late night craving" |
+| Stop Procrastinating | "Task feels overwhelming", "Unclear where to start", "Fear of failure" |
+| Stop Negative Self-Talk | "Made a mistake", "Compared myself to others", "Received criticism" |
+
+---
+
+## WHAT'S LEFT TO DO
+
+- Commit and push branch HB-36-add-trigger-templates
+- Create PR for review
+- Merge after testing
 
 ---
 
@@ -33,26 +49,19 @@ None - all merged to main
 | # | Issue | Priority | Notes |
 |---|-------|----------|-------|
 | 15 | Widget Privacy | Medium | |
-| 16 | Habit creation in home | Low | |
-| 21 | Guest Mode | Low | |
+| 16 | Habit creation in home | Low | Undo capability added |
+| 21 | Guest Mode | Low | Error message improved |
 | 22 | Profile options | Low | |
+| 23 | App Icon | Done | White bg, logo_dark.png |
+| 36 | Trigger Templates | In Progress | This session |
+| 39 | Trigger List | Low | Sub-issue of #36 |
 
 ---
 
-## NEW ISSUES (Created by user)
-| # | Issue |
-|---|-------|
-| 23+ | Failure confirmation popup |
-| 24+ | Flashcard manual navigation |
-| 25+ | Top bar spacing |
+## BLOCKING (Requires User Action)
 
----
-
-## KNOWN ISSUES
-| Issue | Status |
-|-------|--------|
-| PaperClipJar not visible | Component exists, needs UI integration |
-| OnboardingScreen missing logo | Needs logo added |
+- Test the trigger dialog with different BREAK habits
+- Approve and merge PR for #36
 
 ---
 

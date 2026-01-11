@@ -55,7 +55,7 @@ sealed class HomeEvent {
     data class LaunchTemptationOverlay(val habitId: String) : HomeEvent()
     data class ShowMilestoneCelebration(val streak: Int) : HomeEvent()
     data class ShowStreakBreakAnimation(val previousStreak: Int) : HomeEvent()
-    data class ShowTriggerDialog(val habitId: String, val habitName: String) : HomeEvent()
+    data class ShowTriggerDialog(val habitId: String, val habitName: String, val templateId: String?) : HomeEvent()
 }
 
 /**
@@ -199,7 +199,7 @@ class HomeViewModel @Inject constructor(
 
             // For BREAK habits, ask what triggered the failure
             if (habit?.type == HabitType.BREAK) {
-                _events.emit(HomeEvent.ShowTriggerDialog(habitId, habit.name))
+                _events.emit(HomeEvent.ShowTriggerDialog(habitId, habit.name, habit.templateId))
                 // Schedule supportive notification 1 hour later
                 alarmScheduler.schedulePostFailureReminder(habitId, habit.name)
             }

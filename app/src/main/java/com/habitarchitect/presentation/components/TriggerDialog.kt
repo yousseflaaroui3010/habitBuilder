@@ -10,7 +10,9 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material3.AlertDialog
@@ -30,34 +32,84 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import com.habitarchitect.data.HabitTemplates
 
 /**
- * Preset trigger options for quick selection.
+ * Default fallback triggers when no habit-specific ones are available.
  */
-private val presetTriggers = listOf(
+private val defaultTriggers = listOf(
     "I got bored" to "😐",
-    "Phone was nearby" to "📱",
-    "Needed dopamine" to "⚡",
     "Stressed/anxious" to "😰",
-    "Social pressure" to "👥",
-    "Saw a cue/trigger" to "👁️",
     "Tired/exhausted" to "😴",
-    "Emotional eating" to "🍕"
+    "Needed dopamine" to "⚡",
+    "Social pressure" to "👥",
+    "Saw a cue/trigger" to "👁️"
 )
 
 /**
+ * Maps trigger text to appropriate emoji based on keywords.
+ */
+private fun getTriggerEmoji(trigger: String): String {
+    val lower = trigger.lowercase()
+    return when {
+        lower.contains("bored") || lower.contains("nothing to do") -> "😐"
+        lower.contains("stress") || lower.contains("anxious") -> "😰"
+        lower.contains("tired") || lower.contains("sleep") || lower.contains("exhausted") -> "😴"
+        lower.contains("phone") || lower.contains("scroll") || lower.contains("screen") -> "📱"
+        lower.contains("social") || lower.contains("friend") || lower.contains("peer") -> "👥"
+        lower.contains("lonely") || lower.contains("rejected") -> "💔"
+        lower.contains("night") || lower.contains("alone") || lower.contains("dark") -> "🌙"
+        lower.contains("food") || lower.contains("meal") || lower.contains("hungry") -> "🍕"
+        lower.contains("alcohol") || lower.contains("drink") -> "🍺"
+        lower.contains("coffee") || lower.contains("morning") -> "☕"
+        lower.contains("work") || lower.contains("meeting") -> "💼"
+        lower.contains("fear") || lower.contains("overwhelm") -> "😨"
+        lower.contains("fomo") || lower.contains("missing") -> "📲"
+        lower.contains("weekend") || lower.contains("friday") -> "🎉"
+        lower.contains("mistake") || lower.contains("fail") -> "❌"
+        lower.contains("compare") || lower.contains("other") -> "👀"
+        lower.contains("critic") -> "🗣️"
+        lower.contains("deadline") || lower.contains("urgent") -> "⏰"
+        lower.contains("tv") || lower.contains("watch") -> "📺"
+        lower.contains("wait") -> "⏳"
+        lower.contains("saw") || lower.contains("content") || lower.contains("ad") -> "👁️"
+        else -> "💭"
+    }
+}
+
+/**
+ * Get triggers for a specific habit template.
+ */
+fun getTriggersForTemplate(templateId: String?): List<Pair<String, String>> {
+    if (templateId == null) return defaultTriggers
+
+    val template = HabitTemplates.breakTemplates.find { it.id == templateId }
+    val triggers = template?.defaultTriggerContexts
+
+    return if (!triggers.isNullOrEmpty()) {
+        triggers.map { it to getTriggerEmoji(it) }
+    } else {
+        defaultTriggers
+    }
+}
+
+/**
  * Dialog shown after user marks a BREAK habit as failed.
- * Asks what triggered the urge to help identify patterns.
+ * Displays habit-specific triggers based on template, with custom input option.
  */
 @Composable
 fun TriggerDialog(
     habitName: String,
+    templateId: String? = null,
     onDismiss: () -> Unit,
     onTriggerSelected: (String) -> Unit
 ) {
     var selectedTrigger by remember { mutableStateOf<String?>(null) }
     var customTrigger by remember { mutableStateOf("") }
     var showCustomInput by remember { mutableStateOf(false) }
+
+    // Get habit-specific triggers or fallback to defaults
+    val triggers = remember(templateId) { getTriggersForTemplate(templateId) }
 
     AlertDialog(
         onDismissRequest = onDismiss,
@@ -77,11 +129,13 @@ fun TriggerDialog(
         },
         text = {
             Column(
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .verticalScroll(rememberScrollState()),
                 verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                // Preset triggers in a grid
-                presetTriggers.chunked(2).forEach { row ->
+                // Habit-specific triggers in a grid (2 columns)
+                triggers.chunked(2).forEach { row ->
                     Row(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.spacedBy(8.dp)
@@ -166,8 +220,7 @@ private fun TriggerChip(
     modifier: Modifier = Modifier
 ) {
     Card(
-        modifier = modifier
-            .clickable { onClick() },
+        modifier = modifier.clickable { onClick() },
         shape = RoundedCornerShape(8.dp),
         colors = CardDefaults.cardColors(
             containerColor = if (isSelected) {
