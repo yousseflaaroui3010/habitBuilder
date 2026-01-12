@@ -31,7 +31,17 @@ object HabitTemplates {
                 "Have a friend set the blocker password",
                 "Keep devices out of bedroom",
                 "Never use phone/laptop in bed"
-            )
+            ),
+            defaultTriggerContexts = listOf(
+                "Alone with phone/laptop" to "📱",
+                "Late night in bed" to "🌙",
+                "Bored with nothing to do" to "😐",
+                "After seeing triggering content" to "👁️",
+                "Stressed or anxious" to "😰",
+                "Feeling lonely" to "💔",
+                "Post-workout dopamine crash" to "🏋️",
+                "Weekend with no plans" to "📅"
+            ).map { "${it.first}|${it.second}" }
         ),
         HabitTemplate(
             id = "break_smoking",
@@ -52,7 +62,17 @@ object HabitTemplates {
                 "Don't buy cigarettes; never have them at home",
                 "Avoid smoking areas and smoking friends initially",
                 "Replace the hand-to-mouth motion (toothpick, carrot)"
-            )
+            ),
+            defaultTriggerContexts = listOf(
+                "After a meal" to "🍽️",
+                "With morning coffee" to "☕",
+                "During work breaks" to "💼",
+                "When stressed" to "😰",
+                "While drinking alcohol" to "🍺",
+                "Seeing others smoke" to "👥",
+                "After waking up" to "🌅",
+                "While driving" to "🚗"
+            ).map { "${it.first}|${it.second}" }
         ),
         HabitTemplate(
             id = "break_doomscrolling",
@@ -72,7 +92,17 @@ object HabitTemplates {
                 "Set app time limits (Screen Time, Digital Wellbeing)",
                 "Remove social apps from home screen",
                 "Grayscale your phone display"
-            )
+            ),
+            defaultTriggerContexts = listOf(
+                "Waiting in line/transit" to "🚌",
+                "Bored at home" to "🏠",
+                "Avoiding work tasks" to "💼",
+                "First thing in morning" to "🌅",
+                "Can't sleep at night" to "🌙",
+                "During meals alone" to "🍽️",
+                "Feeling FOMO" to "😟",
+                "Notification popped up" to "🔔"
+            ).map { "${it.first}|${it.second}" }
         ),
         HabitTemplate(
             id = "break_alcohol",
@@ -91,7 +121,17 @@ object HabitTemplates {
                 "Don't keep alcohol at home",
                 "Order first at restaurants (water/mocktail)",
                 "Tell friends you're taking a break"
-            )
+            ),
+            defaultTriggerContexts = listOf(
+                "Social gatherings" to "🎉",
+                "After stressful day" to "😰",
+                "Weekend evenings" to "🌃",
+                "Watching sports" to "📺",
+                "Out at restaurants" to "🍽️",
+                "Peer pressure" to "👥",
+                "Celebrating something" to "🎊",
+                "Lonely evening" to "💔"
+            ).map { "${it.first}|${it.second}" }
         ),
         HabitTemplate(
             id = "break_oversleeping",
@@ -112,7 +152,17 @@ object HabitTemplates {
                 "Use an app that requires solving puzzles to stop",
                 "Set a consistent bedtime to fix sleep cycle",
                 "No screens 1 hour before bed"
-            )
+            ),
+            defaultTriggerContexts = listOf(
+                "Stayed up too late" to "🌙",
+                "No morning commitment" to "📅",
+                "Cold/dark room" to "❄️",
+                "Weekend morning" to "🛏️",
+                "Phone alarm too easy" to "📱",
+                "Didn't sleep well" to "😫",
+                "Nothing exciting planned" to "😐",
+                "Rainy/gloomy day" to "🌧️"
+            ).map { "${it.first}|${it.second}" }
         ),
         HabitTemplate(
             id = "break_nailbiting",
@@ -132,7 +182,17 @@ object HabitTemplates {
                 "Keep nails trimmed short",
                 "Wear gloves or bandaids on fingers",
                 "Hold a stress ball instead"
-            )
+            ),
+            defaultTriggerContexts = listOf(
+                "Anxious or nervous" to "😰",
+                "Deep in thought" to "🤔",
+                "Watching TV/videos" to "📺",
+                "Bored in meeting" to "💼",
+                "Rough nail edge" to "💅",
+                "Driving" to "🚗",
+                "Reading" to "📖",
+                "Stressed at work" to "😫"
+            ).map { "${it.first}|${it.second}" }
         ),
         HabitTemplate(
             id = "break_junkfood",
@@ -153,7 +213,17 @@ object HabitTemplates {
                 "Meal prep healthy options in advance",
                 "Shop only from a list, never hungry",
                 "Take a different route that avoids fast food"
-            )
+            ),
+            defaultTriggerContexts = listOf(
+                "Stress eating" to "😰",
+                "Late night craving" to "🌙",
+                "Skipped a meal" to "⏰",
+                "Saw an ad/smell" to "👃",
+                "Emotional upset" to "😢",
+                "Convenience/lazy" to "🛋️",
+                "Social eating" to "👥",
+                "Celebrating/reward" to "🎉"
+            ).map { "${it.first}|${it.second}" }
         ),
         HabitTemplate(
             id = "break_procrastination",
@@ -174,7 +244,17 @@ object HabitTemplates {
                 "Break tasks into tiny first steps",
                 "Block distracting websites during work hours",
                 "Set artificial deadlines before real ones"
-            )
+            ),
+            defaultTriggerContexts = listOf(
+                "Task feels overwhelming" to "😰",
+                "Don't know where to start" to "🤔",
+                "Fear of failure" to "😟",
+                "Perfectionism paralysis" to "✨",
+                "Distractions available" to "📱",
+                "Low energy" to "😴",
+                "No clear deadline" to "📅",
+                "Boring/unpleasant task" to "😐"
+            ).map { "${it.first}|${it.second}" }
         ),
         HabitTemplate(
             id = "break_negativity",
@@ -194,7 +274,17 @@ object HabitTemplates {
                 "Replace 'I can't' with 'I'm learning to'",
                 "Keep a thought journal to notice patterns",
                 "Practice the 'no complaints' challenge"
-            )
+            ),
+            defaultTriggerContexts = listOf(
+                "Made a mistake" to "😓",
+                "Compared to others" to "👥",
+                "Received criticism" to "💬",
+                "Looked in mirror" to "🪞",
+                "Failed at something" to "❌",
+                "Feeling tired" to "😴",
+                "Around negative people" to "🗣️",
+                "Scrolling social media" to "📱"
+            ).map { "${it.first}|${it.second}" }
         )
     )
 

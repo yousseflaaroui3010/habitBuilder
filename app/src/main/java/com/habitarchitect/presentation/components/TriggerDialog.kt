@@ -30,11 +30,12 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import com.habitarchitect.data.HabitTemplates
 
 /**
- * Preset trigger options for quick selection.
+ * Default/fallback trigger options when no template-specific ones exist.
  */
-private val presetTriggers = listOf(
+private val defaultTriggers = listOf(
     "I got bored" to "😐",
     "Phone was nearby" to "📱",
     "Needed dopamine" to "⚡",
@@ -46,18 +47,42 @@ private val presetTriggers = listOf(
 )
 
 /**
+ * Get triggers for a specific template, or fallback to defaults.
+ */
+private fun getTriggersForTemplate(templateId: String?): List<Pair<String, String>> {
+    if (templateId == null) return defaultTriggers
+
+    val template = HabitTemplates.breakTemplates.find { it.id == templateId }
+    val triggerContexts = template?.defaultTriggerContexts ?: emptyList()
+
+    if (triggerContexts.isEmpty()) return defaultTriggers
+
+    // Parse "text|emoji" format
+    return triggerContexts.mapNotNull { encoded ->
+        val parts = encoded.split("|")
+        if (parts.size == 2) {
+            parts[0] to parts[1]
+        } else null
+    }.ifEmpty { defaultTriggers }
+}
+
+/**
  * Dialog shown after user marks a BREAK habit as failed.
  * Asks what triggered the urge to help identify patterns.
+ * Shows habit-specific triggers if templateId is provided.
  */
 @Composable
 fun TriggerDialog(
     habitName: String,
+    templateId: String? = null,
     onDismiss: () -> Unit,
     onTriggerSelected: (String) -> Unit
 ) {
     var selectedTrigger by remember { mutableStateOf<String?>(null) }
     var customTrigger by remember { mutableStateOf("") }
     var showCustomInput by remember { mutableStateOf(false) }
+
+    val triggers = remember(templateId) { getTriggersForTemplate(templateId) }
 
     AlertDialog(
         onDismissRequest = onDismiss,
@@ -81,7 +106,7 @@ fun TriggerDialog(
                 verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 // Preset triggers in a grid
-                presetTriggers.chunked(2).forEach { row ->
+                triggers.chunked(2).forEach { row ->
                     Row(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.spacedBy(8.dp)
