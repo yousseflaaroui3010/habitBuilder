@@ -35,6 +35,7 @@ import com.habitarchitect.presentation.screen.breaktools.FrictionTrackerScreen
 import com.habitarchitect.presentation.screen.bundle.TemptationBundleScreen
 import com.habitarchitect.presentation.screen.reflection.WeeklyReflectionScreen
 import com.habitarchitect.presentation.screen.identity.IdentityScreen
+import com.habitarchitect.presentation.screen.triggerlist.TriggerListScreen
 
 /**
  * Main navigation host for Habit Architect.
@@ -169,6 +170,9 @@ fun HabitArchitectNavHost(
                 },
                 onNavigateToFrictionTracker = {
                     navController.navigate(Screen.FrictionTracker.createRoute(habitId))
+                },
+                onNavigateToTriggerList = {
+                    navController.navigate(Screen.TriggerList.createRoute(habitId))
                 }
             )
         }
@@ -407,6 +411,17 @@ fun HabitArchitectNavHost(
             val habitId = backStackEntry.arguments?.getString("habitId") ?: return@composable
             FrictionTrackerScreen(
                 habitId = habitId,
+                onNavigateBack = { navController.popBackStack() }
+            )
+        }
+
+        // Trigger List (track triggers and solution effectiveness)
+        composable(
+            route = Screen.TriggerList.route,
+            arguments = listOf(navArgument("habitId") { type = NavType.StringType })
+        ) { backStackEntry ->
+            val habitId = backStackEntry.arguments?.getString("habitId") ?: return@composable
+            TriggerListScreen(
                 onNavigateBack = { navController.popBackStack() }
             )
         }

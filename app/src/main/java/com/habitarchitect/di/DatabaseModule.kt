@@ -6,6 +6,7 @@ import com.habitarchitect.data.local.database.dao.DailyLogDao
 import com.habitarchitect.data.local.database.dao.HabitDao
 import com.habitarchitect.data.local.database.dao.ListItemDao
 import com.habitarchitect.data.local.database.dao.PartnershipDao
+import com.habitarchitect.data.local.database.dao.TriggerLogDao
 import com.habitarchitect.data.local.database.dao.UserDao
 import com.habitarchitect.data.local.database.dao.WeeklyReflectionDao
 import dagger.Module
@@ -43,4 +44,7 @@ object DatabaseModule {
 
     @Provides
     fun provideWeeklyReflectionDao(database: HabitArchitectDatabase): WeeklyReflectionDao = database.weeklyReflectionDao()
+
+    @Provides
+    fun provideTriggerLogDao(database: HabitArchitectDatabase): TriggerLogDao = database.triggerLogDao()
 }

@@ -10,12 +10,14 @@ import com.habitarchitect.data.local.database.dao.DailyLogDao
 import com.habitarchitect.data.local.database.dao.HabitDao
 import com.habitarchitect.data.local.database.dao.ListItemDao
 import com.habitarchitect.data.local.database.dao.PartnershipDao
+import com.habitarchitect.data.local.database.dao.TriggerLogDao
 import com.habitarchitect.data.local.database.dao.UserDao
 import com.habitarchitect.data.local.database.dao.WeeklyReflectionDao
 import com.habitarchitect.data.local.database.entity.DailyLogEntity
 import com.habitarchitect.data.local.database.entity.HabitEntity
 import com.habitarchitect.data.local.database.entity.ListItemEntity
 import com.habitarchitect.data.local.database.entity.PartnershipEntity
+import com.habitarchitect.data.local.database.entity.TriggerLogEntity
 import com.habitarchitect.data.local.database.entity.UserEntity
 import com.habitarchitect.data.local.database.entity.WeeklyReflectionEntity
 
@@ -30,9 +32,10 @@ import com.habitarchitect.data.local.database.entity.WeeklyReflectionEntity
         DailyLogEntity::class,
         ListItemEntity::class,
         PartnershipEntity::class,
-        WeeklyReflectionEntity::class
+        WeeklyReflectionEntity::class,
+        TriggerLogEntity::class
     ],
-    version = 4,
+    version = 5,
     exportSchema = true
 )
 abstract class HabitArchitectDatabase : RoomDatabase() {
@@ -43,6 +46,7 @@ abstract class HabitArchitectDatabase : RoomDatabase() {
     abstract fun listItemDao(): ListItemDao
     abstract fun partnershipDao(): PartnershipDao
     abstract fun weeklyReflectionDao(): WeeklyReflectionDao
+    abstract fun triggerLogDao(): TriggerLogDao
 
     companion object {
         const val DATABASE_NAME = "habit_architect_db"
@@ -85,6 +89,27 @@ abstract class HabitArchitectDatabase : RoomDatabase() {
             }
         }
 
+        // Migration from version 4 to 5: Add trigger logs table for tracking triggers and solutions
+        val MIGRATION_4_5 = object : Migration(4, 5) {
+            override fun migrate(database: SupportSQLiteDatabase) {
+                database.execSQL("""
+                    CREATE TABLE IF NOT EXISTS trigger_logs (
+                        id TEXT PRIMARY KEY NOT NULL,
+                        habitId TEXT NOT NULL,
+                        trigger TEXT NOT NULL,
+                        timestamp INTEGER NOT NULL,
+                        solution TEXT,
+                        solutionWorked INTEGER,
+                        alternativeSolution TEXT,
+                        alternativeWorked INTEGER,
+                        notes TEXT
+                    )
+                """)
+                database.execSQL("CREATE INDEX IF NOT EXISTS index_trigger_logs_habitId ON trigger_logs(habitId)")
+                database.execSQL("CREATE INDEX IF NOT EXISTS index_trigger_logs_timestamp ON trigger_logs(timestamp)")
+            }
+        }
+
         /**
          * Get singleton database instance for non-Hilt contexts (like widgets).
          */
@@ -95,7 +120,7 @@ abstract class HabitArchitectDatabase : RoomDatabase() {
                     HabitArchitectDatabase::class.java,
                     DATABASE_NAME
                 )
-                    .addMigrations(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4)
+                    .addMigrations(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5)
                     .build()
                 INSTANCE = instance
                 instance

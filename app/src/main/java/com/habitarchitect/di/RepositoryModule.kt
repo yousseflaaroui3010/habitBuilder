@@ -4,12 +4,14 @@ import com.habitarchitect.data.repository.DailyLogRepositoryImpl
 import com.habitarchitect.data.repository.HabitRepositoryImpl
 import com.habitarchitect.data.repository.ListItemRepositoryImpl
 import com.habitarchitect.data.repository.PartnershipRepositoryImpl
+import com.habitarchitect.data.repository.TriggerLogRepositoryImpl
 import com.habitarchitect.data.repository.UserRepositoryImpl
 import com.habitarchitect.data.repository.WeeklyReflectionRepositoryImpl
 import com.habitarchitect.domain.repository.DailyLogRepository
 import com.habitarchitect.domain.repository.HabitRepository
 import com.habitarchitect.domain.repository.ListItemRepository
 import com.habitarchitect.domain.repository.PartnershipRepository
+import com.habitarchitect.domain.repository.TriggerLogRepository
 import com.habitarchitect.domain.repository.UserRepository
 import com.habitarchitect.domain.repository.WeeklyReflectionRepository
 import dagger.Binds
@@ -48,4 +50,8 @@ abstract class RepositoryModule {
     @Binds
     @Singleton
     abstract fun bindWeeklyReflectionRepository(impl: WeeklyReflectionRepositoryImpl): WeeklyReflectionRepository
+
+    @Binds
+    @Singleton
+    abstract fun bindTriggerLogRepository(impl: TriggerLogRepositoryImpl): TriggerLogRepository
 }

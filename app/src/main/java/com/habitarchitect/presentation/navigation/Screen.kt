@@ -75,6 +75,10 @@ sealed class Screen(val route: String) {
         fun createRoute(habitId: String) = "friction_tracker/$habitId"
     }
 
+    object TriggerList : Screen("trigger_list/{habitId}") {
+        fun createRoute(habitId: String) = "trigger_list/$habitId"
+    }
+
     object PartnerManagement : Screen("partners")
 
     object PartnerView : Screen("partner_view/{partnerId}") {

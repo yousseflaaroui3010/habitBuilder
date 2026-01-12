@@ -25,6 +25,7 @@ import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Psychology
 import androidx.compose.material.icons.filled.Share
 import androidx.compose.material.icons.filled.Block
+import androidx.compose.material.icons.filled.Lightbulb
 import androidx.compose.material.icons.filled.ThumbDown
 import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material3.AlertDialog
@@ -73,6 +74,7 @@ fun HabitDetailScreen(
     onNavigateToCostJournal: () -> Unit = {},
     onNavigateToTemptationBundle: () -> Unit = {},
     onNavigateToFrictionTracker: () -> Unit = {},
+    onNavigateToTriggerList: () -> Unit = {},
     viewModel: HabitDetailViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
@@ -292,7 +294,14 @@ fun HabitDetailScreen(
                             color = Color(0xFFE57373),
                             onClick = onNavigateToFrictionTracker
                         )
-                        Spacer(modifier = Modifier.weight(1f))
+                        ToolCard(
+                            modifier = Modifier.weight(1f),
+                            icon = Icons.Default.Lightbulb,
+                            title = "Trigger Journal",
+                            subtitle = "Track & Solve",
+                            color = Color(0xFFFF9800),
+                            onClick = onNavigateToTriggerList
+                        )
                     }
                 } else {
                     // Build habit tools - the 4 laws
