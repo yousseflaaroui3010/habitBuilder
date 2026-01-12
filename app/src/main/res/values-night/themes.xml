@@ -10,8 +10,9 @@
 
     <!-- Splash Screen Theme (Dark) -->
     <style name="Theme.HabitArchitect.Splash" parent="Theme.SplashScreen">
-        <item name="windowSplashScreenBackground">@color/primary_dark</item>
-        <item name="windowSplashScreenAnimatedIcon">@drawable/ic_launcher_foreground</item>
+        <item name="windowSplashScreenBackground">@color/splash_background</item>
+        <item name="windowSplashScreenAnimatedIcon">@drawable/logo_dark</item>
+        <item name="windowSplashScreenIconBackgroundColor">@color/icon_background</item>
         <item name="postSplashScreenTheme">@style/Theme.HabitArchitect</item>
     </style>
 

@@ -48,6 +48,7 @@
     <color name="calendar_pending">#9E9E9E</color>
     <color name="calendar_today">#2196F3</color>
 
-    <!-- Splash Screen -->
-    <color name="splash_background">#4CAF50</color>
+    <!-- Icon/Splash Screen -->
+    <color name="icon_background">#FFFFFF</color>
+    <color name="splash_background">#173451</color>
 </resources>
