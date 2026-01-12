@@ -35,6 +35,7 @@ import com.habitarchitect.presentation.screen.breaktools.FrictionTrackerScreen
 import com.habitarchitect.presentation.screen.bundle.TemptationBundleScreen
 import com.habitarchitect.presentation.screen.reflection.WeeklyReflectionScreen
 import com.habitarchitect.presentation.screen.identity.IdentityScreen
+import com.habitarchitect.presentation.screen.archived.ArchivedHabitsScreen
 
 /**
  * Main navigation host for Habit Architect.
@@ -139,6 +140,16 @@ fun HabitArchitectNavHost(
         // Profile
         composable(Screen.Profile.route) {
             ProfileScreen(
+                onNavigateBack = { navController.popBackStack() },
+                onNavigateToArchivedHabits = {
+                    navController.navigate(Screen.ArchivedHabits.route)
+                }
+            )
+        }
+
+        // Archived Habits
+        composable(Screen.ArchivedHabits.route) {
+            ArchivedHabitsScreen(
                 onNavigateBack = { navController.popBackStack() }
             )
         }

@@ -55,6 +55,8 @@ sealed class Screen(val route: String) {
 
     object Profile : Screen("profile")
 
+    object ArchivedHabits : Screen("archived_habits")
+
     object WeeklyReflection : Screen("weekly_reflection")
 
     object Identity : Screen("identity")

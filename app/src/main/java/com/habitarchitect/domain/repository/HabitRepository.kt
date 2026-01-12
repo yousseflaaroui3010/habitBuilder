@@ -33,6 +33,10 @@ interface HabitRepository {
 
     suspend fun archiveHabit(habitId: String): Result<Unit>
 
+    fun getArchivedHabits(userId: String): Flow<List<Habit>>
+
+    suspend fun restoreHabit(habitId: String): Result<Unit>
+
     suspend fun updateSharingStatus(habitId: String, shared: Boolean): Result<Unit>
 
     suspend fun updateFrictionStrategies(habitId: String, strategies: List<String>, implemented: List<String>): Result<Unit>

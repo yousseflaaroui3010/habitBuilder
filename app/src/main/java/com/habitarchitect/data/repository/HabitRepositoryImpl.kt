@@ -94,6 +94,18 @@ class HabitRepositoryImpl @Inject constructor(
         }
     }
 
+    override fun getArchivedHabits(userId: String): Flow<List<Habit>> {
+        return habitDao.getArchivedHabits(userId).map { entities ->
+            entities.map { it.toDomain() }
+        }
+    }
+
+    override suspend fun restoreHabit(habitId: String): Result<Unit> {
+        return runCatching {
+            habitDao.restoreHabit(habitId, System.currentTimeMillis())
+        }
+    }
+
     override suspend fun updateSharingStatus(habitId: String, shared: Boolean): Result<Unit> {
         return runCatching {
             habitDao.updateSharingStatus(habitId, shared, System.currentTimeMillis())

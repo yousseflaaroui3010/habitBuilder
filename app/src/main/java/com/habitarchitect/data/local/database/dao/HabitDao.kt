@@ -75,6 +75,12 @@ interface HabitDao {
     @Query("SELECT COUNT(*) FROM habits WHERE userId = :userId AND isArchived = 0")
     suspend fun getActiveHabitCount(userId: String): Int
 
+    @Query("SELECT * FROM habits WHERE userId = :userId AND isArchived = 1 ORDER BY updatedAt DESC")
+    fun getArchivedHabits(userId: String): Flow<List<HabitEntity>>
+
+    @Query("UPDATE habits SET isArchived = 0, updatedAt = :timestamp WHERE id = :habitId")
+    suspend fun restoreHabit(habitId: String, timestamp: Long)
+
     @Query("SELECT * FROM habits WHERE type = :type AND isArchived = 0 ORDER BY createdAt ASC")
     suspend fun getHabitsByTypeOnce(type: String): List<HabitEntity>
 
