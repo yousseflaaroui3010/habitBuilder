@@ -35,4 +35,6 @@ interface DailyLogRepository {
     suspend fun getSuccessCount(habitId: String): Int
 
     suspend fun getFailureCount(habitId: String): Int
+
+    suspend fun deleteLogForDate(habitId: String, date: LocalDate): Result<Unit>
 }

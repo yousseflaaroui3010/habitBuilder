@@ -43,6 +43,10 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Snackbar
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.SnackbarResult
 import androidx.compose.material3.SwipeToDismiss
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -54,7 +58,9 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import kotlinx.coroutines.launch
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -107,6 +113,12 @@ fun HomeContentScreen(
     var triggerHabitName by remember { mutableStateOf("") }
     var triggerTemplateId by remember { mutableStateOf<String?>(null) }
 
+    // Snackbar for undo functionality
+    val snackbarHostState = remember { SnackbarHostState() }
+    val scope = rememberCoroutineScope()
+    var undoHabitId by remember { mutableStateOf("") }
+    var undoPreviousStreak by remember { mutableStateOf(0) }
+
     // Get user info for greeting and profile picture
     val currentUser = FirebaseAuth.getInstance().currentUser
     val userName = currentUser?.displayName?.split(" ")?.firstOrNull() ?: "there"
@@ -157,6 +169,20 @@ fun HomeContentScreen(
                     triggerTemplateId = event.templateId
                     showTriggerDialog = true
                 }
+                is HomeEvent.ShowUndoSnackbar -> {
+                    undoHabitId = event.habitId
+                    undoPreviousStreak = event.previousStreak
+                    scope.launch {
+                        val result = snackbarHostState.showSnackbar(
+                            message = "Marked \"${event.habitName}\" as failed",
+                            actionLabel = "Undo",
+                            withDismissAction = true
+                        )
+                        if (result == SnackbarResult.ActionPerformed) {
+                            viewModel.undoFailure(undoHabitId, undoPreviousStreak)
+                        }
+                    }
+                }
             }
         }
     }
@@ -172,6 +198,7 @@ fun HomeContentScreen(
     val logoRes = if (isDarkTheme) R.drawable.logo_dark else R.drawable.logo_light
 
     Scaffold(
+        snackbarHost = { SnackbarHost(snackbarHostState) },
         topBar = {
             TopAppBar(
                 title = { },

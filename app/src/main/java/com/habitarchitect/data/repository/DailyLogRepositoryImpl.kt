@@ -89,4 +89,10 @@ class DailyLogRepositoryImpl @Inject constructor(
     override suspend fun getFailureCount(habitId: String): Int {
         return dailyLogDao.getFailureCount(habitId)
     }
+
+    override suspend fun deleteLogForDate(habitId: String, date: LocalDate): Result<Unit> {
+        return runCatching {
+            dailyLogDao.deleteLogForDate(habitId, date.toString())
+        }
+    }
 }

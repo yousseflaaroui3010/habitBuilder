@@ -129,14 +129,14 @@ fun HabitCard(
                 }
             }
 
-            // Show "I'm Tempted" button for BREAK habits
+            // Show "Snap-Back" button for BREAK habits
             if (habit.type == HabitType.BREAK && todayStatus == null) {
                 Spacer(modifier = Modifier.height(12.dp))
                 FilledTonalButton(
                     onClick = onTemptedClick,
                     modifier = Modifier.fillMaxWidth()
                 ) {
-                    Text("I'm Tempted")
+                    Text("Snap-Back")
                 }
             }
         }

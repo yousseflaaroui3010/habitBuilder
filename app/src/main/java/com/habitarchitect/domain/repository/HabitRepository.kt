@@ -27,7 +27,11 @@ interface HabitRepository {
 
     suspend fun resetStreak(habitId: String): Result<Unit>
 
+    suspend fun setStreak(habitId: String, streak: Int): Result<Unit>
+
     suspend fun addPaperClip(habitId: String): Int
+
+    suspend fun addPaperClips(habitId: String, count: Int): Int
 
     suspend fun removePaperClips(habitId: String, count: Int): Int
 

@@ -71,4 +71,7 @@ interface DailyLogDao {
 
     @Query("SELECT * FROM daily_logs WHERE habitId = :habitId ORDER BY date DESC")
     fun getLogsForHabit(habitId: String): Flow<List<DailyLogEntity>>
+
+    @Query("DELETE FROM daily_logs WHERE habitId = :habitId AND date = :date")
+    suspend fun deleteLogForDate(habitId: String, date: String)
 }

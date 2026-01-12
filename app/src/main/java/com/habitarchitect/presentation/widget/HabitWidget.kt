@@ -280,7 +280,7 @@ class HabitWidget : GlanceAppWidget() {
                         flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
                     }
                     Button(
-                        text = "I'm Tempted",
+                        text = "Snap-Back",
                         onClick = actionStartActivity(intent)
                     )
                 } else {

@@ -54,6 +54,15 @@ interface HabitDao {
     """)
     suspend fun incrementStreak(habitId: String, timestamp: Long)
 
+    @Query("""
+        UPDATE habits
+        SET currentStreak = :streak,
+            totalFailureDays = CASE WHEN totalFailureDays > 0 THEN totalFailureDays - 1 ELSE 0 END,
+            updatedAt = :timestamp
+        WHERE id = :habitId
+    """)
+    suspend fun setStreak(habitId: String, streak: Int, timestamp: Long)
+
     @Query("UPDATE habits SET isArchived = 1, updatedAt = :timestamp WHERE id = :habitId")
     suspend fun archiveHabit(habitId: String, timestamp: Long)
 

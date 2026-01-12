@@ -56,6 +56,7 @@ sealed class HomeEvent {
     data class ShowMilestoneCelebration(val streak: Int) : HomeEvent()
     data class ShowStreakBreakAnimation(val previousStreak: Int) : HomeEvent()
     data class ShowTriggerDialog(val habitId: String, val habitName: String, val templateId: String?) : HomeEvent()
+    data class ShowUndoSnackbar(val habitId: String, val habitName: String, val previousStreak: Int) : HomeEvent()
 }
 
 /**
@@ -203,6 +204,25 @@ class HomeViewModel @Inject constructor(
                 // Schedule supportive notification 1 hour later
                 alarmScheduler.schedulePostFailureReminder(habitId, habit.name)
             }
+
+            // Show undo snackbar
+            _events.emit(HomeEvent.ShowUndoSnackbar(habitId, habit?.name ?: "", previousStreak))
+
+            // Reload to update UI
+            loadHabits()
+        }
+    }
+
+    fun undoFailure(habitId: String, previousStreak: Int) {
+        viewModelScope.launch {
+            // Remove the failure log for today
+            dailyLogRepository.deleteLogForDate(habitId, today)
+
+            // Restore streak
+            habitRepository.setStreak(habitId, previousStreak)
+
+            // Restore paper clips (we removed 2)
+            habitRepository.addPaperClips(habitId, 2)
 
             // Reload to update UI
             loadHabits()

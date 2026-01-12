@@ -74,9 +74,22 @@ class HabitRepositoryImpl @Inject constructor(
         }
     }
 
+    override suspend fun setStreak(habitId: String, streak: Int): Result<Unit> {
+        return runCatching {
+            habitDao.setStreak(habitId, streak, System.currentTimeMillis())
+        }
+    }
+
     override suspend fun addPaperClip(habitId: String): Int {
         val habit = habitDao.getHabitByIdOnce(habitId) ?: return 0
         val newCount = (habit.paperClipCount + 1).coerceAtMost(habit.paperClipGoal)
+        habitDao.updatePaperClipCount(habitId, newCount, System.currentTimeMillis())
+        return newCount
+    }
+
+    override suspend fun addPaperClips(habitId: String, count: Int): Int {
+        val habit = habitDao.getHabitByIdOnce(habitId) ?: return 0
+        val newCount = (habit.paperClipCount + count).coerceAtMost(habit.paperClipGoal)
         habitDao.updatePaperClipCount(habitId, newCount, System.currentTimeMillis())
         return newCount
     }
