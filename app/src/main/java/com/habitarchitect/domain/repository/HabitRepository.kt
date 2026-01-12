@@ -35,6 +35,8 @@ interface HabitRepository {
 
     suspend fun removePaperClips(habitId: String, count: Int): Int
 
+    suspend fun setPaperClips(habitId: String, count: Int): Result<Unit>
+
     suspend fun archiveHabit(habitId: String): Result<Unit>
 
     suspend fun updateSharingStatus(habitId: String, shared: Boolean): Result<Unit>

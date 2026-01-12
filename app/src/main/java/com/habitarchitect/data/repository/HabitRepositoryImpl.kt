@@ -101,6 +101,12 @@ class HabitRepositoryImpl @Inject constructor(
         return newCount
     }
 
+    override suspend fun setPaperClips(habitId: String, count: Int): Result<Unit> {
+        return runCatching {
+            habitDao.updatePaperClipCount(habitId, count, System.currentTimeMillis())
+        }
+    }
+
     override suspend fun archiveHabit(habitId: String): Result<Unit> {
         return runCatching {
             habitDao.archiveHabit(habitId, System.currentTimeMillis())

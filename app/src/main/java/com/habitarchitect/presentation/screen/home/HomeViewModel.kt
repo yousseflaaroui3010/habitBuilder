@@ -56,7 +56,8 @@ sealed class HomeEvent {
     data class ShowMilestoneCelebration(val streak: Int) : HomeEvent()
     data class ShowStreakBreakAnimation(val previousStreak: Int) : HomeEvent()
     data class ShowTriggerDialog(val habitId: String, val habitName: String, val templateId: String?) : HomeEvent()
-    data class ShowUndoSnackbar(val habitId: String, val habitName: String, val previousStreak: Int) : HomeEvent()
+    data class ShowUndoFailureSnackbar(val habitId: String, val habitName: String, val previousStreak: Int) : HomeEvent()
+    data class ShowUndoSuccessSnackbar(val habitId: String, val habitName: String, val previousStreak: Int, val previousPaperClips: Int) : HomeEvent()
 }
 
 /**
@@ -160,6 +161,11 @@ class HomeViewModel @Inject constructor(
 
     fun markSuccess(habitId: String) {
         viewModelScope.launch {
+            // Get current state before changes for undo
+            val habit = habitRepository.getHabitByIdOnce(habitId)
+            val previousStreak = habit?.currentStreak ?: 0
+            val previousPaperClips = habit?.paperClipCount ?: 0
+
             dailyLogRepository.markStatus(habitId, today, DailyStatus.SUCCESS)
             val newStreak = habitRepository.incrementStreak(habitId)
 
@@ -173,6 +179,9 @@ class HomeViewModel @Inject constructor(
             } else {
                 soundManager.playSuccessSound()
             }
+
+            // Show undo snackbar
+            _events.emit(HomeEvent.ShowUndoSuccessSnackbar(habitId, habit?.name ?: "", previousStreak, previousPaperClips))
 
             // Reload to update UI
             loadHabits()
@@ -206,7 +215,7 @@ class HomeViewModel @Inject constructor(
             }
 
             // Show undo snackbar
-            _events.emit(HomeEvent.ShowUndoSnackbar(habitId, habit?.name ?: "", previousStreak))
+            _events.emit(HomeEvent.ShowUndoFailureSnackbar(habitId, habit?.name ?: "", previousStreak))
 
             // Reload to update UI
             loadHabits()
@@ -223,6 +232,22 @@ class HomeViewModel @Inject constructor(
 
             // Restore paper clips (we removed 2)
             habitRepository.addPaperClips(habitId, 2)
+
+            // Reload to update UI
+            loadHabits()
+        }
+    }
+
+    fun undoSuccess(habitId: String, previousStreak: Int, previousPaperClips: Int) {
+        viewModelScope.launch {
+            // Remove the success log for today
+            dailyLogRepository.deleteLogForDate(habitId, today)
+
+            // Restore streak to previous value
+            habitRepository.setStreak(habitId, previousStreak)
+
+            // Restore paper clips to previous value
+            habitRepository.setPaperClips(habitId, previousPaperClips)
 
             // Reload to update UI
             loadHabits()

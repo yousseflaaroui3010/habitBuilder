@@ -118,6 +118,8 @@ fun HomeContentScreen(
     val scope = rememberCoroutineScope()
     var undoHabitId by remember { mutableStateOf("") }
     var undoPreviousStreak by remember { mutableStateOf(0) }
+    var undoPreviousPaperClips by remember { mutableStateOf(0) }
+    var isUndoForSuccess by remember { mutableStateOf(false) }
 
     // Get user info for greeting and profile picture
     val currentUser = FirebaseAuth.getInstance().currentUser
@@ -169,9 +171,10 @@ fun HomeContentScreen(
                     triggerTemplateId = event.templateId
                     showTriggerDialog = true
                 }
-                is HomeEvent.ShowUndoSnackbar -> {
+                is HomeEvent.ShowUndoFailureSnackbar -> {
                     undoHabitId = event.habitId
                     undoPreviousStreak = event.previousStreak
+                    isUndoForSuccess = false
                     scope.launch {
                         val result = snackbarHostState.showSnackbar(
                             message = "Marked \"${event.habitName}\" as failed",
@@ -180,6 +183,22 @@ fun HomeContentScreen(
                         )
                         if (result == SnackbarResult.ActionPerformed) {
                             viewModel.undoFailure(undoHabitId, undoPreviousStreak)
+                        }
+                    }
+                }
+                is HomeEvent.ShowUndoSuccessSnackbar -> {
+                    undoHabitId = event.habitId
+                    undoPreviousStreak = event.previousStreak
+                    undoPreviousPaperClips = event.previousPaperClips
+                    isUndoForSuccess = true
+                    scope.launch {
+                        val result = snackbarHostState.showSnackbar(
+                            message = "Marked \"${event.habitName}\" as done",
+                            actionLabel = "Undo",
+                            withDismissAction = true
+                        )
+                        if (result == SnackbarResult.ActionPerformed) {
+                            viewModel.undoSuccess(undoHabitId, undoPreviousStreak, undoPreviousPaperClips)
                         }
                     }
                 }
