@@ -49,5 +49,8 @@
     <color name="calendar_today">#2196F3</color>
 
     <!-- Splash Screen -->
-    <color name="splash_background">#4CAF50</color>
+    <color name="splash_background">#173451</color>
+
+    <!-- Icon -->
+    <color name="icon_background">#FFFFFF</color>
 </resources>
