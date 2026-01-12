@@ -1,12 +1,14 @@
 # Habit Architect — Context Log
 
-**Last Updated:** 2026-01-08 | **Repo:** github.com/yousseflaaroui3010/habitBuilder
+**Last Updated:** 2026-01-12 | **Repo:** github.com/yousseflaaroui3010/habitBuilder
 
 ---
 
 ## BRANCHES
 
-None - all merged to main
+| Branch | Issue | Status |
+|--------|-------|--------|
+| HB-24-add-archived-habits-page | #24 Archived Habits | Ready for PR |
 
 ---
 
@@ -36,6 +38,8 @@ None - all merged to main
 | 16 | Habit creation in home | Low | |
 | 21 | Guest Mode | Low | |
 | 22 | Profile options | Low | |
+| 24 | Archived Habits Page | Medium | Branch ready for PR |
+| 39 | Trigger List | Medium | Todo next |
 
 ---
 
