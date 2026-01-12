@@ -26,9 +26,3 @@ WHAT TO AVOID:
 Avoid redundant functions, files, code-snippets...
 Avoid hard-coding secrtes
 Avoid merging branches to the main until I test and till you to merge or I do it manually
-
-
-1. get the PRD - BluePrint
-2. add PRD.md to directory, create prompt.md 
-2. Create Repo and commit your first changes after the prompt
-
