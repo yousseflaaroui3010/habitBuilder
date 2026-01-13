@@ -24,6 +24,7 @@ class NotificationAlarmReceiver : BroadcastReceiver() {
         private const val NOTIFICATION_MORNING = 1
         private const val NOTIFICATION_EVENING = 2
         private const val NOTIFICATION_POST_FAILURE_BASE = 100
+        private const val NOTIFICATION_HABIT_REMINDER_BASE = 200
     }
 
     override fun onReceive(context: Context, intent: Intent) {
@@ -36,6 +37,11 @@ class NotificationAlarmReceiver : BroadcastReceiver() {
                 val habitId = intent.getStringExtra(AlarmScheduler.EXTRA_HABIT_ID) ?: return
                 val habitName = intent.getStringExtra(AlarmScheduler.EXTRA_HABIT_NAME) ?: "your habit"
                 showPostFailureReminder(context, habitId, habitName)
+            }
+            AlarmScheduler.ACTION_HABIT_REMINDER -> {
+                val habitId = intent.getStringExtra(AlarmScheduler.EXTRA_HABIT_ID) ?: return
+                val habitName = intent.getStringExtra(AlarmScheduler.EXTRA_HABIT_NAME) ?: "your habit"
+                showHabitReminder(context, habitId, habitName)
             }
         }
 
@@ -128,6 +134,31 @@ class NotificationAlarmReceiver : BroadcastReceiver() {
 
         val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
         val notificationId = NOTIFICATION_POST_FAILURE_BASE + habitId.hashCode()
+        notificationManager.notify(notificationId, notification)
+    }
+
+    private fun showHabitReminder(context: Context, habitId: String, habitName: String) {
+        val openAppIntent = Intent(context, MainActivity::class.java).apply {
+            flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
+        }
+        val pendingIntent = PendingIntent.getActivity(
+            context,
+            0,
+            openAppIntent,
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+        )
+
+        val notification = NotificationCompat.Builder(context, CHANNEL_ID_REMINDERS)
+            .setSmallIcon(R.drawable.ic_launcher_foreground)
+            .setContentTitle("Time for: $habitName")
+            .setContentText("Let's build this habit together!")
+            .setPriority(NotificationCompat.PRIORITY_HIGH)
+            .setContentIntent(pendingIntent)
+            .setAutoCancel(true)
+            .build()
+
+        val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+        val notificationId = NOTIFICATION_HABIT_REMINDER_BASE + habitId.hashCode()
         notificationManager.notify(notificationId, notification)
     }
 

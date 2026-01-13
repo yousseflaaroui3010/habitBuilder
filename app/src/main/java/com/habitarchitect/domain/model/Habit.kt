@@ -14,11 +14,12 @@ data class Habit(
     val templateId: String? = null,
     val iconEmoji: String = "✓",
 
-    // Scheduling
+    // Scheduling & Reminders
     val triggerTime: LocalTime? = null,
     val triggerContext: String? = null,
     val frequency: Frequency = Frequency.DAILY,
     val activeDays: List<Int> = listOf(1, 2, 3, 4, 5, 6, 7),
+    val isReminderEnabled: Boolean = false,
 
     // Intentions-based creation
     val location: String? = null,

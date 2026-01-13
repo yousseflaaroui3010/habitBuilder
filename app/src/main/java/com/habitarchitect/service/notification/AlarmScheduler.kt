@@ -6,6 +6,8 @@ import android.content.Context
 import android.content.Intent
 import android.os.Build
 import dagger.hilt.android.qualifiers.ApplicationContext
+import com.habitarchitect.domain.model.Habit
+import java.time.LocalTime
 import java.util.Calendar
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -24,6 +26,7 @@ class AlarmScheduler @Inject constructor(
         const val ACTION_MORNING_REMINDER = "com.habitarchitect.MORNING_REMINDER"
         const val ACTION_EVENING_CHECKIN = "com.habitarchitect.EVENING_CHECKIN"
         const val ACTION_POST_FAILURE = "com.habitarchitect.POST_FAILURE"
+        const val ACTION_HABIT_REMINDER = "com.habitarchitect.HABIT_REMINDER"
 
         const val EXTRA_HABIT_ID = "habit_id"
         const val EXTRA_HABIT_NAME = "habit_name"
@@ -31,6 +34,7 @@ class AlarmScheduler @Inject constructor(
         private const val REQUEST_MORNING = 1001
         private const val REQUEST_EVENING = 1002
         private const val REQUEST_POST_FAILURE_BASE = 2000
+        private const val REQUEST_HABIT_REMINDER_BASE = 3000
     }
 
     /**
@@ -116,6 +120,78 @@ class AlarmScheduler @Inject constructor(
         )
 
         scheduleExactAlarm(triggerTime, pendingIntent)
+    }
+
+    /**
+     * Schedule habit-specific reminder based on trigger time and frequency.
+     * Calculates next fire time considering activeDays.
+     */
+    fun scheduleHabitReminder(habit: Habit) {
+        val triggerTime = habit.triggerTime ?: return
+        val habitId = habit.id
+        val habitName = habit.name
+        val activeDays = habit.activeDays
+
+        val calendar = Calendar.getInstance().apply {
+            set(Calendar.HOUR_OF_DAY, triggerTime.hour)
+            set(Calendar.MINUTE, triggerTime.minute)
+            set(Calendar.SECOND, 0)
+            set(Calendar.MILLISECOND, 0)
+
+            // Find next valid day based on activeDays
+            var daysToAdd = 0
+            val maxAttempts = 7
+            while (daysToAdd < maxAttempts) {
+                if (daysToAdd > 0) {
+                    add(Calendar.DAY_OF_YEAR, 1)
+                }
+
+                // Calendar.DAY_OF_WEEK: 1=Sunday, 2=Monday, ..., 7=Saturday
+                val currentDayOfWeek = get(Calendar.DAY_OF_WEEK)
+
+                // Check if time has passed today on first iteration
+                val hasPassedToday = daysToAdd == 0 && timeInMillis <= System.currentTimeMillis()
+
+                if (!hasPassedToday && activeDays.contains(currentDayOfWeek)) {
+                    break
+                }
+
+                daysToAdd++
+            }
+        }
+
+        val intent = Intent(context, NotificationAlarmReceiver::class.java).apply {
+            action = ACTION_HABIT_REMINDER
+            putExtra(EXTRA_HABIT_ID, habitId)
+            putExtra(EXTRA_HABIT_NAME, habitName)
+        }
+
+        val requestCode = REQUEST_HABIT_REMINDER_BASE + habitId.hashCode()
+        val pendingIntent = PendingIntent.getBroadcast(
+            context,
+            requestCode,
+            intent,
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+        )
+
+        scheduleExactAlarm(calendar.timeInMillis, pendingIntent)
+    }
+
+    /**
+     * Cancel habit-specific reminder alarm.
+     */
+    fun cancelHabitReminder(habitId: String) {
+        val intent = Intent(context, NotificationAlarmReceiver::class.java).apply {
+            action = ACTION_HABIT_REMINDER
+        }
+        val requestCode = REQUEST_HABIT_REMINDER_BASE + habitId.hashCode()
+        val pendingIntent = PendingIntent.getBroadcast(
+            context,
+            requestCode,
+            intent,
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+        )
+        alarmManager.cancel(pendingIntent)
     }
 
     /**

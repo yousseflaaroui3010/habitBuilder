@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
@@ -18,6 +19,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FilterChip
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -32,6 +34,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -169,6 +172,43 @@ fun EditHabitScreen(
                     modifier = Modifier.fillMaxWidth(),
                     supportingText = { Text("How you'll reward yourself after") }
                 )
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                // Reminder time field
+                OutlinedTextField(
+                    value = uiState.reminderTime,
+                    onValueChange = { viewModel.updateReminderTime(it) },
+                    label = { Text("Reminder Time") },
+                    modifier = Modifier.fillMaxWidth(),
+                    supportingText = { Text("e.g., 8:00 AM, 8am, 08:00") },
+                    singleLine = true
+                )
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                // Day selection for reminders
+                Text(
+                    text = "Reminder Days",
+                    style = MaterialTheme.typography.labelLarge,
+                    modifier = Modifier.padding(bottom = 8.dp)
+                )
+
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    val days = listOf("Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat")
+                    days.forEachIndexed { index, day ->
+                        val dayNum = index + 1
+                        FilterChip(
+                            selected = uiState.selectedDays.contains(dayNum),
+                            onClick = { viewModel.toggleDay(dayNum) },
+                            label = { Text(day, fontSize = 12.sp) },
+                            modifier = Modifier.weight(1f).padding(horizontal = 2.dp)
+                        )
+                    }
+                }
             }
 
             Spacer(modifier = Modifier.height(24.dp))

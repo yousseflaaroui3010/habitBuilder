@@ -38,22 +38,31 @@ class RemindersViewModel @Inject constructor(
                 // Filter habits that have trigger times
                 val habitsWithReminders = habits.filter { it.triggerTime != null }
 
-                // Initialize all reminders as enabled
-                val enabledMap = habitsWithReminders.associate { it.id to true }
+                // Use actual isReminderEnabled from habit
+                val enabledMap = habitsWithReminders.associate { it.id to it.isReminderEnabled }
 
                 _uiState.value = RemindersUiState(
                     habits = habitsWithReminders,
-                    enabledReminders = _uiState.value.enabledReminders.ifEmpty { enabledMap }
+                    enabledReminders = enabledMap
                 )
             }
         }
     }
 
     fun toggleReminder(habitId: String) {
-        val currentEnabled = _uiState.value.enabledReminders[habitId] ?: true
+        val habit = _uiState.value.habits.find { it.id == habitId } ?: return
+        val newEnabledState = !habit.isReminderEnabled
+
+        // Update UI state immediately
         _uiState.value = _uiState.value.copy(
-            enabledReminders = _uiState.value.enabledReminders + (habitId to !currentEnabled)
+            enabledReminders = _uiState.value.enabledReminders + (habitId to newEnabledState)
         )
-        // TODO: Actually cancel/reschedule notifications
+
+        // Update habit and schedule/cancel alarms
+        viewModelScope.launch {
+            habitRepository.updateHabit(
+                habit.copy(isReminderEnabled = newEnabledState)
+            )
+        }
     }
 }

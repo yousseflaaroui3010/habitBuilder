@@ -25,11 +25,12 @@ data class HabitEntity(
     val templateId: String?,
     val iconEmoji: String,
 
-    // Scheduling
+    // Scheduling & Reminders
     val triggerTime: String?,
     val triggerContext: String?,
     val frequency: String,
     val activeDays: String?,
+    val isReminderEnabled: Boolean = false,
 
     // Intentions-based creation
     val location: String?,

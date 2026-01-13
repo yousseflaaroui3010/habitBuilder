@@ -8,6 +8,7 @@ import com.habitarchitect.data.mapper.toEntity
 import com.habitarchitect.domain.model.Habit
 import com.habitarchitect.domain.model.HabitType
 import com.habitarchitect.domain.repository.HabitRepository
+import com.habitarchitect.service.notification.AlarmScheduler
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import java.util.UUID
@@ -19,7 +20,8 @@ import javax.inject.Inject
 class HabitRepositoryImpl @Inject constructor(
     private val habitDao: HabitDao,
     private val dailyLogDao: DailyLogDao,
-    private val listItemDao: ListItemDao
+    private val listItemDao: ListItemDao,
+    private val alarmScheduler: AlarmScheduler
 ) : HabitRepository {
 
     override fun getActiveHabits(userId: String): Flow<List<Habit>> {
@@ -53,13 +55,31 @@ class HabitRepositoryImpl @Inject constructor(
             val id = habit.id.ifBlank { UUID.randomUUID().toString() }
             val habitWithId = habit.copy(id = id)
             habitDao.insertHabit(habitWithId.toEntity())
+
+            // Schedule reminder if enabled and has trigger time (BUILD habits only)
+            if (habitWithId.type == HabitType.BUILD &&
+                habitWithId.isReminderEnabled &&
+                habitWithId.triggerTime != null) {
+                alarmScheduler.scheduleHabitReminder(habitWithId)
+            }
+
             id
         }
     }
 
     override suspend fun updateHabit(habit: Habit): Result<Unit> {
         return runCatching {
-            habitDao.updateHabit(habit.copy(updatedAt = System.currentTimeMillis()).toEntity())
+            val updatedHabit = habit.copy(updatedAt = System.currentTimeMillis())
+            habitDao.updateHabit(updatedHabit.toEntity())
+
+            // Reschedule or cancel reminder based on settings (BUILD habits only)
+            if (updatedHabit.type == HabitType.BUILD) {
+                if (updatedHabit.isReminderEnabled && updatedHabit.triggerTime != null) {
+                    alarmScheduler.scheduleHabitReminder(updatedHabit)
+                } else {
+                    alarmScheduler.cancelHabitReminder(updatedHabit.id)
+                }
+            }
         }
     }
 
@@ -110,6 +130,8 @@ class HabitRepositoryImpl @Inject constructor(
     override suspend fun archiveHabit(habitId: String): Result<Unit> {
         return runCatching {
             habitDao.archiveHabit(habitId, System.currentTimeMillis())
+            // Cancel reminder when habit is archived
+            alarmScheduler.cancelHabitReminder(habitId)
         }
     }
 
@@ -138,6 +160,8 @@ class HabitRepositoryImpl @Inject constructor(
             listItemDao.deleteAllForHabit(habitId)
             dailyLogDao.deleteLogsForHabit(habitId)
             habitDao.deleteHabit(habitId)
+            // Cancel reminder when habit is deleted
+            alarmScheduler.cancelHabitReminder(habitId)
         }
     }
 

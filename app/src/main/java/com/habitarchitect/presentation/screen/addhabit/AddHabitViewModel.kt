@@ -213,6 +213,7 @@ class AddHabitViewModel @Inject constructor(
                     triggerTime = triggerTime,
                     triggerContext = state.selectedTime, // Store the raw time string as context
                     activeDays = state.selectedDays,
+                    isReminderEnabled = triggerTime != null, // Enable reminders if time is set
                     location = state.location,
                     goal = state.goal,
                     minimumVersion = state.startWith.ifBlank { state.currentAnswer },

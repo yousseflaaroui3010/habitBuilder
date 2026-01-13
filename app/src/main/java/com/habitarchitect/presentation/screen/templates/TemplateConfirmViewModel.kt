@@ -17,13 +17,17 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import java.time.LocalTime
 import java.util.UUID
 import javax.inject.Inject
 
 data class TemplateConfirmUiState(
     val template: HabitTemplate? = null,
     val isCreating: Boolean = false,
-    val habitCreated: Boolean = false
+    val habitCreated: Boolean = false,
+    val showReminderDialog: Boolean = false,
+    val reminderTime: String = "",
+    val selectedDays: List<Int> = listOf(1, 2, 3, 4, 5, 6, 7)
 )
 
 @HiltViewModel
@@ -48,14 +52,52 @@ class TemplateConfirmViewModel @Inject constructor(
         _uiState.value = _uiState.value.copy(template = template)
     }
 
+    fun showReminderDialog() {
+        _uiState.value = _uiState.value.copy(showReminderDialog = true)
+    }
+
+    fun hideReminderDialog() {
+        _uiState.value = _uiState.value.copy(showReminderDialog = false)
+    }
+
+    fun updateReminderTime(time: String) {
+        _uiState.value = _uiState.value.copy(reminderTime = time)
+    }
+
+    fun toggleDay(day: Int) {
+        val currentDays = _uiState.value.selectedDays
+        val newDays = if (currentDays.contains(day)) {
+            currentDays - day
+        } else {
+            (currentDays + day).sorted()
+        }
+        _uiState.value = _uiState.value.copy(selectedDays = newDays)
+    }
+
     fun createHabitFromTemplate() {
         val template = _uiState.value.template ?: return
+        // For BUILD habits, show reminder dialog first
+        if (template.type == HabitType.BUILD) {
+            showReminderDialog()
+        } else {
+            proceedWithHabitCreation()
+        }
+    }
+
+    fun proceedWithHabitCreation() {
+        val template = _uiState.value.template ?: return
         val userId = firebaseAuth.currentUser?.uid ?: return
+        val state = _uiState.value
 
         viewModelScope.launch {
-            _uiState.value = _uiState.value.copy(isCreating = true)
+            _uiState.value = _uiState.value.copy(isCreating = true, showReminderDialog = false)
 
             val habitId = UUID.randomUUID().toString()
+
+            // Parse trigger time if provided
+            val triggerTime = if (state.reminderTime.isNotBlank()) {
+                parseTimeString(state.reminderTime)
+            } else null
 
             // Create habit with all template defaults
             val habit = Habit(
@@ -69,7 +111,11 @@ class TemplateConfirmViewModel @Inject constructor(
                 minimumVersion = template.defaultMinimumVersion,
                 stackAnchor = template.defaultStackAnchors.firstOrNull(),
                 reward = template.defaultRewards.firstOrNull(),
-                frictionStrategies = template.defaultFrictionStrategies
+                frictionStrategies = template.defaultFrictionStrategies,
+                triggerTime = triggerTime,
+                triggerContext = state.reminderTime,
+                activeDays = state.selectedDays,
+                isReminderEnabled = triggerTime != null
             )
 
             habitRepository.createHabit(habit)
@@ -107,6 +153,34 @@ class TemplateConfirmViewModel @Inject constructor(
                 isCreating = false,
                 habitCreated = true
             )
+        }
+    }
+
+    private fun parseTimeString(timeStr: String): LocalTime? {
+        val cleanedTime = timeStr.trim().uppercase()
+
+        return try {
+            when {
+                cleanedTime.contains("AM") || cleanedTime.contains("PM") -> {
+                    val isPM = cleanedTime.contains("PM")
+                    val timePart = cleanedTime.replace("AM", "").replace("PM", "").trim()
+                    val parts = timePart.split(":")
+                    var hour = parts[0].toInt()
+                    val minute = if (parts.size > 1) parts[1].toInt() else 0
+
+                    if (isPM && hour != 12) hour += 12
+                    if (!isPM && hour == 12) hour = 0
+
+                    LocalTime.of(hour, minute)
+                }
+                cleanedTime.contains(":") -> {
+                    val parts = cleanedTime.split(":")
+                    LocalTime.of(parts[0].toInt(), parts[1].toInt())
+                }
+                else -> null
+            }
+        } catch (e: Exception) {
+            null
         }
     }
 }

@@ -32,7 +32,7 @@ import com.habitarchitect.data.local.database.entity.WeeklyReflectionEntity
         PartnershipEntity::class,
         WeeklyReflectionEntity::class
     ],
-    version = 4,
+    version = 5,
     exportSchema = true
 )
 abstract class HabitArchitectDatabase : RoomDatabase() {
@@ -85,6 +85,13 @@ abstract class HabitArchitectDatabase : RoomDatabase() {
             }
         }
 
+        // Migration from version 4 to 5: Add isReminderEnabled field for habit reminders
+        val MIGRATION_4_5 = object : Migration(4, 5) {
+            override fun migrate(database: SupportSQLiteDatabase) {
+                database.execSQL("ALTER TABLE habits ADD COLUMN isReminderEnabled INTEGER NOT NULL DEFAULT 0")
+            }
+        }
+
         /**
          * Get singleton database instance for non-Hilt contexts (like widgets).
          */
@@ -95,7 +102,7 @@ abstract class HabitArchitectDatabase : RoomDatabase() {
                     HabitArchitectDatabase::class.java,
                     DATABASE_NAME
                 )
-                    .addMigrations(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4)
+                    .addMigrations(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5)
                     .build()
                 INSTANCE = instance
                 instance
