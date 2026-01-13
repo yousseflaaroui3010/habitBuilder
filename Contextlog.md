@@ -4,22 +4,22 @@
 
 ---
 
-## LATEST SESSION: Issue #102 - Habit Reminders
+## LATEST SESSION: Reminder Dialog UX + Create Flow Improvements
 
 **Date:** 2026-01-13
 
 ### What Was Done
-- ✅ Added `isReminderEnabled` field to Habit model, entity, and mapper
-- ✅ Created database migration (v4 → v5) for new field
-- ✅ Extended AlarmScheduler with per-habit reminder scheduling (`scheduleHabitReminder`, `cancelHabitReminder`)
-- ✅ Integrated alarm scheduling into HabitRepository (create, update, archive, delete)
-- ✅ Updated RemindersViewModel to toggle reminders and persist state
-- ✅ Added reminder setup dialog to template-based habit creation (BUILD habits only)
-- ✅ Added time & frequency editing to EditHabitScreen (BUILD habits only)
-- ✅ Auto-enable reminders in AddHabitSocraticScreen when time is set
+- ✅ Replaced text input with Material 3 TimePicker for time selection (TemplateConfirmScreen + EditHabitScreen)
+- ✅ Fixed day selection - replaced broken FilterChips with circular toggle buttons
+- ✅ Improved dialog layout with centered content, icons, proper spacing
+- ✅ Added accessibility semantics (contentDescription, role) to day buttons
+- ✅ Ensured AA color contrast compliance for both light/dark themes
+- ✅ Updated ViewModels to use hour/minute integers instead of string parsing
+- ✅ Removed Step 2 (Time & Days) from Create Intention flow - reminders now set via popup or edit
+- ✅ Added swipe hint below first habit: "Swipe ← to delete, swipe → to edit"
 
 ### What's Left To Be Done
-- 🔄 End-to-end testing of reminder functionality on device
+- 🔄 Test on device to verify layout and TimePicker functionality
 
 ### What's Blocking
 - None - implementation complete, ready for user testing
@@ -27,9 +27,9 @@
 ### Architecture Notes
 - Reminders are ONLY for BUILD habits (per requirements in gaps.md)
 - Uses AlarmManager for exact-time notifications (not WorkManager)
-- Time format supports: "8:00 AM", "8am", "08:00"
 - Days use Calendar.DAY_OF_WEEK: 1=Sunday, 7=Saturday
 - Unique alarm request codes per habit: `habitId.hashCode()`
+- Create Intention flow now has 4 steps (was 5): Intention → Location → Goal/Start → Habit Stacking
 
 ---
 

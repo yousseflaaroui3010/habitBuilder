@@ -26,7 +26,9 @@ data class TemplateConfirmUiState(
     val isCreating: Boolean = false,
     val habitCreated: Boolean = false,
     val showReminderDialog: Boolean = false,
-    val reminderTime: String = "",
+    val reminderHour: Int = 8,
+    val reminderMinute: Int = 0,
+    val hasTimeSet: Boolean = false,
     val selectedDays: List<Int> = listOf(1, 2, 3, 4, 5, 6, 7)
 )
 
@@ -60,8 +62,16 @@ class TemplateConfirmViewModel @Inject constructor(
         _uiState.value = _uiState.value.copy(showReminderDialog = false)
     }
 
-    fun updateReminderTime(time: String) {
-        _uiState.value = _uiState.value.copy(reminderTime = time)
+    fun updateReminderTime(hour: Int, minute: Int) {
+        _uiState.value = _uiState.value.copy(
+            reminderHour = hour,
+            reminderMinute = minute,
+            hasTimeSet = true
+        )
+    }
+
+    fun clearReminderTime() {
+        _uiState.value = _uiState.value.copy(hasTimeSet = false)
     }
 
     fun toggleDay(day: Int) {
@@ -95,8 +105,8 @@ class TemplateConfirmViewModel @Inject constructor(
             val habitId = UUID.randomUUID().toString()
 
             // Parse trigger time if provided
-            val triggerTime = if (state.reminderTime.isNotBlank()) {
-                parseTimeString(state.reminderTime)
+            val triggerTime = if (state.hasTimeSet) {
+                LocalTime.of(state.reminderHour, state.reminderMinute)
             } else null
 
             // Create habit with all template defaults
@@ -113,7 +123,7 @@ class TemplateConfirmViewModel @Inject constructor(
                 reward = template.defaultRewards.firstOrNull(),
                 frictionStrategies = template.defaultFrictionStrategies,
                 triggerTime = triggerTime,
-                triggerContext = state.reminderTime,
+                triggerContext = if (state.hasTimeSet) formatTimeForDisplay(state.reminderHour, state.reminderMinute) else null,
                 activeDays = state.selectedDays,
                 isReminderEnabled = triggerTime != null
             )
@@ -156,31 +166,13 @@ class TemplateConfirmViewModel @Inject constructor(
         }
     }
 
-    private fun parseTimeString(timeStr: String): LocalTime? {
-        val cleanedTime = timeStr.trim().uppercase()
-
-        return try {
-            when {
-                cleanedTime.contains("AM") || cleanedTime.contains("PM") -> {
-                    val isPM = cleanedTime.contains("PM")
-                    val timePart = cleanedTime.replace("AM", "").replace("PM", "").trim()
-                    val parts = timePart.split(":")
-                    var hour = parts[0].toInt()
-                    val minute = if (parts.size > 1) parts[1].toInt() else 0
-
-                    if (isPM && hour != 12) hour += 12
-                    if (!isPM && hour == 12) hour = 0
-
-                    LocalTime.of(hour, minute)
-                }
-                cleanedTime.contains(":") -> {
-                    val parts = cleanedTime.split(":")
-                    LocalTime.of(parts[0].toInt(), parts[1].toInt())
-                }
-                else -> null
-            }
-        } catch (e: Exception) {
-            null
+    private fun formatTimeForDisplay(hour: Int, minute: Int): String {
+        val amPm = if (hour < 12) "AM" else "PM"
+        val displayHour = when {
+            hour == 0 -> 12
+            hour > 12 -> hour - 12
+            else -> hour
         }
+        return String.format("%d:%02d %s", displayHour, minute, amPm)
     }
 }

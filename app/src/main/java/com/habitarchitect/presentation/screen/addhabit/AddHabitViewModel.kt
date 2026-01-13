@@ -15,14 +15,13 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
-import java.time.LocalTime
 import java.util.UUID
 import javax.inject.Inject
 
 data class AddHabitUiState(
     val habitType: HabitType = HabitType.BUILD,
     val currentStep: Int = 0,
-    val totalSteps: Int = 5, // Both BUILD and BREAK have 5 steps
+    val totalSteps: Int = 4, // BUILD has 4 steps (removed time/days), BREAK has 5 steps
 
     // Current question/answer for BREAK habits
     val currentQuestion: String = "",
@@ -31,7 +30,6 @@ data class AddHabitUiState(
     val answers: List<String> = List(5) { "" },
 
     // Intentions-based fields for BUILD habits
-    val selectedTime: String = "",
     val selectedDays: List<Int> = listOf(1, 2, 3, 4, 5, 6, 7), // All days selected by default
     val location: String = "",
     val goal: String = "",
@@ -69,7 +67,7 @@ class AddHabitViewModel @Inject constructor(
     private val _uiState = MutableStateFlow(
         AddHabitUiState(
             habitType = habitType,
-            totalSteps = if (habitType == HabitType.BUILD) 5 else 5, // Both have 5 steps now
+            totalSteps = if (habitType == HabitType.BUILD) 4 else 5, // BUILD: 4 steps (no time), BREAK: 5 steps
             currentQuestion = if (habitType == HabitType.BREAK) breakQuestions[0].first else "",
             currentHint = if (habitType == HabitType.BREAK) breakQuestions[0].second else ""
         )
@@ -105,20 +103,6 @@ class AddHabitViewModel @Inject constructor(
         )
     }
 
-    fun updateTime(time: String) {
-        _uiState.value = _uiState.value.copy(selectedTime = time)
-    }
-
-    fun toggleDay(dayNumber: Int) {
-        val currentDays = _uiState.value.selectedDays.toMutableList()
-        if (currentDays.contains(dayNumber)) {
-            currentDays.remove(dayNumber)
-        } else {
-            currentDays.add(dayNumber)
-        }
-        _uiState.value = _uiState.value.copy(selectedDays = currentDays.sorted())
-    }
-
     fun updateLocation(location: String) {
         _uiState.value = _uiState.value.copy(location = location)
     }
@@ -141,10 +125,9 @@ class AddHabitViewModel @Inject constructor(
             state.habitType == HabitType.BUILD -> {
                 when (state.currentStep) {
                     0 -> state.currentAnswer.isNotBlank() // Habit action
-                    1 -> state.selectedDays.isNotEmpty() // At least one day selected
-                    2 -> state.location.isNotBlank() // Location
-                    3 -> true // Goal/Start with are optional
-                    4 -> true // Habit stacking is optional
+                    1 -> state.location.isNotBlank() // Location
+                    2 -> true // Goal/Start with are optional
+                    3 -> true // Habit stacking is optional
                     else -> true
                 }
             }
@@ -196,24 +179,16 @@ class AddHabitViewModel @Inject constructor(
             val habitId = UUID.randomUUID().toString()
 
             if (state.habitType == HabitType.BUILD) {
-                // Parse time if provided
-                val triggerTime = try {
-                    if (state.selectedTime.isNotBlank()) {
-                        parseTimeString(state.selectedTime)
-                    } else null
-                } catch (e: Exception) {
-                    null
-                }
-
+                // Reminder time/days will be set via popup after creation or edit screen
                 val habit = Habit(
                     id = habitId,
                     userId = userId,
                     name = state.currentAnswer, // The habit action from step 0
                     type = HabitType.BUILD,
-                    triggerTime = triggerTime,
-                    triggerContext = state.selectedTime, // Store the raw time string as context
+                    triggerTime = null, // Set via reminder popup
+                    triggerContext = null,
                     activeDays = state.selectedDays,
-                    isReminderEnabled = triggerTime != null, // Enable reminders if time is set
+                    isReminderEnabled = false, // Enabled via reminder popup
                     location = state.location,
                     goal = state.goal,
                     minimumVersion = state.startWith.ifBlank { state.currentAnswer },
@@ -269,35 +244,6 @@ class AddHabitViewModel @Inject constructor(
             }
 
             _uiState.value = _uiState.value.copy(isCreating = false)
-        }
-    }
-
-    private fun parseTimeString(timeStr: String): LocalTime? {
-        // Try to parse various time formats like "8:00 AM", "8am", "08:00", etc.
-        val cleanedTime = timeStr.trim().uppercase()
-
-        return try {
-            when {
-                cleanedTime.contains("AM") || cleanedTime.contains("PM") -> {
-                    val isPM = cleanedTime.contains("PM")
-                    val timePart = cleanedTime.replace("AM", "").replace("PM", "").trim()
-                    val parts = timePart.split(":")
-                    var hour = parts[0].toInt()
-                    val minute = if (parts.size > 1) parts[1].toInt() else 0
-
-                    if (isPM && hour != 12) hour += 12
-                    if (!isPM && hour == 12) hour = 0
-
-                    LocalTime.of(hour, minute)
-                }
-                cleanedTime.contains(":") -> {
-                    val parts = cleanedTime.split(":")
-                    LocalTime.of(parts[0].toInt(), parts[1].toInt())
-                }
-                else -> null
-            }
-        } catch (e: Exception) {
-            null
         }
     }
 }

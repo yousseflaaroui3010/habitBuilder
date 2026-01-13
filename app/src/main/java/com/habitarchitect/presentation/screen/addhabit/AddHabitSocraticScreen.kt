@@ -11,7 +11,6 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
-import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -158,8 +157,6 @@ fun AddHabitSocraticScreen(
                 BuildHabitContent(
                     uiState = uiState,
                     onUpdateAnswer = { viewModel.updateAnswer(it) },
-                    onUpdateTime = { viewModel.updateTime(it) },
-                    onToggleDay = { viewModel.toggleDay(it) },
                     onUpdateLocation = { viewModel.updateLocation(it) },
                     onUpdateGoal = { viewModel.updateGoal(it) },
                     onUpdateStartWith = { viewModel.updateStartWith(it) },
@@ -190,7 +187,8 @@ fun AddHabitSocraticScreen(
                 Text(if (uiState.currentStep < uiState.totalSteps - 1) "Next" else "Create Intention")
             }
 
-            if (uiState.currentStep in 3..4 && isBuildHabit) {
+            // Skip button for optional steps (Goal/Start and Habit Stacking)
+            if (uiState.currentStep in 2..3 && isBuildHabit) {
                 TextButton(
                     onClick = { viewModel.nextStep() },
                     modifier = Modifier.fillMaxWidth()
@@ -207,35 +205,29 @@ fun AddHabitSocraticScreen(
 private fun BuildHabitContent(
     uiState: AddHabitUiState,
     onUpdateAnswer: (String) -> Unit,
-    onUpdateTime: (String) -> Unit,
-    onToggleDay: (Int) -> Unit,
     onUpdateLocation: (String) -> Unit,
     onUpdateGoal: (String) -> Unit,
     onUpdateStartWith: (String) -> Unit,
     onUpdateStackAnchor: (String) -> Unit
 ) {
+    // Steps: 0=Intention, 1=Location, 2=Goal/Start, 3=HabitStacking
+    // Time/Days removed - set via reminder popup after creation or edit screen
     when (uiState.currentStep) {
         0 -> IntentionStep(
             habitAction = uiState.currentAnswer,
             onHabitActionChange = onUpdateAnswer
         )
-        1 -> TimeAndDaysStep(
-            selectedTime = uiState.selectedTime,
-            selectedDays = uiState.selectedDays,
-            onTimeChange = onUpdateTime,
-            onToggleDay = onToggleDay
-        )
-        2 -> LocationStep(
+        1 -> LocationStep(
             location = uiState.location,
             onLocationChange = onUpdateLocation
         )
-        3 -> GoalAndStartStep(
+        2 -> GoalAndStartStep(
             goal = uiState.goal,
             startWith = uiState.startWith,
             onGoalChange = onUpdateGoal,
             onStartWithChange = onUpdateStartWith
         )
-        4 -> HabitStackingStep(
+        3 -> HabitStackingStep(
             stackAnchor = uiState.stackAnchor,
             habitAction = uiState.currentAnswer,
             onStackAnchorChange = onUpdateStackAnchor
@@ -344,83 +336,6 @@ private fun IntentionStep(
             text = example,
             onClick = { onHabitActionChange(example) }
         )
-    }
-}
-
-@OptIn(ExperimentalLayoutApi::class)
-@Composable
-private fun TimeAndDaysStep(
-    selectedTime: String,
-    selectedDays: List<Int>,
-    onTimeChange: (String) -> Unit,
-    onToggleDay: (Int) -> Unit
-) {
-    Text(
-        text = "at...",
-        style = MaterialTheme.typography.headlineMedium,
-        fontWeight = FontWeight.Bold,
-        color = MaterialTheme.colorScheme.primary
-    )
-
-    Spacer(modifier = Modifier.height(12.dp))
-
-    // Time selection
-    OutlinedTextField(
-        value = selectedTime,
-        onValueChange = onTimeChange,
-        modifier = Modifier.fillMaxWidth(),
-        placeholder = { Text("8:00 AM") },
-        label = { Text("Time") },
-        singleLine = true
-    )
-
-    Spacer(modifier = Modifier.height(24.dp))
-
-    Text(
-        text = "On these days:",
-        style = MaterialTheme.typography.titleMedium
-    )
-
-    Spacer(modifier = Modifier.height(12.dp))
-
-    // Day selection
-    val days = listOf("Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat")
-    FlowRow(
-        horizontalArrangement = Arrangement.spacedBy(8.dp),
-        verticalArrangement = Arrangement.spacedBy(8.dp)
-    ) {
-        days.forEachIndexed { index, day ->
-            val dayNumber = index + 1 // 1-7 for Sunday-Saturday
-            val isSelected = selectedDays.contains(dayNumber)
-            DayChip(
-                day = day,
-                isSelected = isSelected,
-                onClick = { onToggleDay(dayNumber) }
-            )
-        }
-    }
-
-    Spacer(modifier = Modifier.height(16.dp))
-
-    // Quick select options
-    Row(
-        horizontalArrangement = Arrangement.spacedBy(8.dp)
-    ) {
-        TextButton(onClick = {
-            (1..7).forEach { if (!selectedDays.contains(it)) onToggleDay(it) }
-        }) {
-            Text("Every day")
-        }
-        TextButton(onClick = {
-            listOf(2, 3, 4, 5, 6).forEach { day ->
-                if (!selectedDays.contains(day)) onToggleDay(day)
-            }
-            listOf(1, 7).forEach { day ->
-                if (selectedDays.contains(day)) onToggleDay(day)
-            }
-        }) {
-            Text("Weekdays")
-        }
     }
 }
 

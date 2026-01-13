@@ -365,33 +365,41 @@ fun HomeContentScreen(
                         }
 
                         itemsIndexed(buildHabits, key = { _, habit -> "build_${habit.id}" }) { index, habit ->
-                            HabitCardWithWeeklyProgress(
-                                habit = habit,
-                                todayStatus = state.todayStatuses[habit.id],
-                                weeklyStatus = state.weeklyStatuses[habit.id],
-                                onCardClick = { onNavigateToHabitDetail(habit.id) },
-                                onMarkSuccess = { viewModel.markSuccess(habit.id) },
-                                onMarkFailure = { viewModel.markFailure(habit.id) },
-                                onTemptedClick = { viewModel.showTemptationOverlay(habit.id) },
-                                onDelete = { habitToDelete = habit },
-                                onEdit = { onNavigateToEditHabit(habit.id) },
-                                canMoveUp = index > 0,
-                                canMoveDown = index < buildHabits.size - 1,
-                                onMoveUp = {
-                                    if (index > 0) {
-                                        val ids = buildHabits.map { it.id }.toMutableList()
-                                        ids.add(index - 1, ids.removeAt(index))
-                                        viewModel.reorderHabits(ids)
+                            // Show swipe hint below the first habit overall
+                            val isFirstHabitOverall = index == 0
+                            Column {
+                                HabitCardWithWeeklyProgress(
+                                    habit = habit,
+                                    todayStatus = state.todayStatuses[habit.id],
+                                    weeklyStatus = state.weeklyStatuses[habit.id],
+                                    onCardClick = { onNavigateToHabitDetail(habit.id) },
+                                    onMarkSuccess = { viewModel.markSuccess(habit.id) },
+                                    onMarkFailure = { viewModel.markFailure(habit.id) },
+                                    onTemptedClick = { viewModel.showTemptationOverlay(habit.id) },
+                                    onDelete = { habitToDelete = habit },
+                                    onEdit = { onNavigateToEditHabit(habit.id) },
+                                    canMoveUp = index > 0,
+                                    canMoveDown = index < buildHabits.size - 1,
+                                    onMoveUp = {
+                                        if (index > 0) {
+                                            val ids = buildHabits.map { it.id }.toMutableList()
+                                            ids.add(index - 1, ids.removeAt(index))
+                                            viewModel.reorderHabits(ids)
+                                        }
+                                    },
+                                    onMoveDown = {
+                                        if (index < buildHabits.size - 1) {
+                                            val ids = buildHabits.map { it.id }.toMutableList()
+                                            ids.add(index + 1, ids.removeAt(index))
+                                            viewModel.reorderHabits(ids)
+                                        }
                                     }
-                                },
-                                onMoveDown = {
-                                    if (index < buildHabits.size - 1) {
-                                        val ids = buildHabits.map { it.id }.toMutableList()
-                                        ids.add(index + 1, ids.removeAt(index))
-                                        viewModel.reorderHabits(ids)
-                                    }
+                                )
+                                // Show hint after the first habit in the list
+                                if (isFirstHabitOverall) {
+                                    SwipeHint()
                                 }
-                            )
+                            }
                         }
                     }
 
@@ -407,33 +415,40 @@ fun HomeContentScreen(
                         }
 
                         itemsIndexed(breakHabits, key = { _, habit -> "break_${habit.id}" }) { index, habit ->
-                            HabitCardWithWeeklyProgress(
-                                habit = habit,
-                                todayStatus = state.todayStatuses[habit.id],
-                                weeklyStatus = state.weeklyStatuses[habit.id],
-                                onCardClick = { onNavigateToHabitDetail(habit.id) },
-                                onMarkSuccess = { viewModel.markSuccess(habit.id) },
-                                onMarkFailure = { viewModel.markFailure(habit.id) },
-                                onTemptedClick = { viewModel.showTemptationOverlay(habit.id) },
-                                onDelete = { habitToDelete = habit },
-                                onEdit = { onNavigateToEditHabit(habit.id) },
-                                canMoveUp = index > 0,
-                                canMoveDown = index < breakHabits.size - 1,
-                                onMoveUp = {
-                                    if (index > 0) {
-                                        val ids = breakHabits.map { it.id }.toMutableList()
-                                        ids.add(index - 1, ids.removeAt(index))
-                                        viewModel.reorderHabits(ids)
+                            // Show swipe hint if this is the first habit overall (no build habits)
+                            val isFirstHabitOverall = index == 0 && buildHabits.isEmpty()
+                            Column {
+                                HabitCardWithWeeklyProgress(
+                                    habit = habit,
+                                    todayStatus = state.todayStatuses[habit.id],
+                                    weeklyStatus = state.weeklyStatuses[habit.id],
+                                    onCardClick = { onNavigateToHabitDetail(habit.id) },
+                                    onMarkSuccess = { viewModel.markSuccess(habit.id) },
+                                    onMarkFailure = { viewModel.markFailure(habit.id) },
+                                    onTemptedClick = { viewModel.showTemptationOverlay(habit.id) },
+                                    onDelete = { habitToDelete = habit },
+                                    onEdit = { onNavigateToEditHabit(habit.id) },
+                                    canMoveUp = index > 0,
+                                    canMoveDown = index < breakHabits.size - 1,
+                                    onMoveUp = {
+                                        if (index > 0) {
+                                            val ids = breakHabits.map { it.id }.toMutableList()
+                                            ids.add(index - 1, ids.removeAt(index))
+                                            viewModel.reorderHabits(ids)
+                                        }
+                                    },
+                                    onMoveDown = {
+                                        if (index < breakHabits.size - 1) {
+                                            val ids = breakHabits.map { it.id }.toMutableList()
+                                            ids.add(index + 1, ids.removeAt(index))
+                                            viewModel.reorderHabits(ids)
+                                        }
                                     }
-                                },
-                                onMoveDown = {
-                                    if (index < breakHabits.size - 1) {
-                                        val ids = breakHabits.map { it.id }.toMutableList()
-                                        ids.add(index + 1, ids.removeAt(index))
-                                        viewModel.reorderHabits(ids)
-                                    }
+                                )
+                                if (isFirstHabitOverall) {
+                                    SwipeHint()
                                 }
-                            )
+                            }
                         }
                     }
                 }
@@ -750,4 +765,20 @@ private fun DayCircle(
             color = if (isToday) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant
         )
     }
+}
+
+/**
+ * Hint message showing swipe actions for habits.
+ */
+@Composable
+private fun SwipeHint() {
+    Text(
+        text = "Swipe ← to delete, swipe → to edit",
+        style = MaterialTheme.typography.bodySmall,
+        color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(top = 4.dp, bottom = 8.dp),
+        textAlign = androidx.compose.ui.text.style.TextAlign.Center
+    )
 }
