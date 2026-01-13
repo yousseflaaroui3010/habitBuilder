@@ -236,6 +236,7 @@ private fun IncludedItem(label: String, value: String) {
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun ReminderSetupDialog(
     reminderTime: String,
