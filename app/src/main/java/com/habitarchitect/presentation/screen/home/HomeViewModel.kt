@@ -16,6 +16,7 @@ import com.habitarchitect.domain.repository.ListItemRepository
 import com.habitarchitect.service.notification.AlarmScheduler
 import java.util.UUID
 import com.habitarchitect.service.sound.SoundManager
+import com.habitarchitect.data.analytics.AnalyticsTracker
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -71,7 +72,8 @@ class HomeViewModel @Inject constructor(
     private val listItemRepository: ListItemRepository,
     private val soundManager: SoundManager,
     private val appPreferences: AppPreferences,
-    private val alarmScheduler: AlarmScheduler
+    private val alarmScheduler: AlarmScheduler,
+    private val analyticsTracker: AnalyticsTracker
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow<HomeUiState>(HomeUiState.Loading)
@@ -172,6 +174,15 @@ class HomeViewModel @Inject constructor(
             // Add 1 paper clip for success
             habitRepository.addPaperClip(habitId)
 
+            // Track habit completion
+            habit?.let {
+                analyticsTracker.trackHabitMarked(
+                    habit = it,
+                    status = DailyStatus.SUCCESS,
+                    currentStreak = newStreak
+                )
+            }
+
             // Check for milestone celebration
             if (newStreak in milestoneStreaks) {
                 soundManager.playMilestoneSound()
@@ -200,6 +211,15 @@ class HomeViewModel @Inject constructor(
             // PUNISHMENT: Remove 2 paper clips for failure
             habitRepository.removePaperClips(habitId, 2)
 
+            // Track habit failure
+            habit?.let {
+                analyticsTracker.trackHabitMarked(
+                    habit = it,
+                    status = DailyStatus.FAILURE,
+                    currentStreak = 0
+                )
+            }
+
             soundManager.playStreakBreakSound()
 
             // Show animation if there was a streak to break
@@ -224,6 +244,8 @@ class HomeViewModel @Inject constructor(
 
     fun undoFailure(habitId: String, previousStreak: Int) {
         viewModelScope.launch {
+            val startTime = System.currentTimeMillis()
+
             // Remove the failure log for today
             dailyLogRepository.deleteLogForDate(habitId, today)
 
@@ -233,6 +255,9 @@ class HomeViewModel @Inject constructor(
             // Restore paper clips (we removed 2)
             habitRepository.addPaperClips(habitId, 2)
 
+            // Track undo
+            analyticsTracker.trackUndoAction("failure", System.currentTimeMillis() - startTime)
+
             // Reload to update UI
             loadHabits()
         }
@@ -240,6 +265,8 @@ class HomeViewModel @Inject constructor(
 
     fun undoSuccess(habitId: String, previousStreak: Int, previousPaperClips: Int) {
         viewModelScope.launch {
+            val startTime = System.currentTimeMillis()
+
             // Remove the success log for today
             dailyLogRepository.deleteLogForDate(habitId, today)
 
@@ -248,6 +275,9 @@ class HomeViewModel @Inject constructor(
 
             // Restore paper clips to previous value
             habitRepository.setPaperClips(habitId, previousPaperClips)
+
+            // Track undo
+            analyticsTracker.trackUndoAction("success", System.currentTimeMillis() - startTime)
 
             // Reload to update UI
             loadHabits()

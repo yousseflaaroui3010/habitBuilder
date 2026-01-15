@@ -8,6 +8,7 @@ import com.habitarchitect.domain.model.DailyStatus
 import com.habitarchitect.domain.model.Habit
 import com.habitarchitect.domain.repository.DailyLogRepository
 import com.habitarchitect.domain.repository.HabitRepository
+import com.habitarchitect.data.analytics.AnalyticsTracker
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -36,7 +37,8 @@ data class HabitDetailUiState(
 class HabitDetailViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
     private val habitRepository: HabitRepository,
-    private val dailyLogRepository: DailyLogRepository
+    private val dailyLogRepository: DailyLogRepository,
+    private val analyticsTracker: AnalyticsTracker
 ) : ViewModel() {
 
     private val habitId: String = savedStateHandle["habitId"] ?: ""
@@ -109,7 +111,22 @@ class HabitDetailViewModel @Inject constructor(
 
     fun deleteHabit() {
         viewModelScope.launch {
+            val habit = _uiState.value.habit
+            val habitAge = habit?.let {
+                ((System.currentTimeMillis() - it.createdAt) / (1000 * 60 * 60 * 24)).toInt()
+            } ?: 0
+            val successRate = habit?.let {
+                val total = it.totalSuccessDays + it.totalFailureDays
+                if (total > 0) it.totalSuccessDays.toFloat() / total else 0f
+            } ?: 0f
+
             habitRepository.deleteHabit(habitId)
+
+            // Track deletion
+            habit?.let {
+                analyticsTracker.trackHabitDeleted(it, habitAge, successRate)
+            }
+
             _uiState.value = _uiState.value.copy(
                 showDeleteConfirmation = false,
                 habitDeleted = true
@@ -119,15 +136,36 @@ class HabitDetailViewModel @Inject constructor(
 
     fun archiveHabit() {
         viewModelScope.launch {
+            val habit = _uiState.value.habit
+            val habitAge = habit?.let {
+                ((System.currentTimeMillis() - it.createdAt) / (1000 * 60 * 60 * 24)).toInt()
+            } ?: 0
+            val successRate = habit?.let {
+                val total = it.totalSuccessDays + it.totalFailureDays
+                if (total > 0) it.totalSuccessDays.toFloat() / total else 0f
+            } ?: 0f
+
             habitRepository.archiveHabit(habitId)
+
+            // Track archive
+            habit?.let {
+                analyticsTracker.trackHabitArchived(it, habitAge, successRate)
+            }
+
             _uiState.value = _uiState.value.copy(habitDeleted = true)
         }
     }
 
     fun toggleShareWithPartner() {
         viewModelScope.launch {
-            val currentShared = _uiState.value.habit?.isSharedWithPartner ?: false
+            val habit = _uiState.value.habit ?: return@launch
+            val currentShared = habit.isSharedWithPartner
             habitRepository.updateSharingStatus(habitId, !currentShared)
+
+            // Track sharing toggle
+            if (!currentShared) {
+                analyticsTracker.trackHabitShared(habit)
+            }
         }
     }
 }

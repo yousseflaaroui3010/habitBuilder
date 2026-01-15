@@ -4,6 +4,7 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.habitarchitect.domain.repository.HabitRepository
+import com.habitarchitect.data.analytics.AnalyticsTracker
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -21,7 +22,8 @@ data class FrictionTrackerUiState(
 @HiltViewModel
 class FrictionTrackerViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
-    private val habitRepository: HabitRepository
+    private val habitRepository: HabitRepository,
+    private val analyticsTracker: AnalyticsTracker
 ) : ViewModel() {
 
     private val habitId: String = checkNotNull(savedStateHandle["habitId"])
@@ -68,20 +70,39 @@ class FrictionTrackerViewModel @Inject constructor(
             val updatedBarriers = currentBarriers + newBarrier
             _uiState.value = _uiState.value.copy(barriers = updatedBarriers)
             saveBarriers(updatedBarriers)
+
+            // Track friction added
+            val habit = habitRepository.getHabitByIdOnce(habitId)
+            val habitAge = habit?.let {
+                ((System.currentTimeMillis() - it.createdAt) / (1000 * 60 * 60 * 24)).toInt()
+            } ?: 0
+            analyticsTracker.trackFrictionAdded(habitAge, updatedBarriers.size)
         }
     }
 
     fun toggleBarrier(barrierId: String) {
         viewModelScope.launch {
-            val updatedBarriers = _uiState.value.barriers.map { barrier ->
-                if (barrier.id == barrierId) {
-                    barrier.copy(isImplemented = !barrier.isImplemented)
+            val barrier = _uiState.value.barriers.find { it.id == barrierId }
+            val wasImplemented = barrier?.isImplemented ?: false
+
+            val updatedBarriers = _uiState.value.barriers.map { b ->
+                if (b.id == barrierId) {
+                    b.copy(isImplemented = !b.isImplemented)
                 } else {
-                    barrier
+                    b
                 }
             }
             _uiState.value = _uiState.value.copy(barriers = updatedBarriers)
             saveBarriers(updatedBarriers)
+
+            // Track friction implementation
+            if (!wasImplemented) {
+                val habit = habitRepository.getHabitByIdOnce(habitId)
+                val habitAge = habit?.let {
+                    ((System.currentTimeMillis() - it.createdAt) / (1000 * 60 * 60 * 24)).toInt()
+                } ?: 0
+                analyticsTracker.trackFrictionImplemented(habitAge, 0)
+            }
         }
     }
 

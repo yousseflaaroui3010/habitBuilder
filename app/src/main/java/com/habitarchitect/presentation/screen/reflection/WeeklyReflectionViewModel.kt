@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import com.google.firebase.auth.FirebaseAuth
 import com.habitarchitect.domain.model.WeeklyReflection
 import com.habitarchitect.domain.repository.WeeklyReflectionRepository
+import com.habitarchitect.data.analytics.AnalyticsTracker
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -27,7 +28,8 @@ data class WeeklyReflectionUiState(
 @HiltViewModel
 class WeeklyReflectionViewModel @Inject constructor(
     private val firebaseAuth: FirebaseAuth,
-    private val weeklyReflectionRepository: WeeklyReflectionRepository
+    private val weeklyReflectionRepository: WeeklyReflectionRepository,
+    private val analyticsTracker: AnalyticsTracker
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(WeeklyReflectionUiState())
@@ -37,8 +39,10 @@ class WeeklyReflectionViewModel @Inject constructor(
         .with(TemporalAdjusters.previousOrSame(DayOfWeek.SUNDAY))
 
     private var existingReflectionId: String? = null
+    private var reflectionStartTime: Long = 0L
 
     init {
+        reflectionStartTime = System.currentTimeMillis()
         loadExistingReflection()
     }
 
@@ -91,6 +95,15 @@ class WeeklyReflectionViewModel @Inject constructor(
             )
 
             weeklyReflectionRepository.saveReflection(reflection)
+
+            // Track reflection completion
+            val timeToComplete = System.currentTimeMillis() - reflectionStartTime
+            analyticsTracker.trackReflectionCompleted(
+                wentWellWordCount = state.wentWell.split("\\s+".toRegex()).filter { it.isNotBlank() }.size,
+                didntGoWellWordCount = state.didntGoWell.split("\\s+".toRegex()).filter { it.isNotBlank() }.size,
+                learnedWordCount = state.learned.split("\\s+".toRegex()).filter { it.isNotBlank() }.size,
+                timeToCompleteMs = timeToComplete
+            )
 
             _uiState.value = _uiState.value.copy(
                 isSaving = false,

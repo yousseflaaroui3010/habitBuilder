@@ -11,6 +11,7 @@ import com.habitarchitect.domain.model.ListItem
 import com.habitarchitect.domain.model.ListItemType
 import com.habitarchitect.domain.repository.HabitRepository
 import com.habitarchitect.domain.repository.ListItemRepository
+import com.habitarchitect.data.analytics.AnalyticsTracker
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -45,7 +46,8 @@ class QuickAddHabitViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
     private val firebaseAuth: FirebaseAuth,
     private val habitRepository: HabitRepository,
-    private val listItemRepository: ListItemRepository
+    private val listItemRepository: ListItemRepository,
+    private val analyticsTracker: AnalyticsTracker
 ) : ViewModel() {
 
     private val typeString: String = savedStateHandle["type"] ?: HabitType.BUILD.name
@@ -157,6 +159,13 @@ class QuickAddHabitViewModel @Inject constructor(
             )
 
             habitRepository.createHabit(habit)
+
+            // Track habit creation
+            analyticsTracker.trackHabitCreated(
+                habit = habit,
+                fromTemplate = state.templateId != null,
+                templateId = state.templateId
+            )
 
             // Save resistance/attraction items from template
             if (state.habitType == HabitType.BREAK && state.resistanceItems.isNotEmpty()) {
