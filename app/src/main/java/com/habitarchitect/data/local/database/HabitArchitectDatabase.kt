@@ -6,12 +6,14 @@ import androidx.room.Room
 import androidx.room.RoomDatabase
 import androidx.room.migration.Migration
 import androidx.sqlite.db.SupportSQLiteDatabase
+import com.habitarchitect.data.local.database.dao.AnalyticsDao
 import com.habitarchitect.data.local.database.dao.DailyLogDao
 import com.habitarchitect.data.local.database.dao.HabitDao
 import com.habitarchitect.data.local.database.dao.ListItemDao
 import com.habitarchitect.data.local.database.dao.PartnershipDao
 import com.habitarchitect.data.local.database.dao.UserDao
 import com.habitarchitect.data.local.database.dao.WeeklyReflectionDao
+import com.habitarchitect.data.local.database.entity.AnalyticsEventEntity
 import com.habitarchitect.data.local.database.entity.DailyLogEntity
 import com.habitarchitect.data.local.database.entity.HabitEntity
 import com.habitarchitect.data.local.database.entity.ListItemEntity
@@ -30,9 +32,10 @@ import com.habitarchitect.data.local.database.entity.WeeklyReflectionEntity
         DailyLogEntity::class,
         ListItemEntity::class,
         PartnershipEntity::class,
-        WeeklyReflectionEntity::class
+        WeeklyReflectionEntity::class,
+        AnalyticsEventEntity::class
     ],
-    version = 5,
+    version = 6,
     exportSchema = true
 )
 abstract class HabitArchitectDatabase : RoomDatabase() {
@@ -43,6 +46,7 @@ abstract class HabitArchitectDatabase : RoomDatabase() {
     abstract fun listItemDao(): ListItemDao
     abstract fun partnershipDao(): PartnershipDao
     abstract fun weeklyReflectionDao(): WeeklyReflectionDao
+    abstract fun analyticsDao(): AnalyticsDao
 
     companion object {
         const val DATABASE_NAME = "habit_architect_db"
@@ -92,6 +96,29 @@ abstract class HabitArchitectDatabase : RoomDatabase() {
             }
         }
 
+        // Migration from version 5 to 6: Add analytics_events table for ML data collection
+        val MIGRATION_5_6 = object : Migration(5, 6) {
+            override fun migrate(database: SupportSQLiteDatabase) {
+                database.execSQL("""
+                    CREATE TABLE IF NOT EXISTS analytics_events (
+                        eventId TEXT PRIMARY KEY NOT NULL,
+                        eventName TEXT NOT NULL,
+                        timestamp INTEGER NOT NULL,
+                        anonymousUserId TEXT NOT NULL,
+                        propertiesJson TEXT NOT NULL,
+                        contextJson TEXT NOT NULL,
+                        consentTier INTEGER NOT NULL,
+                        synced INTEGER NOT NULL DEFAULT 0,
+                        syncAttempts INTEGER NOT NULL DEFAULT 0,
+                        lastSyncAttempt INTEGER
+                    )
+                """)
+                database.execSQL("CREATE INDEX IF NOT EXISTS index_analytics_events_synced ON analytics_events(synced)")
+                database.execSQL("CREATE INDEX IF NOT EXISTS index_analytics_events_timestamp ON analytics_events(timestamp)")
+                database.execSQL("CREATE INDEX IF NOT EXISTS index_analytics_events_consentTier ON analytics_events(consentTier)")
+            }
+        }
+
         /**
          * Get singleton database instance for non-Hilt contexts (like widgets).
          */
@@ -102,7 +129,7 @@ abstract class HabitArchitectDatabase : RoomDatabase() {
                     HabitArchitectDatabase::class.java,
                     DATABASE_NAME
                 )
-                    .addMigrations(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5)
+                    .addMigrations(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5, MIGRATION_5_6)
                     .build()
                 INSTANCE = instance
                 instance

@@ -84,4 +84,6 @@ sealed class Screen(val route: String) {
     object AcceptPartnerInvite : Screen("partner/invite/{inviteCode}") {
         fun createRoute(inviteCode: String) = "partner/invite/$inviteCode"
     }
+
+    object ConsentSettings : Screen("consent_settings")
 }

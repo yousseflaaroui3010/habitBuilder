@@ -2,6 +2,7 @@ package com.habitarchitect.di
 
 import android.content.Context
 import com.habitarchitect.data.local.database.HabitArchitectDatabase
+import com.habitarchitect.data.local.database.dao.AnalyticsDao
 import com.habitarchitect.data.local.database.dao.DailyLogDao
 import com.habitarchitect.data.local.database.dao.HabitDao
 import com.habitarchitect.data.local.database.dao.ListItemDao
@@ -43,4 +44,7 @@ object DatabaseModule {
 
     @Provides
     fun provideWeeklyReflectionDao(database: HabitArchitectDatabase): WeeklyReflectionDao = database.weeklyReflectionDao()
+
+    @Provides
+    fun provideAnalyticsDao(database: HabitArchitectDatabase): AnalyticsDao = database.analyticsDao()
 }

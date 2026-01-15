@@ -17,6 +17,7 @@ import androidx.compose.material.icons.filled.DarkMode
 import androidx.compose.material.icons.filled.Schedule
 import androidx.compose.material.icons.filled.EventNote
 import androidx.compose.material.icons.filled.Star
+import androidx.compose.material.icons.filled.Security
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Divider
@@ -56,6 +57,7 @@ fun SettingsScreen(
     onNavigateToPartners: () -> Unit,
     onNavigateToWeeklyReflection: () -> Unit = {},
     onNavigateToIdentity: () -> Unit = {},
+    onNavigateToConsentSettings: () -> Unit = {},
     onSignOut: () -> Unit,
     viewModel: SettingsViewModel = hiltViewModel()
 ) {
@@ -285,6 +287,13 @@ fun SettingsScreen(
                 supportingContent = { Text("Manage who can see your habits") },
                 leadingContent = { Icon(Icons.Default.People, contentDescription = null) },
                 modifier = Modifier.clickable { onNavigateToPartners() }
+            )
+
+            ListItem(
+                headlineContent = { Text("Data & Privacy") },
+                supportingContent = { Text("Control analytics and data collection") },
+                leadingContent = { Icon(Icons.Default.Security, contentDescription = null) },
+                modifier = Modifier.clickable { onNavigateToConsentSettings() }
             )
 
             ListItem(

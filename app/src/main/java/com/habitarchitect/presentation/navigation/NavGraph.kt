@@ -35,6 +35,7 @@ import com.habitarchitect.presentation.screen.breaktools.FrictionTrackerScreen
 import com.habitarchitect.presentation.screen.bundle.TemptationBundleScreen
 import com.habitarchitect.presentation.screen.reflection.WeeklyReflectionScreen
 import com.habitarchitect.presentation.screen.identity.IdentityScreen
+import com.habitarchitect.presentation.screen.settings.ConsentSettingsScreen
 
 /**
  * Main navigation host for Habit Architect.
@@ -301,6 +302,9 @@ fun HabitArchitectNavHost(
                 onNavigateToIdentity = {
                     navController.navigate(Screen.Identity.route)
                 },
+                onNavigateToConsentSettings = {
+                    navController.navigate(Screen.ConsentSettings.route)
+                },
                 onSignOut = {
                     navController.navigate(Screen.SignIn.route) {
                         popUpTo(Screen.Home.route) { inclusive = true }
@@ -407,6 +411,13 @@ fun HabitArchitectNavHost(
             val habitId = backStackEntry.arguments?.getString("habitId") ?: return@composable
             FrictionTrackerScreen(
                 habitId = habitId,
+                onNavigateBack = { navController.popBackStack() }
+            )
+        }
+
+        // Consent Settings (Data & Privacy)
+        composable(Screen.ConsentSettings.route) {
+            ConsentSettingsScreen(
                 onNavigateBack = { navController.popBackStack() }
             )
         }
