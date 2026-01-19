@@ -5,9 +5,11 @@ import com.habitarchitect.data.local.database.dao.DailyLogDao
 import com.habitarchitect.data.local.database.dao.HabitDao
 import com.habitarchitect.data.local.database.dao.ListItemDao
 import com.habitarchitect.data.local.database.entity.HabitEntity
+import com.habitarchitect.data.sync.OfflineQueue
 import com.habitarchitect.domain.model.Frequency
 import com.habitarchitect.domain.model.Habit
 import com.habitarchitect.domain.model.HabitType
+import com.habitarchitect.service.notification.AlarmScheduler
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.every
@@ -25,6 +27,8 @@ class HabitRepositoryImplTest {
     private lateinit var habitDao: HabitDao
     private lateinit var dailyLogDao: DailyLogDao
     private lateinit var listItemDao: ListItemDao
+    private lateinit var alarmScheduler: AlarmScheduler
+    private lateinit var offlineQueue: OfflineQueue
     private lateinit var repository: HabitRepositoryImpl
 
     private val testUserId = "test-user-123"
@@ -35,7 +39,9 @@ class HabitRepositoryImplTest {
         habitDao = mockk(relaxed = true)
         dailyLogDao = mockk(relaxed = true)
         listItemDao = mockk(relaxed = true)
-        repository = HabitRepositoryImpl(habitDao, dailyLogDao, listItemDao)
+        alarmScheduler = mockk(relaxed = true)
+        offlineQueue = mockk(relaxed = true)
+        repository = HabitRepositoryImpl(habitDao, dailyLogDao, listItemDao, alarmScheduler, offlineQueue)
     }
 
     @Test
@@ -201,10 +207,14 @@ class HabitRepositoryImplTest {
         triggerContext = null,
         frequency = "DAILY",
         activeDays = null,
+        isReminderEnabled = false,
+        location = null,
+        goal = null,
         minimumVersion = "5 minutes",
         stackAnchor = null,
         reward = null,
         frictionStrategies = null,
+        implementedFrictionStrategies = null,
         currentStreak = 0,
         longestStreak = 0,
         totalSuccessDays = 0,
