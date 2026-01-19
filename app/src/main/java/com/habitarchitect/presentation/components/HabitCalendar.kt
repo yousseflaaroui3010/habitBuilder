@@ -193,7 +193,7 @@ private fun CalendarGrid(
 @Composable
 private fun CalendarDay(
     day: Int,
-    date: LocalDate,
+    @Suppress("UNUSED_PARAMETER") date: LocalDate,
     isToday: Boolean,
     isFuture: Boolean,
     status: DailyStatus?,

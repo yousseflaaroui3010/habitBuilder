@@ -326,6 +326,7 @@ private fun TimePickerDialogContent(
     )
 }
 
+@Suppress("UNUSED_PARAMETER")
 @Composable
 private fun ThemeSelectorContent(
     currentMode: ThemeMode,

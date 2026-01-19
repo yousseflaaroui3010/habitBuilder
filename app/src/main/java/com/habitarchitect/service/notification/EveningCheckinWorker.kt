@@ -11,6 +11,7 @@ import androidx.hilt.work.HiltWorker
 import androidx.work.CoroutineWorker
 import androidx.work.WorkerParameters
 import com.habitarchitect.R
+import com.habitarchitect.data.analytics.AnalyticsTracker
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedInject
 
@@ -20,12 +21,14 @@ import dagger.assisted.AssistedInject
 @HiltWorker
 class EveningCheckinWorker @AssistedInject constructor(
     @Assisted context: Context,
-    @Assisted params: WorkerParameters
+    @Assisted params: WorkerParameters,
+    private val analyticsTracker: AnalyticsTracker
 ) : CoroutineWorker(context, params) {
 
     override suspend fun doWork(): Result {
         createNotificationChannel()
         showNotification()
+        analyticsTracker.trackNotificationSent(type = "evening_checkin")
         return Result.success()
     }
 

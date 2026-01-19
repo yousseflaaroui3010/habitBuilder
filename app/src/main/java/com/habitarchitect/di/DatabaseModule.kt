@@ -1,6 +1,7 @@
 package com.habitarchitect.di
 
 import android.content.Context
+import com.habitarchitect.data.local.database.EncryptedDatabaseFactory
 import com.habitarchitect.data.local.database.HabitArchitectDatabase
 import com.habitarchitect.data.local.database.dao.AnalyticsDao
 import com.habitarchitect.data.local.database.dao.DailyLogDao
@@ -16,6 +17,10 @@ import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import javax.inject.Singleton
 
+/**
+ * Hilt module for database dependency injection.
+ * Provides encrypted Room database with SQLCipher.
+ */
 @Module
 @InstallIn(SingletonComponent::class)
 object DatabaseModule {
@@ -23,8 +28,8 @@ object DatabaseModule {
     @Provides
     @Singleton
     fun provideDatabase(@ApplicationContext context: Context): HabitArchitectDatabase {
-        // Use the singleton instance to ensure widgets and DI use the same database
-        return HabitArchitectDatabase.getInstance(context)
+        // Use SQLCipher encrypted database for security
+        return EncryptedDatabaseFactory.create(context)
     }
 
     @Provides

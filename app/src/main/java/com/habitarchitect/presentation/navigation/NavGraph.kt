@@ -11,6 +11,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
+import com.habitarchitect.data.analytics.AnalyticsTracker
 import com.habitarchitect.presentation.screen.addhabit.AddHabitSocraticScreen
 import com.habitarchitect.presentation.screen.addhabit.AddHabitTypeSelectionScreen
 import com.habitarchitect.presentation.screen.addhabit.QuickAddHabitScreen
@@ -43,8 +44,17 @@ import com.habitarchitect.presentation.screen.settings.ConsentSettingsScreen
 @Composable
 fun HabitArchitectNavHost(
     navController: NavHostController = rememberNavController(),
-    deepLinkInviteCode: String? = null
+    deepLinkInviteCode: String? = null,
+    analyticsTracker: AnalyticsTracker? = null
 ) {
+    // Track navigation events for analytics
+    analyticsTracker?.let { tracker ->
+        NavigationTracker(
+            navController = navController,
+            analyticsTracker = tracker
+        )
+    }
+
     // Handle deep link navigation after auth
     val pendingInviteCode = deepLinkInviteCode
     NavHost(

@@ -56,24 +56,24 @@ abstract class HabitArchitectDatabase : RoomDatabase() {
 
         // Migration from version 1 to 2: Add location and goal fields for intentions-based habit creation
         val MIGRATION_1_2 = object : Migration(1, 2) {
-            override fun migrate(database: SupportSQLiteDatabase) {
-                database.execSQL("ALTER TABLE habits ADD COLUMN location TEXT")
-                database.execSQL("ALTER TABLE habits ADD COLUMN goal TEXT")
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL("ALTER TABLE habits ADD COLUMN location TEXT")
+                db.execSQL("ALTER TABLE habits ADD COLUMN goal TEXT")
             }
         }
 
         // Migration from version 2 to 3: Add paper clip jar fields for gamification
         val MIGRATION_2_3 = object : Migration(2, 3) {
-            override fun migrate(database: SupportSQLiteDatabase) {
-                database.execSQL("ALTER TABLE habits ADD COLUMN paperClipCount INTEGER NOT NULL DEFAULT 0")
-                database.execSQL("ALTER TABLE habits ADD COLUMN paperClipGoal INTEGER NOT NULL DEFAULT 30")
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL("ALTER TABLE habits ADD COLUMN paperClipCount INTEGER NOT NULL DEFAULT 0")
+                db.execSQL("ALTER TABLE habits ADD COLUMN paperClipGoal INTEGER NOT NULL DEFAULT 30")
             }
         }
 
         // Migration from version 3 to 4: Add weekly reflections table
         val MIGRATION_3_4 = object : Migration(3, 4) {
-            override fun migrate(database: SupportSQLiteDatabase) {
-                database.execSQL("""
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL("""
                     CREATE TABLE IF NOT EXISTS weekly_reflections (
                         id TEXT PRIMARY KEY NOT NULL,
                         userId TEXT NOT NULL,
@@ -85,21 +85,21 @@ abstract class HabitArchitectDatabase : RoomDatabase() {
                         updatedAt INTEGER NOT NULL
                     )
                 """)
-                database.execSQL("CREATE UNIQUE INDEX IF NOT EXISTS index_weekly_reflections_userId_weekStartDate ON weekly_reflections(userId, weekStartDate)")
+                db.execSQL("CREATE UNIQUE INDEX IF NOT EXISTS index_weekly_reflections_userId_weekStartDate ON weekly_reflections(userId, weekStartDate)")
             }
         }
 
         // Migration from version 4 to 5: Add isReminderEnabled field for habit reminders
         val MIGRATION_4_5 = object : Migration(4, 5) {
-            override fun migrate(database: SupportSQLiteDatabase) {
-                database.execSQL("ALTER TABLE habits ADD COLUMN isReminderEnabled INTEGER NOT NULL DEFAULT 0")
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL("ALTER TABLE habits ADD COLUMN isReminderEnabled INTEGER NOT NULL DEFAULT 0")
             }
         }
 
         // Migration from version 5 to 6: Add analytics_events table for ML data collection
         val MIGRATION_5_6 = object : Migration(5, 6) {
-            override fun migrate(database: SupportSQLiteDatabase) {
-                database.execSQL("""
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL("""
                     CREATE TABLE IF NOT EXISTS analytics_events (
                         eventId TEXT PRIMARY KEY NOT NULL,
                         eventName TEXT NOT NULL,
@@ -113,9 +113,9 @@ abstract class HabitArchitectDatabase : RoomDatabase() {
                         lastSyncAttempt INTEGER
                     )
                 """)
-                database.execSQL("CREATE INDEX IF NOT EXISTS index_analytics_events_synced ON analytics_events(synced)")
-                database.execSQL("CREATE INDEX IF NOT EXISTS index_analytics_events_timestamp ON analytics_events(timestamp)")
-                database.execSQL("CREATE INDEX IF NOT EXISTS index_analytics_events_consentTier ON analytics_events(consentTier)")
+                db.execSQL("CREATE INDEX IF NOT EXISTS index_analytics_events_synced ON analytics_events(synced)")
+                db.execSQL("CREATE INDEX IF NOT EXISTS index_analytics_events_timestamp ON analytics_events(timestamp)")
+                db.execSQL("CREATE INDEX IF NOT EXISTS index_analytics_events_consentTier ON analytics_events(consentTier)")
             }
         }
 

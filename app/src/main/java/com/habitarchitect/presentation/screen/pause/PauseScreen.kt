@@ -10,6 +10,7 @@ import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.detectHorizontalDragGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -34,10 +35,13 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -47,26 +51,39 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.habitarchitect.presentation.theme.GradientBlueDark
-import com.habitarchitect.presentation.theme.GradientBlueLight
+import com.habitarchitect.presentation.widget.TemptationViewModel
 import kotlinx.coroutines.delay
+import kotlin.math.abs
 
 @Composable
 fun PauseScreen(
+    habitId: String = "",
     habitName: String,
-    onComplete: () -> Unit,
     onStayStrong: () -> Unit,
-    pauseDuration: Int = 30, // Changed from 60 to 30 seconds
-    resistanceItems: List<String> = emptyList()
+    onFailed: () -> Unit = {},
+    pauseDuration: Int = 30,
+    resistanceItems: List<String> = emptyList(),
+    viewModel: TemptationViewModel? = null
 ) {
     var secondsRemaining by remember { mutableIntStateOf(pauseDuration) }
     var isPaused by remember { mutableStateOf(false) }
     var currentSlideIndex by remember { mutableIntStateOf(0) }
     var isManualNavigation by remember { mutableStateOf(false) }
+    var dragOffset by remember { mutableFloatStateOf(0f) }
+
+    // Listen for failure completion
+    val failureComplete = viewModel?.failureComplete?.collectAsState()
+
+    LaunchedEffect(failureComplete?.value) {
+        if (failureComplete?.value == true) {
+            onFailed()
+        }
+    }
 
     val progress by animateFloatAsState(
         targetValue = 1f - (secondsRemaining.toFloat() / pauseDuration),
@@ -74,22 +91,22 @@ fun PauseScreen(
         label = "progress"
     )
 
-    // Countdown timer
+    // Countdown timer - completes silently (no navigation), user must choose action
     LaunchedEffect(isPaused) {
         if (!isPaused) {
             while (secondsRemaining > 0) {
                 delay(1000)
                 secondsRemaining--
             }
-            onComplete()
+            // Timer complete - don't auto-navigate, wait for user action
         }
     }
 
-    // Auto-rotate slides every 5 seconds (only when not manually navigating)
+    // Auto-rotate slides every 3 seconds (faster) only when not manually navigating
     LaunchedEffect(resistanceItems, isManualNavigation) {
         if (resistanceItems.isNotEmpty() && !isManualNavigation) {
             while (true) {
-                delay(5000)
+                delay(3000) // Changed from 5000 to 3000 for faster auto-advance
                 if (!isManualNavigation) {
                     currentSlideIndex = (currentSlideIndex + 1) % resistanceItems.size
                 }
@@ -97,10 +114,10 @@ fun PauseScreen(
         }
     }
 
-    // Reset manual navigation flag after 10 seconds of inactivity
+    // Reset manual navigation flag after 8 seconds of inactivity
     LaunchedEffect(isManualNavigation) {
         if (isManualNavigation) {
-            delay(10000)
+            delay(8000)
             isManualNavigation = false
         }
     }
@@ -181,7 +198,7 @@ fun PauseScreen(
 
             Spacer(modifier = Modifier.height(32.dp))
 
-            // Flashcard area with navigation
+            // Flashcard area with navigation and swipe support
             if (resistanceItems.isNotEmpty()) {
                 Text(
                     text = "Remember why you're doing this:",
@@ -192,7 +209,7 @@ fun PauseScreen(
 
                 Spacer(modifier = Modifier.height(20.dp))
 
-                // Card with navigation arrows
+                // Card with navigation arrows and swipe gestures
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -225,7 +242,7 @@ fun PauseScreen(
 
                     Spacer(modifier = Modifier.width(12.dp))
 
-                    // Animated flashcard - improved design
+                    // Animated flashcard with swipe support
                     AnimatedContent(
                         targetState = currentSlideIndex,
                         transitionSpec = {
@@ -238,7 +255,33 @@ fun PauseScreen(
                             }
                         },
                         label = "slide",
-                        modifier = Modifier.weight(1f)
+                        modifier = Modifier
+                            .weight(1f)
+                            .pointerInput(resistanceItems.size) {
+                                detectHorizontalDragGestures(
+                                    onDragStart = { dragOffset = 0f },
+                                    onDragEnd = {
+                                        if (abs(dragOffset) > 50) {
+                                            isManualNavigation = true
+                                            if (dragOffset < 0) {
+                                                // Swipe left -> next
+                                                currentSlideIndex = (currentSlideIndex + 1) % resistanceItems.size
+                                            } else {
+                                                // Swipe right -> previous
+                                                currentSlideIndex = if (currentSlideIndex > 0) {
+                                                    currentSlideIndex - 1
+                                                } else {
+                                                    resistanceItems.size - 1
+                                                }
+                                            }
+                                        }
+                                        dragOffset = 0f
+                                    },
+                                    onHorizontalDrag = { _, delta ->
+                                        dragOffset += delta
+                                    }
+                                )
+                            }
                     ) { index ->
                         Card(
                             modifier = Modifier.fillMaxWidth(),
@@ -377,7 +420,7 @@ fun PauseScreen(
 
             Spacer(modifier = Modifier.height(24.dp))
 
-            // Stay Strong button (visible after 10 seconds for 30s timer)
+            // Stay Strong button (visible after 10 seconds)
             if (secondsRemaining <= 20) {
                 Button(
                     onClick = {
@@ -397,6 +440,25 @@ fun PauseScreen(
                         style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.Bold,
                         color = Color.White
+                    )
+                }
+
+                Spacer(modifier = Modifier.height(12.dp))
+
+                // I Failed button
+                OutlinedButton(
+                    onClick = {
+                        isPaused = true
+                        viewModel?.markFailure(habitId)
+                    },
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = ButtonDefaults.outlinedButtonColors(
+                        contentColor = Color.White.copy(alpha = 0.8f)
+                    )
+                ) {
+                    Text(
+                        text = "I Failed Today",
+                        modifier = Modifier.padding(vertical = 8.dp)
                     )
                 }
             }

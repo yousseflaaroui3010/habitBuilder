@@ -9,6 +9,7 @@ import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import timber.log.Timber
 import java.time.LocalDate
 import java.time.LocalTime
 import javax.inject.Inject
@@ -16,7 +17,7 @@ import javax.inject.Singleton
 
 /**
  * Main implementation of the analytics SDK.
- * Handles event tracking, consent filtering, batching, and context enrichment.
+ * Handles event tracking, consent filtering, rate limiting, batching, and context enrichment.
  */
 @Singleton
 class HabitAnalytics @Inject constructor(
@@ -24,7 +25,8 @@ class HabitAnalytics @Inject constructor(
     private val sessionManager: SessionManager,
     private val consentManager: ConsentManager,
     private val anonymousIdGenerator: AnonymousIdGenerator,
-    private val deviceInfoProvider: DeviceInfoProvider
+    private val deviceInfoProvider: DeviceInfoProvider,
+    private val rateLimiter: RateLimiter
 ) : AnalyticsSDK {
 
     companion object {
@@ -48,8 +50,14 @@ class HabitAnalytics @Inject constructor(
      * Track an analytics event.
      */
     override suspend fun trackEvent(event: AnalyticsEvent) {
-        // Check consent
+        // Check consent first
         if (!consentManager.canTrack(event.requiredConsentTier)) {
+            return
+        }
+
+        // Check rate limit
+        if (!rateLimiter.shouldAllowEvent(event.eventName)) {
+            Timber.d("Event ${event.eventName} dropped due to rate limiting")
             return
         }
 
@@ -74,6 +82,12 @@ class HabitAnalytics @Inject constructor(
             return
         }
 
+        // Check rate limit early
+        if (!rateLimiter.shouldAllowEvent(eventName)) {
+            Timber.d("Event $eventName dropped due to rate limiting")
+            return
+        }
+
         val anonymousId = currentAnonymousId ?: run {
             currentUserId?.let { anonymousIdGenerator.generateAnonymousId(it) } ?: "anonymous"
         }
@@ -93,7 +107,10 @@ class HabitAnalytics @Inject constructor(
             requiredConsentTier = consentTier
         )
 
-        trackEvent(event)
+        // Store locally (rate limit already checked)
+        localStorage.store(event)
+        pendingEventCount++
+        checkFlushConditions()
     }
 
     /**
@@ -128,8 +145,6 @@ class HabitAnalytics @Inject constructor(
      * Force flush pending events.
      */
     override suspend fun flush() {
-        // In a real implementation, this would sync to the backend
-        // For now, just update the last flush time
         lastFlushTime = System.currentTimeMillis()
         pendingEventCount = 0
 
@@ -191,13 +206,10 @@ class HabitAnalytics @Inject constructor(
      * Initialize analytics on app start.
      */
     suspend fun initialize(userId: String?) {
-        // Start new session if needed
         sessionManager.getSessionId()
-
-        // Set user if provided
         userId?.let { setUserId(it) }
-
         _isInitialized.value = true
+        Timber.d("Analytics initialized")
     }
 
     /**

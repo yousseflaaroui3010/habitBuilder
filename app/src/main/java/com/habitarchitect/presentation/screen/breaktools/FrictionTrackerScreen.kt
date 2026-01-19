@@ -83,6 +83,7 @@ private val frictionSuggestions = mapOf(
     )
 )
 
+@Suppress("UNUSED_PARAMETER")
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun FrictionTrackerScreen(

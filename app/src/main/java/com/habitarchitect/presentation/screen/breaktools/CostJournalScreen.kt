@@ -72,6 +72,7 @@ enum class CostCategory(
     OTHER("Other", Icons.Default.Edit, Color(0xFF9E9E9E), "✏️")
 }
 
+@Suppress("UNUSED_PARAMETER")
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 @Composable
 fun CostJournalScreen(

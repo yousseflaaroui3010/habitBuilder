@@ -62,6 +62,7 @@ import com.habitarchitect.presentation.components.WeeklyPaperClipProgress
 /**
  * Detailed view of a habit with calendar and stats.
  */
+@Suppress("UNUSED_PARAMETER")
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HabitDetailScreen(

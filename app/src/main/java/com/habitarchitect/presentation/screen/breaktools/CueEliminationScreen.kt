@@ -77,6 +77,7 @@ private val triggerSuggestions = mapOf(
     )
 )
 
+@Suppress("UNUSED_PARAMETER")
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CueEliminationScreen(

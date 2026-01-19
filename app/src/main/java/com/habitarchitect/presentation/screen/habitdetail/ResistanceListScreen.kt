@@ -40,6 +40,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 /**
  * Screen for viewing and editing resistance/attraction list.
  */
+@Suppress("UNUSED_PARAMETER")
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ResistanceListScreen(

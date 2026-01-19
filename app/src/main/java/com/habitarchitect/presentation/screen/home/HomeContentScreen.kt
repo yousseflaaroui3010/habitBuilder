@@ -696,6 +696,7 @@ private fun WeeklyProgressRow(weeklyStatus: WeeklyStatus?) {
         java.time.DayOfWeek.THURSDAY -> 4
         java.time.DayOfWeek.FRIDAY -> 5
         java.time.DayOfWeek.SATURDAY -> 6
+        else -> 0
     }
 
     val statuses = listOf(

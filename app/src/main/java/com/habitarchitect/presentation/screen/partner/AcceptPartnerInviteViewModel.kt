@@ -4,6 +4,7 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.google.firebase.auth.FirebaseAuth
+import com.habitarchitect.data.analytics.AnalyticsTracker
 import com.habitarchitect.domain.model.Partnership
 import com.habitarchitect.domain.model.PartnershipStatus
 import com.habitarchitect.domain.repository.PartnershipRepository
@@ -30,10 +31,12 @@ sealed class AcceptInviteUiState {
 class AcceptPartnerInviteViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
     private val firebaseAuth: FirebaseAuth,
-    private val partnershipRepository: PartnershipRepository
+    private val partnershipRepository: PartnershipRepository,
+    private val analyticsTracker: AnalyticsTracker
 ) : ViewModel() {
 
     private val inviteCode: String = savedStateHandle["inviteCode"] ?: ""
+    private var partnershipCreatedAt: Long? = null
 
     private val _uiState = MutableStateFlow<AcceptInviteUiState>(AcceptInviteUiState.Loading)
     val uiState: StateFlow<AcceptInviteUiState> = _uiState.asStateFlow()
@@ -60,7 +63,10 @@ class AcceptPartnerInviteViewModel @Inject constructor(
                 partnership.status == PartnershipStatus.ACTIVE -> AcceptInviteUiState.AlreadyAccepted
                 partnership.status == PartnershipStatus.REVOKED -> AcceptInviteUiState.NotFound
                 partnership.inviteExpiresAt != null && partnership.inviteExpiresAt < System.currentTimeMillis() -> AcceptInviteUiState.Expired
-                else -> AcceptInviteUiState.Found(partnership)
+                else -> {
+                    partnershipCreatedAt = partnership.createdAt
+                    AcceptInviteUiState.Found(partnership)
+                }
             }
         }
     }
@@ -74,6 +80,11 @@ class AcceptPartnerInviteViewModel @Inject constructor(
             partnershipRepository.acceptPartnership(inviteCode, currentUserId)
                 .onSuccess {
                     _uiState.value = AcceptInviteUiState.Success
+                    // Track partner accepted
+                    val inviteAgeHours = partnershipCreatedAt?.let {
+                        ((System.currentTimeMillis() - it) / (1000 * 60 * 60)).toInt()
+                    } ?: 0
+                    analyticsTracker.trackPartnerAccepted(inviteAgeHours)
                 }
                 .onFailure { e ->
                     _uiState.value = AcceptInviteUiState.Error(e.message ?: "Failed to accept invite")

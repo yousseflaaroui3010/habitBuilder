@@ -59,6 +59,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import com.habitarchitect.domain.model.HabitType
 import com.habitarchitect.domain.model.Priority
 
+@Suppress("UNUSED_PARAMETER")
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun EditHabitScreen(

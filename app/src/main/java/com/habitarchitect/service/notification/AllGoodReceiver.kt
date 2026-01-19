@@ -5,6 +5,7 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import com.google.firebase.auth.FirebaseAuth
+import com.habitarchitect.data.analytics.AnalyticsTracker
 import com.habitarchitect.domain.model.DailyStatus
 import com.habitarchitect.domain.repository.DailyLogRepository
 import com.habitarchitect.domain.repository.HabitRepository
@@ -31,6 +32,9 @@ class AllGoodReceiver : BroadcastReceiver() {
 
     @Inject
     lateinit var firebaseAuth: FirebaseAuth
+
+    @Inject
+    lateinit var analyticsTracker: AnalyticsTracker
 
     override fun onReceive(context: Context, intent: Intent) {
         if (intent.action != ACTION_ALL_GOOD) return
@@ -62,6 +66,9 @@ class AllGoodReceiver : BroadcastReceiver() {
                 // Dismiss the notification
                 val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
                 notificationManager.cancel(EVENING_NOTIFICATION_ID)
+
+                // Track analytics
+                analyticsTracker.trackAllGoodClicked(pendingHabitsCount = habits.size)
 
             } finally {
                 pendingResult.finish()

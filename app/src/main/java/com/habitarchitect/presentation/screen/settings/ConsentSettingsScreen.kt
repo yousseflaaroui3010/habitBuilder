@@ -170,6 +170,7 @@ fun ConsentSettingsScreen(
     }
 }
 
+@Suppress("UNUSED_PARAMETER")
 @Composable
 private fun ConsentTierCard(
     tier: ConsentTier,

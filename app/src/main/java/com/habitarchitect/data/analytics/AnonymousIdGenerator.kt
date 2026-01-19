@@ -89,9 +89,9 @@ class AnonymousIdGenerator @Inject constructor(
         val anonymousId = sha256(combined).substring(0, 16)
 
         // Cache it
-        context.anonymousIdDataStore.edit { prefs ->
-            prefs[KEY_CACHED_USER_ID] = userId
-            prefs[KEY_CACHED_ANONYMOUS_ID] = anonymousId
+        context.anonymousIdDataStore.edit { mutablePrefs ->
+            mutablePrefs[KEY_CACHED_USER_ID] = userId
+            mutablePrefs[KEY_CACHED_ANONYMOUS_ID] = anonymousId
         }
 
         cachedUserId = userId

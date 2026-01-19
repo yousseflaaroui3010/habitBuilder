@@ -46,98 +46,95 @@ fun HabitCard(
     onTemptedClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    Card(
+    // Note: When used inside HabitCardWithWeeklyProgress, this is wrapped in another Card
+    // Using Column instead of Card to avoid double elevation/nesting issues
+    Column(
         modifier = modifier
             .fillMaxWidth()
-            .clickable { onCardClick() },
-        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+            .clickable { onCardClick() }
     ) {
-        Column(
-            modifier = Modifier.padding(16.dp)
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
         ) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Text(
-                        text = habit.iconEmoji,
-                        style = MaterialTheme.typography.headlineMedium
-                    )
-                    Spacer(modifier = Modifier.width(12.dp))
-                    Column {
-                        Row(verticalAlignment = Alignment.CenterVertically) {
-                            Text(
-                                text = habit.name,
-                                style = MaterialTheme.typography.titleMedium
-                            )
-                            if (habit.priority == Priority.HIGH) {
-                                Spacer(modifier = Modifier.width(6.dp))
-                                Box(
-                                    modifier = Modifier
-                                        .size(8.dp)
-                                        .background(Color(0xFFFF5252), CircleShape)
-                                )
-                            }
-                        }
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Text(
+                    text = habit.iconEmoji,
+                    style = MaterialTheme.typography.headlineMedium
+                )
+                Spacer(modifier = Modifier.width(12.dp))
+                Column {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
                         Text(
-                            text = "${habit.currentStreak} day streak",
-                            style = MaterialTheme.typography.bodySmall,
-                            color = if (habit.currentStreak > 0) Streak else MaterialTheme.colorScheme.onSurfaceVariant
+                            text = habit.name,
+                            style = MaterialTheme.typography.titleMedium
                         )
+                        if (habit.priority == Priority.HIGH) {
+                            Spacer(modifier = Modifier.width(6.dp))
+                            Box(
+                                modifier = Modifier
+                                    .size(8.dp)
+                                    .background(Color(0xFFFF5252), CircleShape)
+                            )
+                        }
                     }
+                    Text(
+                        text = "${habit.currentStreak} day streak",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = if (habit.currentStreak > 0) Streak else MaterialTheme.colorScheme.onSurfaceVariant
+                    )
                 }
+            }
 
-                // Status indicator
-                when (todayStatus) {
-                    DailyStatus.SUCCESS -> {
-                        Icon(
-                            Icons.Default.Check,
-                            contentDescription = "Completed",
-                            tint = CalendarSuccess,
-                            modifier = Modifier.size(32.dp)
-                        )
-                    }
-                    DailyStatus.FAILURE -> {
-                        Icon(
-                            Icons.Default.Close,
-                            contentDescription = "Failed",
-                            tint = CalendarFailure,
-                            modifier = Modifier.size(32.dp)
-                        )
-                    }
-                    else -> {
-                        // Show action buttons
-                        Row {
-                            IconButton(onClick = onMarkSuccess) {
-                                Icon(
-                                    Icons.Default.Check,
-                                    contentDescription = "Mark success",
-                                    tint = CalendarSuccess
-                                )
-                            }
-                            IconButton(onClick = onMarkFailure) {
-                                Icon(
-                                    Icons.Default.Close,
-                                    contentDescription = "Mark failure",
-                                    tint = CalendarFailure
-                                )
-                            }
+            // Status indicator
+            when (todayStatus) {
+                DailyStatus.SUCCESS -> {
+                    Icon(
+                        Icons.Default.Check,
+                        contentDescription = "Completed",
+                        tint = CalendarSuccess,
+                        modifier = Modifier.size(32.dp)
+                    )
+                }
+                DailyStatus.FAILURE -> {
+                    Icon(
+                        Icons.Default.Close,
+                        contentDescription = "Failed",
+                        tint = CalendarFailure,
+                        modifier = Modifier.size(32.dp)
+                    )
+                }
+                else -> {
+                    // Show action buttons
+                    Row {
+                        IconButton(onClick = onMarkSuccess) {
+                            Icon(
+                                Icons.Default.Check,
+                                contentDescription = "Mark success",
+                                tint = CalendarSuccess
+                            )
+                        }
+                        IconButton(onClick = onMarkFailure) {
+                            Icon(
+                                Icons.Default.Close,
+                                contentDescription = "Mark failure",
+                                tint = CalendarFailure
+                            )
                         }
                     }
                 }
             }
+        }
 
-            // Show "Snap-Back" button for BREAK habits
-            if (habit.type == HabitType.BREAK && todayStatus == null) {
-                Spacer(modifier = Modifier.height(12.dp))
-                FilledTonalButton(
-                    onClick = onTemptedClick,
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    Text("Snap-Back")
-                }
+        // Show "Snap-Back" button for BREAK habits
+        if (habit.type == HabitType.BREAK && todayStatus == null) {
+            Spacer(modifier = Modifier.height(12.dp))
+            FilledTonalButton(
+                onClick = onTemptedClick,
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Text("Snap-Back")
             }
         }
     }

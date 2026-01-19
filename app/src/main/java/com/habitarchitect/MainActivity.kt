@@ -13,6 +13,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
+import com.habitarchitect.data.analytics.AnalyticsTracker
 import com.habitarchitect.data.preferences.AppPreferences
 import com.habitarchitect.data.preferences.ThemeMode
 import com.habitarchitect.presentation.navigation.HabitArchitectNavHost
@@ -28,6 +29,9 @@ class MainActivity : ComponentActivity() {
 
     @Inject
     lateinit var appPreferences: AppPreferences
+
+    @Inject
+    lateinit var analyticsTracker: AnalyticsTracker
 
     override fun onCreate(savedInstanceState: Bundle?) {
         installSplashScreen()
@@ -50,7 +54,10 @@ class MainActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ) {
-                    HabitArchitectNavHost(deepLinkInviteCode = inviteCode)
+                    HabitArchitectNavHost(
+                        deepLinkInviteCode = inviteCode,
+                        analyticsTracker = analyticsTracker
+                    )
                 }
             }
         }

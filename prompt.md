@@ -15,6 +15,8 @@ STYLE & TONE
 ACTIONS
     WHAT TO DO:
         ALWAYS use DRY Code (Don\t Repeat yourself)
+        ALWAYS use KISS (Keep It Simple, Stupid)
+        Always apply Boy Scout Rule (Leave the coebase cleaner that you found it)
         ALWAYS use clean, clear, optimized codes and files structure
         ALWAYS use the best practices in terms of Exception handling, UI/UX, Color Contrast (minimum AA)
         MAKE Sure that everything is secure

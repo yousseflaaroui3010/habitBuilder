@@ -63,6 +63,7 @@ import com.habitarchitect.domain.model.HabitType
  * Intentions-based habit creation flow.
  * Format: "I will [habit] at [time] in [location]"
  */
+@Suppress("UNUSED_PARAMETER")
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 @Composable
 fun AddHabitSocraticScreen(

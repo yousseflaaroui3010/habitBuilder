@@ -71,6 +71,7 @@ private fun getTriggersForTemplate(templateId: String?): List<Pair<String, Strin
  * Asks what triggered the urge to help identify patterns.
  * Shows habit-specific triggers if templateId is provided.
  */
+@Suppress("UNUSED_PARAMETER")
 @Composable
 fun TriggerDialog(
     habitName: String,

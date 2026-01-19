@@ -51,6 +51,7 @@ import com.habitarchitect.domain.model.HabitType
 /**
  * Screen for viewing partner's shared habits (read-only).
  */
+@Suppress("UNUSED_PARAMETER")
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PartnerViewScreen(

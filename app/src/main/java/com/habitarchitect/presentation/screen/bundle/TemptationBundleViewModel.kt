@@ -45,6 +45,7 @@ class TemptationBundleViewModel @Inject constructor(
         }
     }
 
+    @Suppress("UNUSED_PARAMETER")
     fun saveBundle(habitId: String, needToDo: String, wantToDo: String, enforce: Boolean) {
         viewModelScope.launch {
             _uiState.value = _uiState.value.copy(isSaving = true)

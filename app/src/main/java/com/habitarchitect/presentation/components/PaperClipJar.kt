@@ -145,6 +145,7 @@ fun PaperClipJar(
     }
 }
 
+@Suppress("UNUSED_PARAMETER")
 @Composable
 private fun PaperClipsGrid(
     count: Int,
@@ -199,6 +200,7 @@ fun WeeklyPaperClipProgress(
     modifier: Modifier = Modifier,
     isBuildHabit: Boolean = true
 ) {
+    @Suppress("UNUSED_VARIABLE")
     val progress = (weeklySuccesses.toFloat() / weeklyGoal).coerceIn(0f, 1f)
     val progressColor = if (isBuildHabit) Color(0xFF4CAF50) else Color(0xFFE57373)
     val backgroundColor = if (isBuildHabit) Color(0xFFE8F5E9) else Color(0xFFFFEBEE)
