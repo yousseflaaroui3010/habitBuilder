@@ -50,23 +50,37 @@ data class HabitDto(
     @SerializedName("name") val name: String,
     @SerializedName("type") val type: String,
     @SerializedName("category") val category: String?,
+    @SerializedName("template_id") val templateId: String? = null,
     @SerializedName("icon_emoji") val iconEmoji: String,
+    @SerializedName("trigger_time") val triggerTime: String? = null,
+    @SerializedName("trigger_context") val triggerContext: String? = null,
     @SerializedName("frequency") val frequency: String,
+    @SerializedName("active_days") val activeDays: List<String>? = null,
+    @SerializedName("location") val location: String? = null,
+    @SerializedName("goal") val goal: String? = null,
+    @SerializedName("minimum_version") val minimumVersion: String? = null,
+    @SerializedName("stack_anchor") val stackAnchor: String? = null,
+    @SerializedName("reward") val reward: String? = null,
     @SerializedName("current_streak") val currentStreak: Int,
     @SerializedName("longest_streak") val longestStreak: Int,
-    @SerializedName("is_active") val isActive: Boolean,
-    @SerializedName("is_shared") val isShared: Boolean,
+    @SerializedName("total_success_days") val totalSuccessDays: Int = 0,
+    @SerializedName("total_failure_days") val totalFailureDays: Int = 0,
+    @SerializedName("paper_clip_count") val paperClipCount: Int = 0,
+    @SerializedName("paper_clip_goal") val paperClipGoal: Int = 30,
+    @SerializedName("is_shared_with_partner") val isSharedWithPartner: Boolean = false,
+    @SerializedName("order_index") val orderIndex: Int = 0,
+    @SerializedName("priority") val priority: String = "MEDIUM",
+    @SerializedName("is_archived") val isArchived: Boolean = false,
     @SerializedName("created_at") val createdAt: Long,
     @SerializedName("updated_at") val updatedAt: Long
 )
 
 data class DailyLogDto(
-    @SerializedName("id") val id: String,
     @SerializedName("habit_id") val habitId: String,
     @SerializedName("date") val date: String,
     @SerializedName("status") val status: String,
-    @SerializedName("notes") val notes: String?,
-    @SerializedName("created_at") val createdAt: Long
+    @SerializedName("marked_at") val markedAt: Long? = null,
+    @SerializedName("note") val note: String? = null
 )
 
 data class SyncConflict(

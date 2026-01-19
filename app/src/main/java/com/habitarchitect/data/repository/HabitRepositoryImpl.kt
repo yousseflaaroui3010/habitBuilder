@@ -3,8 +3,10 @@ package com.habitarchitect.data.repository
 import com.habitarchitect.data.local.database.dao.DailyLogDao
 import com.habitarchitect.data.local.database.dao.HabitDao
 import com.habitarchitect.data.local.database.dao.ListItemDao
+import com.habitarchitect.data.local.database.entity.EntityType
 import com.habitarchitect.data.mapper.toDomain
 import com.habitarchitect.data.mapper.toEntity
+import com.habitarchitect.data.sync.OfflineQueue
 import com.habitarchitect.domain.model.Habit
 import com.habitarchitect.domain.model.HabitType
 import com.habitarchitect.domain.repository.HabitRepository
@@ -16,12 +18,14 @@ import javax.inject.Inject
 
 /**
  * Implementation of HabitRepository using Room database.
+ * Uses local-first approach with offline queue for sync.
  */
 class HabitRepositoryImpl @Inject constructor(
     private val habitDao: HabitDao,
     private val dailyLogDao: DailyLogDao,
     private val listItemDao: ListItemDao,
-    private val alarmScheduler: AlarmScheduler
+    private val alarmScheduler: AlarmScheduler,
+    private val offlineQueue: OfflineQueue
 ) : HabitRepository {
 
     override fun getActiveHabits(userId: String): Flow<List<Habit>> {
@@ -54,7 +58,13 @@ class HabitRepositoryImpl @Inject constructor(
         return runCatching {
             val id = habit.id.ifBlank { UUID.randomUUID().toString() }
             val habitWithId = habit.copy(id = id)
-            habitDao.insertHabit(habitWithId.toEntity())
+            val entity = habitWithId.toEntity()
+
+            // Save locally first (local-first approach)
+            habitDao.insertHabit(entity)
+
+            // Queue for sync
+            offlineQueue.queueCreate(EntityType.HABIT, id, entity)
 
             // Schedule reminder if enabled and has trigger time (BUILD habits only)
             if (habitWithId.type == HabitType.BUILD &&
@@ -70,7 +80,13 @@ class HabitRepositoryImpl @Inject constructor(
     override suspend fun updateHabit(habit: Habit): Result<Unit> {
         return runCatching {
             val updatedHabit = habit.copy(updatedAt = System.currentTimeMillis())
-            habitDao.updateHabit(updatedHabit.toEntity())
+            val entity = updatedHabit.toEntity()
+
+            // Update locally first
+            habitDao.updateHabit(entity)
+
+            // Queue for sync
+            offlineQueue.queueUpdate(EntityType.HABIT, habit.id, entity)
 
             // Reschedule or cancel reminder based on settings (BUILD habits only)
             if (updatedHabit.type == HabitType.BUILD) {
@@ -157,9 +173,14 @@ class HabitRepositoryImpl @Inject constructor(
 
     override suspend fun deleteHabit(habitId: String): Result<Unit> {
         return runCatching {
+            // Queue delete for sync first
+            offlineQueue.queueDelete(EntityType.HABIT, habitId)
+
+            // Delete locally
             listItemDao.deleteAllForHabit(habitId)
             dailyLogDao.deleteLogsForHabit(habitId)
             habitDao.deleteHabit(habitId)
+
             // Cancel reminder when habit is deleted
             alarmScheduler.cancelHabitReminder(habitId)
         }

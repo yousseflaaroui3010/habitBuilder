@@ -37,7 +37,8 @@ object EncryptedDatabaseFactory {
                 HabitArchitectDatabase.MIGRATION_2_3,
                 HabitArchitectDatabase.MIGRATION_3_4,
                 HabitArchitectDatabase.MIGRATION_4_5,
-                HabitArchitectDatabase.MIGRATION_5_6
+                HabitArchitectDatabase.MIGRATION_5_6,
+                HabitArchitectDatabase.MIGRATION_6_7
             )
             .build()
     }

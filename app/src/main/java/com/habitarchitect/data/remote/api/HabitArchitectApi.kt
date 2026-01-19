@@ -16,6 +16,7 @@ import retrofit2.http.Path
 /**
  * Retrofit API interface for HabitArchitect backend.
  * Defines all API endpoints for data synchronization.
+ * Auth is handled by AuthInterceptor.
  */
 interface HabitArchitectApi {
 
@@ -23,7 +24,6 @@ interface HabitArchitectApi {
 
     @POST("api/v1/analytics/batch")
     suspend fun uploadAnalyticsBatch(
-        @Header("Authorization") token: String,
         @Body request: AnalyticsBatchRequest
     ): Response<AnalyticsBatchResponse>
 
@@ -31,33 +31,28 @@ interface HabitArchitectApi {
 
     @POST("api/v1/habits/sync")
     suspend fun syncHabits(
-        @Header("Authorization") token: String,
         @Body request: HabitSyncRequest
     ): Response<HabitSyncResponse>
 
-    @GET("api/v1/habits")
+    @GET("api/v1/habits/{userId}")
     suspend fun getHabits(
-        @Header("Authorization") token: String
+        @Path("userId") userId: String
     ): Response<HabitSyncResponse>
 
     // ==================== Partnerships ====================
 
     @POST("api/v1/partnerships/invite")
     suspend fun createPartnerInvite(
-        @Header("Authorization") token: String,
         @Body request: PartnerInviteRequest
     ): Response<PartnerInviteResponse>
 
     @POST("api/v1/partnerships/accept/{code}")
     suspend fun acceptPartnerInvite(
-        @Header("Authorization") token: String,
         @Path("code") inviteCode: String
     ): Response<PartnerInviteResponse>
 
     @GET("api/v1/partnerships")
-    suspend fun getPartnerships(
-        @Header("Authorization") token: String
-    ): Response<List<PartnerInviteResponse>>
+    suspend fun getPartnerships(): Response<List<PartnerInviteResponse>>
 
     companion object {
         const val BASE_URL = "https://api.habitarchitect.app/"

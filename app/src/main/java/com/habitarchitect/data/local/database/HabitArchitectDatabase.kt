@@ -11,6 +11,7 @@ import com.habitarchitect.data.local.database.dao.DailyLogDao
 import com.habitarchitect.data.local.database.dao.HabitDao
 import com.habitarchitect.data.local.database.dao.ListItemDao
 import com.habitarchitect.data.local.database.dao.PartnershipDao
+import com.habitarchitect.data.local.database.dao.PendingOperationDao
 import com.habitarchitect.data.local.database.dao.UserDao
 import com.habitarchitect.data.local.database.dao.WeeklyReflectionDao
 import com.habitarchitect.data.local.database.entity.AnalyticsEventEntity
@@ -18,6 +19,7 @@ import com.habitarchitect.data.local.database.entity.DailyLogEntity
 import com.habitarchitect.data.local.database.entity.HabitEntity
 import com.habitarchitect.data.local.database.entity.ListItemEntity
 import com.habitarchitect.data.local.database.entity.PartnershipEntity
+import com.habitarchitect.data.local.database.entity.PendingOperationEntity
 import com.habitarchitect.data.local.database.entity.UserEntity
 import com.habitarchitect.data.local.database.entity.WeeklyReflectionEntity
 
@@ -33,9 +35,10 @@ import com.habitarchitect.data.local.database.entity.WeeklyReflectionEntity
         ListItemEntity::class,
         PartnershipEntity::class,
         WeeklyReflectionEntity::class,
-        AnalyticsEventEntity::class
+        AnalyticsEventEntity::class,
+        PendingOperationEntity::class
     ],
-    version = 6,
+    version = 7,
     exportSchema = true
 )
 abstract class HabitArchitectDatabase : RoomDatabase() {
@@ -47,6 +50,7 @@ abstract class HabitArchitectDatabase : RoomDatabase() {
     abstract fun partnershipDao(): PartnershipDao
     abstract fun weeklyReflectionDao(): WeeklyReflectionDao
     abstract fun analyticsDao(): AnalyticsDao
+    abstract fun pendingOperationDao(): PendingOperationDao
 
     companion object {
         const val DATABASE_NAME = "habit_architect_db"
@@ -119,6 +123,29 @@ abstract class HabitArchitectDatabase : RoomDatabase() {
             }
         }
 
+        // Migration from version 6 to 7: Add pending_operations table for offline sync
+        val MIGRATION_6_7 = object : Migration(6, 7) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL("""
+                    CREATE TABLE IF NOT EXISTS pending_operations (
+                        id TEXT PRIMARY KEY NOT NULL,
+                        entityType TEXT NOT NULL,
+                        entityId TEXT NOT NULL,
+                        operation TEXT NOT NULL,
+                        payload TEXT NOT NULL,
+                        status TEXT NOT NULL DEFAULT 'PENDING',
+                        attempts INTEGER NOT NULL DEFAULT 0,
+                        lastError TEXT,
+                        createdAt INTEGER NOT NULL,
+                        lastAttemptAt INTEGER
+                    )
+                """)
+                db.execSQL("CREATE INDEX IF NOT EXISTS index_pending_operations_entityType_entityId ON pending_operations(entityType, entityId)")
+                db.execSQL("CREATE INDEX IF NOT EXISTS index_pending_operations_createdAt ON pending_operations(createdAt)")
+                db.execSQL("CREATE INDEX IF NOT EXISTS index_pending_operations_status ON pending_operations(status)")
+            }
+        }
+
         /**
          * Get singleton database instance for non-Hilt contexts (like widgets).
          */
@@ -129,7 +156,7 @@ abstract class HabitArchitectDatabase : RoomDatabase() {
                     HabitArchitectDatabase::class.java,
                     DATABASE_NAME
                 )
-                    .addMigrations(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5, MIGRATION_5_6)
+                    .addMigrations(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5, MIGRATION_5_6, MIGRATION_6_7)
                     .build()
                 INSTANCE = instance
                 instance

@@ -1,6 +1,9 @@
 package com.habitarchitect.di
 
+import com.google.firebase.auth.FirebaseAuth
+import com.google.gson.Gson
 import com.habitarchitect.BuildConfig
+import com.habitarchitect.data.remote.AuthInterceptor
 import com.habitarchitect.data.remote.api.HabitArchitectApi
 import dagger.Module
 import dagger.Provides
@@ -16,6 +19,7 @@ import javax.inject.Singleton
 /**
  * Hilt module for network dependencies.
  * Provides Retrofit, OkHttp, and API interfaces.
+ * Gson is provided by AppModule.
  */
 @Module
 @InstallIn(SingletonComponent::class)
@@ -23,7 +27,13 @@ object NetworkModule {
 
     @Provides
     @Singleton
-    fun provideOkHttpClient(): OkHttpClient {
+    fun provideAuthInterceptor(firebaseAuth: FirebaseAuth): AuthInterceptor {
+        return AuthInterceptor(firebaseAuth)
+    }
+
+    @Provides
+    @Singleton
+    fun provideOkHttpClient(authInterceptor: AuthInterceptor): OkHttpClient {
         val loggingInterceptor = HttpLoggingInterceptor().apply {
             level = if (BuildConfig.DEBUG) {
                 HttpLoggingInterceptor.Level.BODY
@@ -33,6 +43,7 @@ object NetworkModule {
         }
 
         return OkHttpClient.Builder()
+            .addInterceptor(authInterceptor)
             .addInterceptor(loggingInterceptor)
             .connectTimeout(30, TimeUnit.SECONDS)
             .readTimeout(30, TimeUnit.SECONDS)
@@ -42,11 +53,11 @@ object NetworkModule {
 
     @Provides
     @Singleton
-    fun provideRetrofit(okHttpClient: OkHttpClient): Retrofit {
+    fun provideRetrofit(okHttpClient: OkHttpClient, gson: Gson): Retrofit {
         return Retrofit.Builder()
             .baseUrl(HabitArchitectApi.BASE_URL)
             .client(okHttpClient)
-            .addConverterFactory(GsonConverterFactory.create())
+            .addConverterFactory(GsonConverterFactory.create(gson))
             .build()
     }
 
