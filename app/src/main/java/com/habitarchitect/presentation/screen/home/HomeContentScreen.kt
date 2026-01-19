@@ -82,9 +82,11 @@ import com.habitarchitect.data.preferences.ThemeMode
 import com.habitarchitect.domain.model.DailyStatus
 import com.habitarchitect.domain.model.Habit
 import com.habitarchitect.domain.model.HabitType
+import com.habitarchitect.data.sync.SyncState
 import com.habitarchitect.presentation.components.HabitCard
 import com.habitarchitect.presentation.components.MilestoneCelebration
 import com.habitarchitect.presentation.components.StreakBreakAnimation
+import com.habitarchitect.presentation.components.SyncStatusIndicator
 import com.habitarchitect.presentation.components.TodaysFocusCard
 import com.habitarchitect.presentation.components.TriggerDialog
 import com.habitarchitect.presentation.widget.TemptationActivity
@@ -103,6 +105,7 @@ fun HomeContentScreen(
 ) {
     val context = LocalContext.current
     val uiState by viewModel.uiState.collectAsState()
+    val syncState by viewModel.syncState.collectAsState()
     var showCelebration by remember { mutableStateOf(false) }
     var celebrationStreak by remember { mutableStateOf(0) }
     var showStreakBreak by remember { mutableStateOf(false) }
@@ -278,181 +281,184 @@ fun HomeContentScreen(
         }
         // FAB moved to MainScreen for consistent visibility across all tabs
     ) { paddingValues ->
-        when (val state = uiState) {
-            is HomeUiState.Loading -> {
-                Box(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(paddingValues),
-                    contentAlignment = Alignment.Center
-                ) {
-                    CircularProgressIndicator()
-                }
-            }
-            is HomeUiState.Empty -> {
-                Column(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(paddingValues)
-                        .padding(16.dp)
-                ) {
-                    // Greeting
-                    GreetingHeader(greeting = greeting, userName = userName)
-
-                    Spacer(modifier = Modifier.height(32.dp))
-
+        Box(modifier = Modifier.fillMaxSize().padding(paddingValues)) {
+            when (val state = uiState) {
+                is HomeUiState.Loading -> {
                     Box(
                         modifier = Modifier.fillMaxSize(),
                         contentAlignment = Alignment.Center
                     ) {
-                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                            Text(
-                                text = "No habits yet",
-                                style = MaterialTheme.typography.headlineSmall
-                            )
-                            Spacer(modifier = Modifier.height(8.dp))
-                            Text(
-                                text = "Start your journey by adding your first habit",
-                                style = MaterialTheme.typography.bodyMedium,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant
-                            )
-                        }
+                        CircularProgressIndicator()
                     }
                 }
-            }
-            is HomeUiState.Success -> {
-                val buildHabits = state.habits.filter { it.type == HabitType.BUILD }
-                val breakHabits = state.habits.filter { it.type == HabitType.BREAK }
-
-                LazyColumn(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(paddingValues),
-                    contentPadding = PaddingValues(16.dp),
-                    verticalArrangement = Arrangement.spacedBy(12.dp)
-                ) {
-                    // Greeting Header
-                    item {
+                is HomeUiState.Empty -> {
+                    Column(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(16.dp)
+                    ) {
+                        // Greeting
                         GreetingHeader(greeting = greeting, userName = userName)
-                    }
 
-                    // Today's Focus Card
-                    item {
-                        TodaysFocusCard(
-                            focusText = state.todaysFocus,
-                            onFocusChanged = { viewModel.updateTodaysFocus(it) }
-                        )
-                    }
+                        Spacer(modifier = Modifier.height(32.dp))
 
-                    // Weekly progress message
-                    item {
-                        Text(
-                            text = "Welcome to your habits and overall progress for your week",
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                            modifier = Modifier.padding(vertical = 8.dp)
-                        )
-                    }
-
-                    // BUILD Habits Section
-                    if (buildHabits.isNotEmpty()) {
-                        item {
-                            SectionHeader(
-                                title = "Habits to Build",
-                                emoji = "🌱",
-                                color = Color(0xFF4CAF50)
-                            )
-                        }
-
-                        itemsIndexed(buildHabits, key = { _, habit -> "build_${habit.id}" }) { index, habit ->
-                            // Show swipe hint below the first habit overall
-                            val isFirstHabitOverall = index == 0
-                            Column {
-                                HabitCardWithWeeklyProgress(
-                                    habit = habit,
-                                    todayStatus = state.todayStatuses[habit.id],
-                                    weeklyStatus = state.weeklyStatuses[habit.id],
-                                    onCardClick = { onNavigateToHabitDetail(habit.id) },
-                                    onMarkSuccess = { viewModel.markSuccess(habit.id) },
-                                    onMarkFailure = { viewModel.markFailure(habit.id) },
-                                    onTemptedClick = { viewModel.showTemptationOverlay(habit.id) },
-                                    onDelete = { habitToDelete = habit },
-                                    onEdit = { onNavigateToEditHabit(habit.id) },
-                                    canMoveUp = index > 0,
-                                    canMoveDown = index < buildHabits.size - 1,
-                                    onMoveUp = {
-                                        if (index > 0) {
-                                            val ids = buildHabits.map { it.id }.toMutableList()
-                                            ids.add(index - 1, ids.removeAt(index))
-                                            viewModel.reorderHabits(ids)
-                                        }
-                                    },
-                                    onMoveDown = {
-                                        if (index < buildHabits.size - 1) {
-                                            val ids = buildHabits.map { it.id }.toMutableList()
-                                            ids.add(index + 1, ids.removeAt(index))
-                                            viewModel.reorderHabits(ids)
-                                        }
-                                    }
+                        Box(
+                            modifier = Modifier.fillMaxSize(),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                                Text(
+                                    text = "No habits yet",
+                                    style = MaterialTheme.typography.headlineSmall
                                 )
-                                // Show hint after the first habit in the list
-                                if (isFirstHabitOverall) {
-                                    SwipeHint()
-                                }
+                                Spacer(modifier = Modifier.height(8.dp))
+                                Text(
+                                    text = "Start your journey by adding your first habit",
+                                    style = MaterialTheme.typography.bodyMedium,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                )
                             }
                         }
                     }
+                }
+                is HomeUiState.Success -> {
+                    val buildHabits = state.habits.filter { it.type == HabitType.BUILD }
+                    val breakHabits = state.habits.filter { it.type == HabitType.BREAK }
 
-                    // BREAK Habits Section
-                    if (breakHabits.isNotEmpty()) {
+                    LazyColumn(
+                        modifier = Modifier.fillMaxSize(),
+                        contentPadding = PaddingValues(16.dp),
+                        verticalArrangement = Arrangement.spacedBy(12.dp)
+                    ) {
+                        // Greeting Header
                         item {
-                            Spacer(modifier = Modifier.height(16.dp))
-                            SectionHeader(
-                                title = "Habits to Break",
-                                emoji = "🔥",
-                                color = Color(0xFFE57373)
+                            GreetingHeader(greeting = greeting, userName = userName)
+                        }
+
+                        // Today's Focus Card
+                        item {
+                            TodaysFocusCard(
+                                focusText = state.todaysFocus,
+                                onFocusChanged = { viewModel.updateTodaysFocus(it) }
                             )
                         }
 
-                        itemsIndexed(breakHabits, key = { _, habit -> "break_${habit.id}" }) { index, habit ->
-                            // Show swipe hint if this is the first habit overall (no build habits)
-                            val isFirstHabitOverall = index == 0 && buildHabits.isEmpty()
-                            Column {
-                                HabitCardWithWeeklyProgress(
-                                    habit = habit,
-                                    todayStatus = state.todayStatuses[habit.id],
-                                    weeklyStatus = state.weeklyStatuses[habit.id],
-                                    onCardClick = { onNavigateToHabitDetail(habit.id) },
-                                    onMarkSuccess = { viewModel.markSuccess(habit.id) },
-                                    onMarkFailure = { viewModel.markFailure(habit.id) },
-                                    onTemptedClick = { viewModel.showTemptationOverlay(habit.id) },
-                                    onDelete = { habitToDelete = habit },
-                                    onEdit = { onNavigateToEditHabit(habit.id) },
-                                    canMoveUp = index > 0,
-                                    canMoveDown = index < breakHabits.size - 1,
-                                    onMoveUp = {
-                                        if (index > 0) {
-                                            val ids = breakHabits.map { it.id }.toMutableList()
-                                            ids.add(index - 1, ids.removeAt(index))
-                                            viewModel.reorderHabits(ids)
-                                        }
-                                    },
-                                    onMoveDown = {
-                                        if (index < breakHabits.size - 1) {
-                                            val ids = breakHabits.map { it.id }.toMutableList()
-                                            ids.add(index + 1, ids.removeAt(index))
-                                            viewModel.reorderHabits(ids)
-                                        }
-                                    }
+                        // Weekly progress message
+                        item {
+                            Text(
+                                text = "Welcome to your habits and overall progress for your week",
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                modifier = Modifier.padding(vertical = 8.dp)
+                            )
+                        }
+
+                        // BUILD Habits Section
+                        if (buildHabits.isNotEmpty()) {
+                            item {
+                                SectionHeader(
+                                    title = "Habits to Build",
+                                    emoji = "🌱",
+                                    color = Color(0xFF4CAF50)
                                 )
-                                if (isFirstHabitOverall) {
-                                    SwipeHint()
+                            }
+
+                            itemsIndexed(buildHabits, key = { _, habit -> "build_${habit.id}" }) { index, habit ->
+                                // Show swipe hint below the first habit overall
+                                val isFirstHabitOverall = index == 0
+                                Column {
+                                    HabitCardWithWeeklyProgress(
+                                        habit = habit,
+                                        todayStatus = state.todayStatuses[habit.id],
+                                        weeklyStatus = state.weeklyStatuses[habit.id],
+                                        onCardClick = { onNavigateToHabitDetail(habit.id) },
+                                        onMarkSuccess = { viewModel.markSuccess(habit.id) },
+                                        onMarkFailure = { viewModel.markFailure(habit.id) },
+                                        onTemptedClick = { viewModel.showTemptationOverlay(habit.id) },
+                                        onDelete = { habitToDelete = habit },
+                                        onEdit = { onNavigateToEditHabit(habit.id) },
+                                        canMoveUp = index > 0,
+                                        canMoveDown = index < buildHabits.size - 1,
+                                        onMoveUp = {
+                                            if (index > 0) {
+                                                val ids = buildHabits.map { it.id }.toMutableList()
+                                                ids.add(index - 1, ids.removeAt(index))
+                                                viewModel.reorderHabits(ids)
+                                            }
+                                        },
+                                        onMoveDown = {
+                                            if (index < buildHabits.size - 1) {
+                                                val ids = buildHabits.map { it.id }.toMutableList()
+                                                ids.add(index + 1, ids.removeAt(index))
+                                                viewModel.reorderHabits(ids)
+                                            }
+                                        }
+                                    )
+                                    // Show hint after the first habit in the list
+                                    if (isFirstHabitOverall) {
+                                        SwipeHint()
+                                    }
+                                }
+                            }
+                        }
+
+                        // BREAK Habits Section
+                        if (breakHabits.isNotEmpty()) {
+                            item {
+                                Spacer(modifier = Modifier.height(16.dp))
+                                SectionHeader(
+                                    title = "Habits to Break",
+                                    emoji = "🔥",
+                                    color = Color(0xFFE57373)
+                                )
+                            }
+
+                            itemsIndexed(breakHabits, key = { _, habit -> "break_${habit.id}" }) { index, habit ->
+                                // Show swipe hint if this is the first habit overall (no build habits)
+                                val isFirstHabitOverall = index == 0 && buildHabits.isEmpty()
+                                Column {
+                                    HabitCardWithWeeklyProgress(
+                                        habit = habit,
+                                        todayStatus = state.todayStatuses[habit.id],
+                                        weeklyStatus = state.weeklyStatuses[habit.id],
+                                        onCardClick = { onNavigateToHabitDetail(habit.id) },
+                                        onMarkSuccess = { viewModel.markSuccess(habit.id) },
+                                        onMarkFailure = { viewModel.markFailure(habit.id) },
+                                        onTemptedClick = { viewModel.showTemptationOverlay(habit.id) },
+                                        onDelete = { habitToDelete = habit },
+                                        onEdit = { onNavigateToEditHabit(habit.id) },
+                                        canMoveUp = index > 0,
+                                        canMoveDown = index < breakHabits.size - 1,
+                                        onMoveUp = {
+                                            if (index > 0) {
+                                                val ids = breakHabits.map { it.id }.toMutableList()
+                                                ids.add(index - 1, ids.removeAt(index))
+                                                viewModel.reorderHabits(ids)
+                                            }
+                                        },
+                                        onMoveDown = {
+                                            if (index < breakHabits.size - 1) {
+                                                val ids = breakHabits.map { it.id }.toMutableList()
+                                                ids.add(index + 1, ids.removeAt(index))
+                                                viewModel.reorderHabits(ids)
+                                            }
+                                        }
+                                    )
+                                    if (isFirstHabitOverall) {
+                                        SwipeHint()
+                                    }
                                 }
                             }
                         }
                     }
                 }
             }
+
+            // Sync status indicator overlay at top
+            SyncStatusIndicator(
+                syncState = syncState,
+                onRetryClick = { viewModel.retrySync() }
+            )
         }
     }
 

@@ -17,6 +17,8 @@ import com.habitarchitect.service.notification.AlarmScheduler
 import java.util.UUID
 import com.habitarchitect.service.sound.SoundManager
 import com.habitarchitect.data.analytics.AnalyticsTracker
+import com.habitarchitect.data.sync.SyncManager
+import com.habitarchitect.data.sync.SyncState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -73,7 +75,8 @@ class HomeViewModel @Inject constructor(
     private val soundManager: SoundManager,
     private val appPreferences: AppPreferences,
     private val alarmScheduler: AlarmScheduler,
-    private val analyticsTracker: AnalyticsTracker
+    private val analyticsTracker: AnalyticsTracker,
+    private val syncManager: SyncManager
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow<HomeUiState>(HomeUiState.Loading)
@@ -84,6 +87,9 @@ class HomeViewModel @Inject constructor(
 
     // Expose theme mode for UI
     val themeMode = appPreferences.themeMode
+
+    // Expose sync state for UI
+    val syncState: StateFlow<SyncState> = syncManager.syncState
 
     private val today = LocalDate.now()
 
@@ -330,6 +336,13 @@ class HomeViewModel @Inject constructor(
                 ThemeMode.LIGHT -> ThemeMode.DARK
             }
             appPreferences.setThemeMode(newMode)
+        }
+    }
+
+    fun retrySync() {
+        val userId = firebaseAuth.currentUser?.uid ?: return
+        viewModelScope.launch {
+            syncManager.sync(userId)
         }
     }
 }

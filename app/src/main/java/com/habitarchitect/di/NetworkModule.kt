@@ -4,6 +4,7 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.gson.Gson
 import com.habitarchitect.BuildConfig
 import com.habitarchitect.data.remote.AuthInterceptor
+import com.habitarchitect.data.remote.MockApiInterceptor
 import com.habitarchitect.data.remote.api.HabitArchitectApi
 import dagger.Module
 import dagger.Provides
@@ -33,7 +34,16 @@ object NetworkModule {
 
     @Provides
     @Singleton
-    fun provideOkHttpClient(authInterceptor: AuthInterceptor): OkHttpClient {
+    fun provideMockApiInterceptor(gson: Gson): MockApiInterceptor {
+        return MockApiInterceptor(gson)
+    }
+
+    @Provides
+    @Singleton
+    fun provideOkHttpClient(
+        authInterceptor: AuthInterceptor,
+        mockApiInterceptor: MockApiInterceptor
+    ): OkHttpClient {
         val loggingInterceptor = HttpLoggingInterceptor().apply {
             level = if (BuildConfig.DEBUG) {
                 HttpLoggingInterceptor.Level.BODY
@@ -44,6 +54,7 @@ object NetworkModule {
 
         return OkHttpClient.Builder()
             .addInterceptor(authInterceptor)
+            .addInterceptor(mockApiInterceptor) // Mock API for development
             .addInterceptor(loggingInterceptor)
             .connectTimeout(30, TimeUnit.SECONDS)
             .readTimeout(30, TimeUnit.SECONDS)
